@@ -1,0 +1,52 @@
+{
+	"enhancedScene": {
+		"class" : "GuiDiv",
+		"params" : {
+			"parent" : "#root",
+			"background": {
+				"image" : "background.png"
+			},
+			"style" : "enhancedScene",
+			"enhancedScene" : true
+		}
+	},
+	"mainScene": {
+		"class" : "GuiDiv",
+		"params" : {
+			"parent" : "enhancedScene",
+			"style" : "mainScene",
+			"innerScene" : true
+		}
+	},
+	"play": {
+		"class" : "GuiButton",
+		"params" : {
+			"parent" : "enhancedScene",
+			"normal" : {
+				"image" : "button.png",
+				"label" : {
+					"style" : "gameButton pusab-white",
+					"text" : "Play",
+					"fontSize" : 36,
+					"scale" : 100
+				}
+			},
+			"hover" : {
+				"image" : "button.png",
+				"scale" : 115,
+				"label" : {}
+			},
+			"active" : {"image" : "button.png",
+				"scale" : 105,
+				"label" : {}
+			},
+			"style" : "gameButton",
+			"width" : 120,
+			"height" : 66,
+			"x" : "50%",
+			"y" : "50%",
+			"offsetX" : -60,
+			"offsetY" : -33
+		}
+	}
+}

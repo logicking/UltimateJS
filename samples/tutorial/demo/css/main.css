@@ -1,0 +1,240 @@
+body,html {
+	margin: 0;
+	padding: 0;
+	font-family: Arial;
+	font-size: 20px;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+/******************************/
+/* Makes screen non-selectable and prevents text cursor from displaying */
+/******************************/
+div {
+    margin: 0;
+    padding: 0;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    /*3D transform */
+    -webkit-transform: scale3d(1, 1, 1);
+    -o-user-select: none;
+    user-select: none;
+}
+
+.unselectable {
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+#all,#viewport {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+#root {
+	position: absolute;
+}
+
+/* Z-index of #mask must lower than #boxes .window */
+.mask {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 21;
+	background-color: #000;
+	opacity: 0.5;
+	display: none;
+	width: 100%;
+	height: 100%;
+}
+
+.dialog {
+	position: absolute;
+	display: none;
+	z-index: 1000;
+}
+
+.window {
+	position: absolute;
+	z-index: 20;
+}
+
+.mainWindow {
+	position: absolute;
+	z-index: 21;
+}
+
+.gameButton {
+	position: absolute;
+	display: none;
+	z-index: 10;
+}
+
+.bordered {
+	border: solid;
+}
+
+.dialogButton {
+	position: absolute;
+	z-index: 25;
+}
+
+.dialogButtonLabel {
+	position: absolute;
+	z-index: 26;
+}
+
+.stage {
+	position: absolute;
+	display: none;
+	z-index: 5;
+}
+
+.scene {
+	position: absolute;
+	display: block;
+	z-index: 6;
+}
+
+.sprite {
+	position: absolute;
+	display: block;
+	z-index: 100;
+}
+
+.dragged { /* 	border:solid; */
+	/* 	border-color:blue; */
+	z-index: 500;
+}
+
+.mainScene {
+	position: absolute;
+	display: none;
+}
+
+.enhancedScene {
+	position: absolute;
+	display: block;
+	overflow: hidden;
+}
+
+#fps {
+	position: absolute;
+	z-index: 50;
+}
+
+.hidden {
+	display: none;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+/* @media screen and (orientation: landscape) { */
+/* 	html,body { */
+/* 		width: 100%; */
+/* 	} */
+/* 	.rotateMsg { */
+/* 		display: none; */
+/* 		position: absolute; */
+/* 		z-index: 0; */
+/* 	} */
+/* 	#root { */
+/* 		display: block; */
+/* 	} */
+/* } */
+
+/* @media screen and (orientation: portrait) { */
+/* 	html,body { */
+/* 		width: 100%; */
+/* 	} */
+/* 	#root { */
+/* 		display: none; */
+/* 	} */
+/* 	.rotateMsg { */
+/* 		display: block; */
+/* 		position: absolute; */
+/* 		left: 0px; */
+/* 		top: 0px; */
+/* 		z-index: 99999; */
+/* 	} */
+/* } */
+
+/*
+* Scroller styles
+*/
+.scrollerWrapper {
+	position: absolute;
+	overflow: auto;
+}
+
+.scrollerBackground {
+	position: absolute;
+	/*	-webkit-touch-callout:none;*/
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	width: 100%;
+	padding: 0;
+}
+
+.scrollerWrapper ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	text-align: left;
+}
+
+.scrollerWrapper li {
+	padding: 0;
+	margin: 0;
+}
+
+.scrollButton {
+	z-index: 10;
+}
+
+.scrollButtonH {
+	z-index: 10;
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.scrollButtonImage {
+	position: relative;
+	/* 	border:solid; */
+	/* 	border-color:blue; */
+}
+
+.buttonImage {
+	position: absolute;
+	/* 	border:solid; */
+	/* 	border-color:blue; */
+}
+
+.buttonImageBackground {
+	position: absolute;
+	z-index: 0;
+	/* 	border:solid; */
+	/* 	border-color:blue; */
+}
+
+/* centering */
+.middle {
+	height: 100%;
+	display: table;
+	margin: 0 auto;
+	border: none;
+}
+
+.inner {
+	vertical-align: middle;
+	display: table-cell;
+	border: none;
+}

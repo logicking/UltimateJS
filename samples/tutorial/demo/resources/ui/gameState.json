@@ -1,0 +1,65 @@
+{
+	"enhancedScene": {
+		"class" : "GuiDiv",
+		"params" : {
+			"parent" : "#root",
+			"style" : "enhancedScene",
+			"enhancedScene" : true
+		}
+	},
+	"mainScene": {
+		"class" : "GuiDiv",
+		"params" : {
+			"parent" : "enhancedScene",
+			"style" : "mainScene",
+			"innerScene" : true
+		}
+	},
+	"signLabel": {
+		"class" : "GuiLabel",
+		"params" : {
+			"parent" : "mainScene",
+			"style" : "dialogButton pusab-white",
+			"width" : 500,
+			"height" : 58,
+			"x" : "50%",
+			"y" : 10,
+			"offsetX" : -250,
+			"text" : "Tap anywhere and monkey will walk there!",
+			"fontSize" : 30,
+			"align" : "center", 
+			"verticalAlign" : "middle"
+		}
+	}, 	
+	"backToMenu": {
+		"class" : "GuiButton",
+		"params" : {
+			"parent" : "enhancedScene",
+			"normal" : {
+				"image" : "button.png",
+				"label" : {
+					"style" : "gameButton pusab-white",
+					"text" : "Menu",
+					"fontSize" : 36,
+					"scale" : 100
+				}
+			},
+			"hover" : {
+				"image" : "button.png",
+				"scale" : 115,
+				"label" : {}
+			},
+			"active" : {"image" : "button.png",
+				"scale" : 105,
+				"label" : {}
+			},
+			"style" : "gameButton",
+			"width" : 120,
+			"height" : 66,
+			"x" : "100%",
+			"y" : "100%",
+			"offsetX" : -130,
+			"offsetY" : -80
+		}
+	}
+}

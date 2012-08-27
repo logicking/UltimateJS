@@ -1,0 +1,47 @@
+<!DOCTYPE>
+<html>
+<meta name="viewport"
+	content="initial-scale=1.0,maximum-scale=1.0,width=device-width,user-scalable = no
+	target-densitydpi=device-dpi" />
+<meta content='yes' name='apple-mobile-web-app-capable'>
+<meta content='default' name='apple-mobile-web-app-status-bar-style'>
+<head>
+<title>UltimateJS Basic Sample</title>
+<link rel="stylesheet" type="text/css" href="css/main.css" />
+<link rel="stylesheet" type="text/css" href="css/fonts.css" />
+</head>
+<body>
+	<div id="all">
+		<div id="root"></div>
+		<div id="loadingMsg" class="unselectable"
+			style="position: absolute; left: 50%; top: 50%;"
+			onmousedown="return false;">
+			<img src="images/logo.png"
+				style="position: absolute; width: 336px; height: 108px; left: -168px; top: -105px" />
+			<div id="loadingStateText" class="default-bold"
+				style="position: absolute; text-align: center; left: -50px; top: 50px; width: 100px; height: 50px;">0%</div>
+		</div>
+	</div>
+	</div>
+	<img id="rotateMsg" class="hidden" src="images/rotate.jpg" />
+
+	<script type="text/javascript" src="js/loader.js"></script>
+	<script type="text/javascript">
+		Loader.updateLoadingState(5);
+	</script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript">
+		Loader.updateLoadingState(15);
+	</script>
+	<script type="text/javascript" src="js/thirdParty.js"></script>
+	<script type="text/javascript">
+		Loader.updateLoadingState(15);
+	</script>
+	<script type="text/javascript" src="js/ultimateJS.js"></script>
+	<script type="text/javascript">
+		Loader.updateLoadingState(5);
+	</script>
+	<script type="text/javascript" src="js/game.js"></script>
+</body>
+
+</html>

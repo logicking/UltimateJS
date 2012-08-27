@@ -1,0 +1,29 @@
+@media screen and (orientation: portrait) {
+	html,body {
+		width: 100%;
+	}
+	.rotateMsg {
+		display: none;
+		position: absolute;
+		z-index: 0;
+	}
+	#root {
+		display: block;
+	}
+}
+
+@media screen and (orientation: landscape) {
+	html,body {
+		width: 100%;
+	}
+	#root {
+		display: none;
+	}
+	.rotateMsg {
+		display: block;
+		position: absolute;
+		left: 0px;
+		top: 0px;
+		z-index: 999999;
+	}
+}

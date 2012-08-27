@@ -1,0 +1,9 @@
+body,html {
+	background-color: #DEBA90;
+}
+
+.scene {
+	background-color: #0000AA;
+	border: solid;
+	border-color: green;
+}

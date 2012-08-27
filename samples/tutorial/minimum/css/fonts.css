@@ -1,0 +1,39 @@
+.default-bold {
+	color: #00000;
+	font-style: bold;
+	font-size: 35px;
+}
+
+
+
+/* 
+	Pusab Font
+*/
+@font-face {
+	font-family: 'PusabRegular';
+	src: url('../fonts/pusab-webfont.eot');
+	src: url('../fonts/pusab-webfont.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+.pusab-blue {
+	font-family: PusabRegular;
+	color: #01B5FE;
+	-webkit-text-stroke: 1px #000000;
+	text-shadow: 2px 2px 0 #000000;
+}
+
+.pusab-yellow {
+	font-family: PusabRegular;
+	color: #FFCA30;
+	-webkit-text-stroke: 1px #000000;
+	text-shadow: 2px 2px 0 #000000;
+}
+
+.pusab-white {
+	font-family: PusabRegular;
+	color: white;
+	-webkit-text-stroke: 1px #000000;
+	text-shadow: 2px 2px 0 #000000;
+}

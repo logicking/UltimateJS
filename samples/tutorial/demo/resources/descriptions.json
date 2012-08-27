@@ -1,0 +1,21 @@
+{
+	"monkey" : {
+		"totalImage" : "monkey.png",
+		"totalImageWidth" : 1620,
+		"totalImageHeight" : 172,
+		"width" : 135,
+		"centerX" : "50%",
+		"centerY" : "80%",
+		"height" : 172,
+		"totalTile" : {
+			"x" : 12,
+			"y" : 0
+		}
+	},
+
+	"basicTextureTile" : {
+		"image" : "tile.png",
+		"width" : 269,
+		"height" : 219
+	}
+}
