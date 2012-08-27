@@ -6,6 +6,7 @@
  * @constructor
  */
 
+var KITTY_RUN_DIST = 500;
 var ACTION_MOVE_PRECISION = 3;
 
 function ActionMove() {
@@ -31,12 +32,10 @@ ActionMove.prototype.init = function(params) {
 	this.velocity = params.velocity;
 	this.dir = {x : 0, y : 0};
 	this.dir.x = ((this.target.x > this.actor.x) > 0) ? 1 : -1;
-	if(this.dir.x > 0){
-		this.actor.getVisual().flip(true);
-	}else{
-		this.actor.getVisual().flip(false);
-	}
-	if(Math.abs(this.target.x - this.actor.x) < 500){
+	
+	this.actor.getVisual().flip(this.dir.x > 0);
+	
+	if(Math.abs(this.target.x - this.actor.x) < KITTY_RUN_DIST){
 		this.actor.getVisual().setCurrentAnimation("walk");
 	}else{
 		this.actor.getVisual().setCurrentAnimation("run");

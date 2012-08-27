@@ -774,7 +774,7 @@ var Sound = (function() {
 						PATH_TO_JPLAYER_SWF + 'jquery.jplayer.min.js',
 						function() {
 							$("body")['append']
-									("<div id='jPlayerInstanceId' style='width: 0px; height: 0px;'></div>");
+									("<div id='jPlayerInstanceId' style='position:absolute; left:50%; right:50%; width: 0px; height: 0px;'></div>");
 							jPlayerInstance = $("#jPlayerInstanceId");
 							jPlayerInstance['jPlayer']
 									({
@@ -787,8 +787,8 @@ var Sound = (function() {
 											// alert("READY11");
 										},
 										supplied : "oga, mp3, m4a",
-										//solution : "flash, html",
-										 solution : "html, flash",
+										solution : "flash, html",
+										//solution : "html, flash",
 										swfPath : PATH_TO_JPLAYER_SWF,
 
 										ended : function() { // The
@@ -1848,6 +1848,9 @@ var Device = (function() {
 			case 'cursorOut':
 				result = Device.isTouch() ? 'touchstart' : 'mouseout';
 				break;
+			case 'cursorOver':
+				result = Device.isTouch() ? 'touchstart' : 'mouseover';
+				break;	
 			default:
 				assert(false, "Unrecognizible event " + eventName);
 				result = eventName;
@@ -2058,6 +2061,9 @@ var Resources = (function() {
 	var images = new Array();
 	var resolutions = new Object();
 	
+	//enum of strings of current language
+	var strings = new Object();
+	
 	var currentResolution = null;
 	var defaultResolution = null;
 	
@@ -2118,7 +2124,23 @@ var Resources = (function() {
 				resolutions[resolutionName].images[name] = name;
 			}
 		},
-		
+		//returnes string
+		getString : function(stringId){
+			if(strings[stringId]){
+				return strings[stringId];
+			}else{
+				//console.error(stringId + " Not Found");
+				return stringId;
+			}
+			
+		},
+		//loads json with set language
+		setLanguage : function(language){
+			var fileName = "resources/localization/" + language + ".json"; 
+			$['getJSON'](fileName, function(data){
+				strings = data;
+			});
+		},
 		// returns filename of an image for current resolution 
 		getImage : function(name, preload, preloadCallback) {
 			var imageFilename = null;
@@ -2284,20 +2306,22 @@ Entity.prototype.init = function(params) {
 	// Variables values for synchronizing with server
 	this.properties = {};
 
-	if (typeof params['parent'] == "string") {
+	if (params['parent']) {
 		// find parent among entities in account
-		var parent = Account.instance.getEntity(params['parent']);
-		this.assert(parent, " No parent found with id='" + params['parent']
-				+ "' ");
+		var parent = params['parent'];
+		if (typeof params['parent'] == "string") {
+			parent = Account.instance.getEntity(params['parent']);
+			this.assert(parent, " No parent found with id='" + params['parent']
+					+ "' ");
+		}
 		parent.addChild(this);
-
 	} else {
 		console.log(" No parent provided for entity with id='" + this.id + "'");
 	}
 
 	var enabled = selectValue(params['enabled'], true);
 	this.setEnable(enabled);
-	
+
 	// this.readUpdate(params);
 	this.timeouts = null;
 	this.intervals = null;
@@ -2359,15 +2383,14 @@ Entity.prototype.isEnabled = function() {
 
 Entity.prototype.setEnable = function(isTrue) {
 	this.enabled = isTrue;
-	if(typeof(this.update) == "function") {
-		if(isTrue) {
+	if (typeof (this.update) == "function") {
+		if (isTrue) {
 			Account.instance.addScheduledEntity(this);
 		} else {
 			Account.instance.removeScheduledEntity(this);
 		}
 	}
 };
-
 
 // Synchronization with server
 Entity.prototype.setDirty = function() {
@@ -2396,8 +2419,10 @@ Entity.prototype.readUpdate = function(data) {
 	var parentId = this.parent ? this.parent['id'] : null;
 	// if (data['parent']) {
 	if (data['parent'] != parentId) {
-		this.parent.removeChild(this);
-		this.parent = null;
+		if(this.parent != null){
+			this.parent.removeChild(this);
+			this.parent = null;	
+		}
 		if (data['parent']) {
 			Account.instance.getEntity(data['parent']).addChild(this);
 		}
@@ -2464,7 +2489,8 @@ Entity.prototype.clearTimeouts = function() {
 		clearTimeout(this.timeouts[i]);
 	}
 	this.timeouts = new Array();
-};/*
+};
+/*
  * Account - root entity that is parent to all active entities
  */
 
@@ -3431,7 +3457,7 @@ Countdown.prototype.update = function(updateTime) {
 					this.label.change(this.description['go']);
 					if (this.EndCallback) {
 						this.EndCallback();
-						this.update = null;
+						delete this.update;
 					}
 				}
 			}
@@ -3447,7 +3473,7 @@ Countdown.prototype.update = function(updateTime) {
 			} else {
 				if (this.EndCallback) {
 					this.EndCallback();
-					this.update = null;
+					delete this.update;
 				}
 			}
 		}
@@ -3908,10 +3934,10 @@ var Physics = (function() {
 				debugDraw();
 			}
 
-			contactListener.update();
+			//contactListener.update();
 
 			for ( var i = 0; i < updateItems.length; ++i)
-				updateItems[i].update();
+				updateItems[i].updatePhysics();
 		},
 		createSphere : function(x, y, radius, localPosition) {
 			var sphereSd = new b2CircleDef();
@@ -3981,6 +4007,9 @@ var Physics = (function() {
 				pause = !pause;
 			else
 				pause = v;
+		},
+		paused : function() {
+			return pause;
 		},
 		resetTimeout : function(addTime) {
 			if (!timeout)
@@ -4080,7 +4109,7 @@ var collisionCallback = function() {
 };
 
 
-var DAMAGE_DECR = 200;
+var DAMAGE_DECR = 180;
 var FORCE_RATING = 100;
 
 // Creates physics explosion without any visual presentation
@@ -4092,45 +4121,54 @@ var FORCE_RATING = 100;
 // duration - explosion effect duration in <ms>
 // decr - how fast force decreases by distance from center <number>
 // owner - object that initiate explosion, should not affect it
-Physics.explode = function(params) { //(center, radius, force, duration, owner, decr) {
-	var decr = (params.decr!=null) ? params.decr : 1;
+Physics.explode = function(params) { // (center, radius, force, duration,
+	// owner, decr) {
+	var decr = (params.decr != null) ? params.decr : 1;
+	DAMAGE_DECR = (params.damageDecr != null) ? params.damageDecr : 150;
 	var world = Physics.getWorld();
 	var score = 0;
 	var delta = (params.delta > 0) ? params.delta : 20;
-	var time = params.duration / delta;		
+	var time = params.duration / delta;
 	function tick() {
-		setTimeout(function () {
+		setTimeout(function() {
 			var body = world.m_bodyList;
 			for (; body != null; body = body['m_next']) {
 				var bodyCenter = body.GetCenterPosition();
-				var rVec = new b2Vec2(bodyCenter.x - params.center.x, 
+				var rVec = new b2Vec2(bodyCenter.x - params.center.x,
 						bodyCenter.y - params.center.y);
 				var dist = rVec.Length();
 				if (dist < params.radius) {
 					var impulse = rVec;
 					impulse.Normalize();
-					impulse.Multiply(FORCE_RATING * params.force / 
-							Math.pow(1 + dist, decr));
-					if (body.m_userData) 
+					impulse.Multiply(FORCE_RATING * params.force
+							/ Math.pow(1 + dist, decr));
+					if (body.m_userData) {
 						if (body.m_userData.params.id != "CannonBall") {
 							body.WakeUp();
-							body.ApplyImpulse(impulse, body.GetCenterPosition());
+							body
+									.ApplyImpulse(impulse, body
+											.GetCenterPosition());
 							body.AllowSleeping(true);
 						}
+					}
 
-					if ((body.m_userData)&&(body.m_userData.destructable)) {
-						var damage = impulse.Length()/DAMAGE_DECR;
+					if ((body.m_userData) && (body.m_userData.destructable)) {
+						var damage = impulse.Length() / DAMAGE_DECR;
 						body.m_userData.onDamage(damage);
 						score += damage;
 					}
-				};
-			};
-			if (time < params.duration) tick(); 
+				}
+				;
+			}
+			;
+			if (time < params.duration)
+				tick();
 			time += delta;
-		}, 10);
-	};
+		}, 5);
+	}
+	;
 	tick();
-};	/**
+};/**
  * Contact Processor - part of the Physics singleton to
  * handle and process cantact events
  */
@@ -4205,11 +4243,12 @@ var LOG_DEBUG = false;
 /**
  * @constructor
  */
-function ContactListener(contactProcessor) {
+function ContactListener(contactProcessor, body) {
+	this.body = body;
 	this.contactProcessor = contactProcessor;
 	if (!contactProcessor)
 		console.log("No contact processor were added! Will be defaults");
-	world = Physics.getWorld();
+	//world = Physics.getWorld();
 	this.activeContacts = new Array();
 	this.activeContactIDs = new Array();
 //	this.contactShape1 = null;
@@ -4221,15 +4260,22 @@ function ContactListener(contactProcessor) {
 //
 //	Returns list of contacts and contacted entities id
 //
-ContactListener.prototype.getContacts = function() {
-	var contact = world.m_contactList;
+ContactListener.prototype.getContacts = function(body) {
+	//var body = world.m_bodyList;
 	var contactIDs = new Array();
 	var contacts = new Array();
-	for (; contact != null; contact = contact['m_next']) {
-		contactIDs.push(contact.m_shape1.m_body.m_userData.id + ':'
-				+ contact.m_shape2.m_body.m_userData.id);
-		contacts.push(contact);
-	}
+	//for (; body != null; body = body['m_next']) {
+		var contact = body.m_contactList;
+		if (contact!=null)
+		for (; contact != null; contact = contact['m_next']) {
+			if ($.inArray(contact, contacts) == -1)
+				{
+					contactIDs.push(contact.contact.m_shape1.m_body.m_userData.id + ':'
+							+ contact.contact.m_shape2.m_body.m_userData.id);
+					contacts.push(contact.contact);
+				}
+		}
+	//}
 	return {
 		"iDs" : contactIDs,
 		"contacts" : contacts
@@ -4241,7 +4287,7 @@ ContactListener.prototype.getContacts = function() {
 //
 ContactListener.prototype.update = function() {
 	var that = this;
-	var contactList = this.getContacts();
+	var contactList = this.getContacts(this.body);
 
 	var newContactIDs = contactList["iDs"];
 	var newContacts = contactList["contacts"];
@@ -4360,7 +4406,7 @@ PhysicEntity.prototype.createPhysics = function() {
 		shapeDefinition.radius = physicParams.radius;
 		setShapeParams(shapeDefinition, physicParams);
 		bodyDefinition.AddShape(shapeDefinition);
-		bodyDefinition.bullet == true;
+		//bodyDefinition.bullet == true;
 		break;
 	}
 	case "Poly": {
@@ -4453,7 +4499,6 @@ PhysicEntity.prototype.createPhysics = function() {
 	bodyDefinition.linearDamping = physicParams.linearDamping;
 	physicWorld = Physics.getWorld();
 	this.physics = physicWorld.CreateBody(bodyDefinition);
-	//this.physics.AllowSleeping(true);
 	this.physics.SetCenterPosition(
 			new b2Vec2(logicPosition.x, logicPosition.y), 0);
 	this.destructable = physicParams["destructable"];
@@ -4490,6 +4535,8 @@ PhysicEntity.prototype.createVisual = function() {
 PhysicEntity.prototype.updatePositionFromPhysics = function() {
 	var that = this;
 
+	if (that.physics==null)
+		return;
 	that.setPosition(that.physics.m_position.x - that.params.physics.x
 			- that.params.physics.width / 2, that.physics.m_position.y
 			- that.params.physics.y - that.params.physics.height / 2);
@@ -4534,9 +4581,12 @@ PhysicEntity.prototype.physicsEnable = function(v) {
 };
 
 // PhysicEntity update function
-PhysicEntity.prototype.update = function() {
-	if ((this.params.physics) && (this.physicsEnabled))
-		this.updatePositionFromPhysics();
+PhysicEntity.prototype.updatePhysics = function() {
+	if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused()))
+		{
+			this.updatePositionFromPhysics();
+				//this.physics.SetCenterPosition(this.physics.GetCenterPosition(), this.physics.GetRotation());
+		}
 };
 
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
@@ -4569,7 +4619,7 @@ PhysicEntity.prototype.rotateByAxis = function(axis, angle) {
 	$['each'](this.visuals, function(id, visualInfo) {
 		var t = matTrans.transformPoint(that.params.x - that.params.physics.x,
 				that.params.y - that.params.physics.y);
-		that.physics.SetOriginPosition(new b2Vec2(t[0], t[1]), 0);
+		that.physics.SetCenterPosition(new b2Vec2(t[0], t[1]), that.physics.GetRotation());
 	});
 };
 
@@ -4908,7 +4958,7 @@ GuiContainer.prototype.clear = function() {
 		}
 	}
 	popAllElementsFromArray(this.guiEntities);
-	delete this.guiEntitiesMap;
+	this.guiEntitiesMap = {};
 };
 
 GuiContainer.prototype.remove = function() {
@@ -6429,8 +6479,8 @@ GuiLabel.prototype.generate = function(src) {
 	this.rowId = this.id + "_row";
 	this.cellId = this.id + "_cell";
 	return "<div id='" + this.id + "' class='" + this.style + " unselectable'>"
-			+ "<div id='" + this.rowId + "' style='display:table-row;'>"
-			+ "<div id='" + this.cellId + "' style='display:table-cell;'>"
+			+ "<div id='" + this.rowId + "' style='display:table-row;cursor: default; '>"
+			+ "<div id='" + this.cellId + "' style='display:table-cell;cursor: default;'>"
 			+ src + "</div></div></div>";
 };
 

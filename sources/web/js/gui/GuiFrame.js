@@ -4,6 +4,9 @@
  * there's no other method to scale content inside iframe.
  */
 
+/**
+ * Scene to operate Sprites
+ */
 
 GuiFrame.prototype = new GuiElement();
 GuiFrame.prototype.constructor = GuiFrame;
@@ -11,8 +14,8 @@ GuiFrame.prototype.constructor = GuiFrame;
 /**
  * @constructor
  */
-function GuiFrame() {
-	GuiFrame.parent.constructor.call(this);
+function GuiFrame(parent, clazz, width, height) {
+	GuiFrame.parent.constructor.call(this, parent, "", clazz, width, height);
 }
 
 GuiFrame.inheritsFrom(GuiElement);
@@ -39,7 +42,15 @@ GuiFrame.prototype.initialize = function(params) {
 	
 	this.attachedDiv['show']();
 	this.realWidth = this.attachedDiv['width']();
-	var originalWidth = params['originalWidth'] ? params['originalWidth'] : params['width'];
+	var originalWidth = params['originalWidth'] ? params['originalWidth'] : 320;
+	var originalHeight = params['originalHeight'] ? params['originalHeight'] : 50;
+	this.originalWidth = originalWidth;
+	this.originalHeight = originalHeight;
+	this.alignH = params['alignH'];
+	this.alignV = params['alignV'];
+	
+	
+	
 	this.scaleFactor = params['width'] / originalWidth;
 	this.attachedDiv['width'](0);
 	this.attachedDiv['height'](0);
@@ -50,7 +61,7 @@ GuiFrame.prototype.initialize = function(params) {
 	this.jObject['css']("position", "absolute");
 
 	this.jObject['css']("display", "block");
-//	this.jObject['css']("border", "solid");
+	//this.jObject['css']("border", "solid");
 
 	// this.setRealSize(0, 0);
 	// this.rootOffsetX = this.rootOffsetY = 0;
@@ -66,12 +77,32 @@ GuiFrame.prototype.resize = function() {
 	if (this.attachedDiv) {
 		var scaleX = Screen.widthRatio() * this.scaleFactor;
 		var scaleY = Screen.heightRatio() * this.scaleFactor;
-
+		if(scaleX > 1) {
+			scaleX = scaleY = 1;
+		}
 		var pos = this.jObject.offset();
-		cssTransform(this.attachedDiv, null, null, scaleX, scaleY, {
-			"x" : pos.left,
-			"y" : pos.top
-		});
+		
+		if(this.alignH == "center") {
+			pos.left  = pos.left  + this.jObject.width() /2 - this.originalWidth / 2;
+		} else if(this.alignH == "right") {
+			pos.left  = pos.left  + this.jObject.width() - this.originalWidth;
+		}
+		
+		
+		if(this.alignV == "center") {
+			pos.top  = pos.top + this.jObject.height() / 2 - this.originalHeight / 2;
+		} else if(this.alignV == "bottom") {
+			pos.top  = pos.top  + this.jObject.height() - this.originalHeight;
+		}
+		
+		
+		
+		this.attachedDiv['css']("left", pos.left);
+		this.attachedDiv['css']("top", pos.top);
+//		cssTransform(this.attachedDiv, null, null, scaleX, scaleY, {
+//			"x" : pos.left,
+//			"y" : pos.top
+//		});
 	}
 };
 
