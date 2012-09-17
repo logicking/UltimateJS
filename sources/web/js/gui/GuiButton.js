@@ -139,7 +139,7 @@ GuiButton.prototype.initialize = function(params) {
 
 		var callback = function() {
 			// a bit hacky, but works
-			// identify current state buy reference to its params object
+			// identify current state by reference to its params object
 			if (that.currentStateParams === params) {
 				return;
 			} else {
