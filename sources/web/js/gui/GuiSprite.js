@@ -33,7 +33,7 @@ GuiSprite.prototype.initialize = function(params) {
 
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
-
+	this.frameCallback = null;
 	this.totalSrc = params['totalImage'];
 	// // .hack temporary for older games
 	 if (GUISPRITE_HACK_ON) {
@@ -96,7 +96,6 @@ GuiSprite.prototype.update = function(dt) {
 	this.lastUpdateTime = curTime;
 
 	this.currentFrameTime += dt;
-
 	while (this.currentFrameTime >= this.currentFrameLength) {
 		this.updateAnimation();
 		this.currentFrameTime -= this.currentFrameLength;
@@ -131,7 +130,11 @@ GuiSprite.prototype.updateAnimation = function() {
 	this.frame = frame;
 	this.row = row;
 	this.setRealBackgroundPosition();
-
+	if(this.frameCallback != null) {
+		if(this.frameCallback[this.currentAnimation]){
+			this.frameCallback[this.currentAnimation](this.currentFrame);
+		}
+	}
 	this.currentFrame++;
 	
 
@@ -142,6 +145,7 @@ GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
 	clearInterval(this.updateAnimationCallback);
 	this.updateAnimationCallback = null;
 	this.currentAnimation = null;
+//	this.frameCallback = null;
 
 	if (!dontCallCallback && this.animationEndCallback) {
 		// trick with oldCallback is to allow to call setCallback
@@ -156,6 +160,11 @@ GuiSprite.prototype.remove = function() {
 	GuiSprite.parent.remove.call(this);
 	clearInterval(this.updateAnimationCallback);
 	this.updateAnimationCallback = null;
+};
+
+GuiSprite.prototype.setFrameCallback = function(frameCallback) {
+	console.log("frameCallback", frameCallback);
+	this.frameCallback = frameCallback;
 };
 
 GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
