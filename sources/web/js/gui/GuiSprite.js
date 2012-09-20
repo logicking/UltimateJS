@@ -28,17 +28,18 @@ guiFactory.addClass(GuiSprite);
 GuiSprite.prototype.initialize = function(params) {
 	GuiSprite.parent.initialize.call(this, params);
 
-	//.hack temporary disable viewport for sprites at all
-//	this.clampByViewport = this.clampByViewportSimple;
+	// .hack temporary disable viewport for sprites at all
+	// this.clampByViewport = this.clampByViewportSimple;
 
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
 	this.frameCallback = null;
+	this.offsetY1 = 0;
 	this.totalSrc = params['totalImage'];
 	// // .hack temporary for older games
-	 if (GUISPRITE_HACK_ON) {
-		 this.totalSrc = Resources.getImage(params['totalImage']);
-	 }
+	if (GUISPRITE_HACK_ON) {
+		this.totalSrc = Resources.getImage(params['totalImage']);
+	}
 
 	if (params['totalTile'] == null) {
 		this.totalTile = {
@@ -68,6 +69,13 @@ GuiSprite.prototype.initialize = function(params) {
 			+ "px "
 			+ Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
 			+ "px");
+	// // if((this.visualEntity) && (this.visualEntity.row == 0)){
+	// console.log("OIOIOI", Math.floor(Screen.widthRatio()
+	// * this.totalTile.x * this.width)
+	// + "px "
+	// + Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
+	// + "px");
+	// // }
 };
 
 GuiSprite.prototype.addSpriteAnimation = function(name, description) {
@@ -112,7 +120,7 @@ GuiSprite.prototype.updateAnimation = function() {
 			return;
 		}
 	}
-	
+
 	// console.log("Frames " + this.currentFrame);
 	var rowFramesLength = Math.round(this.totalWidth / this.width);
 	var frame = this.animations[this.currentAnimation].frames[this.currentFrame];
@@ -124,19 +132,17 @@ GuiSprite.prototype.updateAnimation = function() {
 	this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
 			* frame * this.width)
 			+ "px "
-			+ Math.round(-Screen.heightRatio() * row * this.height)
+			+ Math.round(-Screen.heightRatio() * row * this.height + Screen.heightRatio() * this.offsetY1)
 			+ "px ");
-
 	this.frame = frame;
 	this.row = row;
 	this.setRealBackgroundPosition();
-	if(this.frameCallback != null) {
-		if(this.frameCallback[this.currentAnimation]){
+	if (this.frameCallback != null) {
+		if (this.frameCallback[this.currentAnimation]) {
 			this.frameCallback[this.currentAnimation](this.currentFrame);
 		}
 	}
 	this.currentFrame++;
-	
 
 };
 
@@ -145,7 +151,7 @@ GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
 	clearInterval(this.updateAnimationCallback);
 	this.updateAnimationCallback = null;
 	this.currentAnimation = null;
-//	this.frameCallback = null;
+	// this.frameCallback = null;
 
 	if (!dontCallCallback && this.animationEndCallback) {
 		// trick with oldCallback is to allow to call setCallback
@@ -163,7 +169,6 @@ GuiSprite.prototype.remove = function() {
 };
 
 GuiSprite.prototype.setFrameCallback = function(frameCallback) {
-	console.log("frameCallback", frameCallback);
 	this.frameCallback = frameCallback;
 };
 
@@ -187,7 +192,7 @@ GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 	this.currentFrameTime = 0;
 	this.lastUpdateTime = (new Date()).getTime();
 
-	//console.log(this.animations[this.currentAnimation].frameDuration);
+	// console.log(this.animations[this.currentAnimation].frameDuration);
 	if (duration) {
 		this.currentFrameLength = duration / animation.frames.length;
 		// console.log("frame lenght " + this.currentFrameLength + ", " +
@@ -273,11 +278,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-//	if (this.viewport) {
-//		this.clampByViewport();
-//	} else {
-		this.setRealPosition(x, y);
-//	}
+	// if (this.viewport) {
+	// this.clampByViewport();
+	// } else {
+	this.setRealPosition(x, y);
+	// }
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -301,6 +306,9 @@ GuiSprite.prototype.resize = function() {
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
+	if (offsetY) {
+		this.offsetY1 = offsetY;
+	}
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);
 	this.jObject['css']("background-position", Math.round(Screen.widthRatio()

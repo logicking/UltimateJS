@@ -5,7 +5,7 @@
 Account.prototype = new BaseState();
 Account.prototype.constructor = Account;
 
-var GLOBAL_UPDATE_INTERVAL = 50;
+var GLOBAL_UPDATE_INTERVAL = 10;
 
 /**
  * @constructor
@@ -142,7 +142,6 @@ Account.prototype.resize = function() {
 // Creates/Updates/Destroy all active entities
 Account.prototype.readGlobalUpdate = function(data) {
 	var that = this;
-	console.log("READ DATA", data);
 	$['each'](data, function(id, element) {
 //		 console.log("readGlobalUpdate key is ", id, element);
 		var entity = Account.instance.getEntity(id);
@@ -209,7 +208,6 @@ Account.prototype.syncWithServer = function(callback, data, syncInterval) {
 	// var d = new Date();
 	// var g = d.getTime();
 	var writeData = this.writeGlobalUpdate();
-	console.log("WRITE DATA", writeData);
 	if (data) {
 		$['extend'](true, writeData, data);
 	}
