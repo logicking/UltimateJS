@@ -35,6 +35,7 @@ GuiSprite.prototype.initialize = function(params) {
 	this.totalHeight = params['totalImageHeight'];
 	this.frameCallback = null;
 	this.offsetY1 = 0;
+	this.offsetX1 = 0;
 	this.totalSrc = params['totalImage'];
 	// // .hack temporary for older games
 	if (GUISPRITE_HACK_ON) {
@@ -69,13 +70,6 @@ GuiSprite.prototype.initialize = function(params) {
 			+ "px "
 			+ Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
 			+ "px");
-	// // if((this.visualEntity) && (this.visualEntity.row == 0)){
-	// console.log("OIOIOI", Math.floor(Screen.widthRatio()
-	// * this.totalTile.x * this.width)
-	// + "px "
-	// + Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
-	// + "px");
-	// // }
 };
 
 GuiSprite.prototype.addSpriteAnimation = function(name, description) {
@@ -130,7 +124,7 @@ GuiSprite.prototype.updateAnimation = function() {
 	frame = remainder;
 
 	this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
-			* frame * this.width)
+			* frame * this.width + Screen.heightRatio() * this.offsetX1)
 			+ "px "
 			+ Math.round(-Screen.heightRatio() * row * this.height + Screen.heightRatio() * this.offsetY1)
 			+ "px ");
@@ -152,7 +146,6 @@ GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
 	this.updateAnimationCallback = null;
 	this.currentAnimation = null;
 	// this.frameCallback = null;
-
 	if (!dontCallCallback && this.animationEndCallback) {
 		// trick with oldCallback is to allow to call setCallback
 		// iside callback itself
@@ -178,6 +171,7 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
+	console.log("!!", animationName, duration, isLooped);
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
 
@@ -308,6 +302,9 @@ GuiSprite.prototype.resize = function() {
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 	if (offsetY) {
 		this.offsetY1 = offsetY;
+	}
+	if (offsetX) {
+		this.offsetX1 = offsetX;
 	}
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);

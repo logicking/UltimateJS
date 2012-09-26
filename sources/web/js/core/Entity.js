@@ -154,7 +154,8 @@ Entity.prototype.writeUpdateProperty = function(data, name, value) {
 
 Entity.prototype.writeUpdate = function(globalData, entityData) {
 	globalData[this.id] = entityData;
-	entityData['class'] = this.params['class'];
+//	entityData['class'] = this.params['class'];
+	this.writeUpdateProperty(entityData,"class", this.params['class']);
 //	entityData['parent'] = this.params['parent'];
 	this.writeUpdateProperty(entityData,"parent", this.params['parent']);
 	if (this.children) {
