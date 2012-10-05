@@ -22,6 +22,7 @@ GuiMessageBox.prototype.initialize = function(params) {
 
 	GuiMessageBox.parent.initialize.call(this, params);
 	this.parent = params['parent'];
+	this.customGuis = [];
 	this.x = 800 / 2 - this.width / 2;
 	this.y = 500 / 2 - this.height / 2;
 	this.buttons = new Object();
@@ -74,7 +75,7 @@ GuiMessageBox.prototype.initialize = function(params) {
 			height : value['params']['height'],
 			params : value['params']['params'],
 			normal : value['params']['normal'],
-			//label : value['params']['label'],
+			// label : value['params']['label'],
 			hover : value['params']['hover'],
 			active : value['params']['active'],
 			x : value['params']['x'],
@@ -106,4 +107,23 @@ GuiMessageBox.prototype.initialize = function(params) {
 GuiMessageBox.prototype.resize = function() {
 	GuiMessageBox.parent.resize.call(this);
 	this.children.resize();
+};
+
+GuiMessageBox.prototype.addCustomGui = function(gui, name) {
+	this.customGuis.push(name);
+	this.children.addGui(gui, name);
+	console.log("ARRRAY", this.customGuis);
+};
+GuiMessageBox.prototype.removeAllCustomGui = function() {
+	for ( var i = 0; i < this.customGuis.length; i++) {
+		var entity = this.children.getGui(this.customGuis[i]);
+		console.log("ENTITY!!", entity, this.customGuis[i]);
+		this.children.removeGui(entity);
+	}
+	this.customGuis = [];
+};
+
+GuiMessageBox.prototype.hide = function() {
+	GuiMessageBox.parent.hide.call(this);
+//	this.removeAllCustomGui();
 };

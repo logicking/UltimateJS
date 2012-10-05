@@ -46,7 +46,9 @@ Item.prototype.getIcon = function() {
 
 Item.prototype.createVisual = function() {
 	this.assert(this.guiParent, "No gui parent provided for creating visuals");
-	this.description = Account.instance.descriptionsData[this.params['description']];
+	if(this.description == null){
+		this.description = Account.instance.descriptionsData[this.params['description']];
+	}
 	this.assert(this.description, "There is no correct description");
 
 	var totalImage = Resources.getImage(this.description['totalImage']);

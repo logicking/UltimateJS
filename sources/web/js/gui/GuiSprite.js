@@ -28,17 +28,19 @@ guiFactory.addClass(GuiSprite);
 GuiSprite.prototype.initialize = function(params) {
 	GuiSprite.parent.initialize.call(this, params);
 
-	//.hack temporary disable viewport for sprites at all
-//	this.clampByViewport = this.clampByViewportSimple;
+	// .hack temporary disable viewport for sprites at all
+	// this.clampByViewport = this.clampByViewportSimple;
 
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
-
+	this.frameCallback = null;
+	this.offsetY1 = 0;
+	this.offsetX1 = 0;
 	this.totalSrc = params['totalImage'];
 	// // .hack temporary for older games
-	 if (GUISPRITE_HACK_ON) {
-		 this.totalSrc = Resources.getImage(params['totalImage']);
-	 }
+	if (GUISPRITE_HACK_ON) {
+		this.totalSrc = Resources.getImage(params['totalImage']);
+	}
 
 	if (params['totalTile'] == null) {
 		this.totalTile = {
@@ -96,7 +98,6 @@ GuiSprite.prototype.update = function(dt) {
 	this.lastUpdateTime = curTime;
 
 	this.currentFrameTime += dt;
-
 	while (this.currentFrameTime >= this.currentFrameLength) {
 		this.updateAnimation();
 		this.currentFrameTime -= this.currentFrameLength;
@@ -113,7 +114,7 @@ GuiSprite.prototype.updateAnimation = function() {
 			return;
 		}
 	}
-	
+
 	// console.log("Frames " + this.currentFrame);
 	var rowFramesLength = Math.round(this.totalWidth / this.width);
 	var frame = this.animations[this.currentAnimation].frames[this.currentFrame];
@@ -123,17 +124,19 @@ GuiSprite.prototype.updateAnimation = function() {
 	frame = remainder;
 
 	this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
-			* frame * this.width)
+			* frame * this.width + Screen.heightRatio() * this.offsetX1)
 			+ "px "
-			+ Math.round(-Screen.heightRatio() * row * this.height)
+			+ Math.round(-Screen.heightRatio() * row * this.height + Screen.heightRatio() * this.offsetY1)
 			+ "px ");
-
 	this.frame = frame;
 	this.row = row;
 	this.setRealBackgroundPosition();
-
+	if (this.frameCallback != null) {
+		if (this.frameCallback[this.currentAnimation]) {
+			this.frameCallback[this.currentAnimation](this.currentFrame);
+		}
+	}
 	this.currentFrame++;
-	
 
 };
 
@@ -142,7 +145,7 @@ GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
 	clearInterval(this.updateAnimationCallback);
 	this.updateAnimationCallback = null;
 	this.currentAnimation = null;
-
+	// this.frameCallback = null;
 	if (!dontCallCallback && this.animationEndCallback) {
 		// trick with oldCallback is to allow to call setCallback
 		// iside callback itself
@@ -158,12 +161,17 @@ GuiSprite.prototype.remove = function() {
 	this.updateAnimationCallback = null;
 };
 
+GuiSprite.prototype.setFrameCallback = function(frameCallback) {
+	this.frameCallback = frameCallback;
+};
+
 GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 	this.animationEndCallback = animationEndCallback;
 };
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
+	console.log("!!", animationName, duration, isLooped);
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
 
@@ -178,7 +186,7 @@ GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 	this.currentFrameTime = 0;
 	this.lastUpdateTime = (new Date()).getTime();
 
-	//console.log(this.animations[this.currentAnimation].frameDuration);
+	// console.log(this.animations[this.currentAnimation].frameDuration);
 	if (duration) {
 		this.currentFrameLength = duration / animation.frames.length;
 		// console.log("frame lenght " + this.currentFrameLength + ", " +
@@ -264,11 +272,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-//	if (this.viewport) {
-//		this.clampByViewport();
-//	} else {
-		this.setRealPosition(x, y);
-//	}
+	// if (this.viewport) {
+	// this.clampByViewport();
+	// } else {
+	this.setRealPosition(x, y);
+	// }
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -292,6 +300,12 @@ GuiSprite.prototype.resize = function() {
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
+	if (offsetY) {
+		this.offsetY1 = offsetY;
+	}
+	if (offsetX) {
+		this.offsetX1 = offsetX;
+	}
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);
 	this.jObject['css']("background-position", Math.round(Screen.widthRatio()

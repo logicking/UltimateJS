@@ -143,7 +143,7 @@ Account.prototype.resize = function() {
 Account.prototype.readGlobalUpdate = function(data) {
 	var that = this;
 	$['each'](data, function(id, element) {
-		// console.log("readGlobalUpdate key is ", id);
+//		 console.log("readGlobalUpdate key is ", id, element);
 		var entity = Account.instance.getEntity(id);
 		// entity already exists
 		if (entity) {
