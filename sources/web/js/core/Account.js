@@ -23,6 +23,7 @@ Account.prototype.init = function(params) {
 	this.allEntities = new Object();
 	// entities that should be update on timely basis
 	this.scheduledEntities = new Object();
+	this.renderEntities = new Object();
 
 	// time interval for scheduled synchronization with server
 	this.syncWithServerInterval = params['syncWithServerInterval'];
@@ -88,10 +89,10 @@ Account.prototype.addScheduledEntity = function(newEntity) {
 	var dt = this.globalUpdateInterval;
 	// if adding first object to scheduling queue start update interval
 	if (!this.globalUpdateIntervalHandle) {
-		 this.globalUpdateIntervalHandle = this.setInterval(function() {
-		 that.update(dt);
-		 }, dt);
-		
+		this.globalUpdateIntervalHandle = this.setInterval(function() {
+			that.update(dt);
+		}, dt);
+
 	}
 	this.scheduledEntities[newEntity.id] = newEntity;
 };
@@ -105,6 +106,57 @@ Account.prototype.removeScheduledEntity = function(entity) {
 		this.clearInterval(this.globalUpdateIntervalHandle);
 		this.globalUpdateIntervalHandle = null;
 	}
+};
+/*
+ * Rendering for children entities
+ */
+var oldWindowRequestAnimationFrame = window.requestAnimationFrame;
+window.requestAnimationFrame = (function() {
+	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
+			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
+			|| window.msRequestAnimationFrame
+			|| function( /* function */callback, /* DOMElement */element) {
+				window.setTimeout(callback, 1000 / 60);
+			};
+})();
+
+Account.prototype.addRenderEntity = function(newEntity) {
+	assert(typeof (newEntity.id) == "string", "Entity ID must be string");
+	var that = this;
+	// if adding first object to rendering queue start update interval
+	if (!this.globalRenderFrameHandle) {
+		this.lastRenderTime = Date.now();
+		this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+			that.render();
+		});
+	}
+	this.renderEntities[newEntity.id] = newEntity;
+};
+
+Account.prototype.removeRenderEntity = function(entity) {
+	assert(typeof (entity.id) == "string", "Entity ID must be string");
+	delete this.renderEntities[entity.id];
+	// if nothing to schedule anymore stop interval either
+	if (!this.globalRenderFrameHandle
+			&& $['isEmptyObject'](this.renderEntities)) {
+		this.clearInterval(this.globalRenderFrameHandle);
+		this.globalRenderFrameHandle = null;
+	}
+};
+
+// Regular render update for registered enities
+Account.prototype.render = function() {
+	var dt = Date.now() - this.lastRenderTime;
+	$['each'](this.renderEntities, function(id, entity) {
+		if (entity && entity.isVisible && entity.isVisible()) {
+			entity.render(dt);
+		}
+	});
+	var that = this;
+	this.lastRenderTime = Date.now();
+	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+		that.render();
+	});
 };
 
 // Regular scheduled update for registered enities
@@ -143,7 +195,7 @@ Account.prototype.resize = function() {
 Account.prototype.readGlobalUpdate = function(data) {
 	var that = this;
 	$['each'](data, function(id, element) {
-//		 console.log("readGlobalUpdate key is ", id, element);
+		// console.log("readGlobalUpdate key is ", id, element);
 		var entity = Account.instance.getEntity(id);
 		// entity already exists
 		if (entity) {

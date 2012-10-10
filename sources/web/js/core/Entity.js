@@ -129,9 +129,9 @@ Entity.prototype.readUpdate = function(data) {
 	var parentId = this.parent ? this.parent['id'] : null;
 	// if (data['parent']) {
 	if (data['parent'] != parentId) {
-		if(this.parent != null){
+		if (this.parent != null) {
 			this.parent.removeChild(this);
-			this.parent = null;	
+			this.parent = null;
 		}
 		if (data['parent']) {
 			Account.instance.getEntity(data['parent']).addChild(this);
@@ -154,10 +154,10 @@ Entity.prototype.writeUpdateProperty = function(data, name, value) {
 
 Entity.prototype.writeUpdate = function(globalData, entityData) {
 	globalData[this.id] = entityData;
-//	entityData['class'] = this.params['class'];
-	this.writeUpdateProperty(entityData,"class", this.params['class']);
-//	entityData['parent'] = this.params['parent'];
-	this.writeUpdateProperty(entityData,"parent", this.params['parent']);
+	// entityData['class'] = this.params['class'];
+	this.writeUpdateProperty(entityData, "class", this.params['class']);
+	// entityData['parent'] = this.params['parent'];
+	this.writeUpdateProperty(entityData, "parent", this.params['parent']);
 	if (this.children) {
 		$['each'](this.children, function(idx, entity) {
 			entity.writeUpdate(globalData, new Object());

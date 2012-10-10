@@ -69,7 +69,7 @@ VisualEntity.prototype.attachToGui = function(guiParent, clampByParentViewport) 
 				visualInfo.visual.clampByParentViewport(clampByParentViewport);
 		});
 	}
-	
+
 };
 
 VisualEntity.prototype.destroy = function() {
@@ -89,20 +89,20 @@ VisualEntity.prototype.setZ = function(z) {
 	var that = this;
 	$['each'](that.visuals, function(id, visualInfo) {
 		if (typeof that.z == "number") {
-			visualInfo.visual.setZ(that.z + visualInfo.z);
+			var visualZ = typeof visualInfo.z == "number" ? visualInfo.z : 0;
+			visualInfo.visual.setZ(that.z + visualZ);
 		}
 	});
 };
-
 VisualEntity.prototype.setPosition = function(x, y) {
 
 	this.x = x;
 	this.y = y;
-	
+
 	var that = this;
 	$['each'](that.visuals, function(id, visualInfo) {
 		// dont' move dependent
-		if(visualInfo.dependent) {
+		if (visualInfo.dependent) {
 			return;
 		}
 		var x = that.x, y = that.y;
@@ -112,7 +112,7 @@ VisualEntity.prototype.setPosition = function(x, y) {
 		if (typeof visualInfo.offsetY == "number") {
 			y -= visualInfo.offsetY;
 		}
-		
+
 		visualInfo.visual.setPosition(x, y);
 	});
 };
@@ -135,6 +135,10 @@ VisualEntity.prototype.show = function() {
 	$['each'](this.visuals, function(id, visualInfo) {
 		visualInfo.visual.show();
 	});
+};
+
+VisualEntity.prototype.isVisible = function() {
+	return this.visible;
 };
 
 VisualEntity.prototype.hide = function() {
@@ -161,8 +165,8 @@ VisualEntity.prototype.writeUpdate = function(globalData, entityData) {
 };
 
 VisualEntity.prototype.readUpdate = function(data) {
-	//this.x = this.readUpdateProperty(data, 'x');
-	//this.y = this.readUpdateProperty(data, 'y');
+	// this.x = this.readUpdateProperty(data, 'x');
+	// this.y = this.readUpdateProperty(data, 'y');
 	VisualEntity.parent.readUpdate.call(this, data);
 
 };
