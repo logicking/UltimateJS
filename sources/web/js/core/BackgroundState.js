@@ -51,6 +51,24 @@ BackgroundState.prototype.init = function(params) {
 		x : 0,
 		y : 0
 	});
+	
+	if(params["loader"]){
+		loader = guiFactory.createObject("GuiDiv", {
+			parent : this.mask,
+			image : params['loader'],
+			background : {
+				image : params['loader']
+			},
+			style : "sprite",
+			width : 35,
+			height : 35,
+			x : "50%",
+			y : "50%",
+			offsetX : -17,
+			offsetY : -17
+			
+		});
+	}
 	this.addGui(this.mask);
 	this.mask.$()['css']("opacity", 0);
 	this.mask.setZ(10000);
