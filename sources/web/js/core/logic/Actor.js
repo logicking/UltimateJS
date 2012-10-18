@@ -1,11 +1,17 @@
 /**
  * Actor - is VisualEntity that can act on its own.
  * Actor can be described by:
- * - current state 
+ * - current state (number of parameters)
  * - set of actuators (effectors)
  * 
  * Actions can be assigned on one or several actuators. Actor manages that more prioritized
  * actions get access to actuators while terminating current actions if they executing.  
+ * 
+ * ActionAlternative - select and execute child action based on external evaluator.
+ * ActionQueue - executes actions one by one
+ * ActionUseItem = ActionQueue(ActionMove(itemPos), ActionAnimateUsage(item));
+ * ActionRoot = ActionAlternative({ActionMove, hasMovePoint}, {ActionUseItem, hasItemToUse}, {ActionIdle, nothingToDo})
+ * hasMovePoint, hasItemToUse, nothingToDo - function, evaluated priority of the action
  */
 
 
