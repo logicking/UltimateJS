@@ -171,7 +171,6 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
-	console.log("!!", animationName, duration, isLooped);
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
 
