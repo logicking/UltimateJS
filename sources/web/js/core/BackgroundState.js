@@ -51,10 +51,10 @@ BackgroundState.prototype.init = function(params) {
 		x : 0,
 		y : 0
 	});
-	
-	if(params["loader"]){
-		loader = guiFactory.createObject("GuiDiv", {
-			parent : this.mask,
+
+	if (params["loader"]) {
+		this.loader = guiFactory.createObject("GuiDiv", {
+			parent : "body",
 			image : params['loader'],
 			background : {
 				image : params['loader']
@@ -66,8 +66,14 @@ BackgroundState.prototype.init = function(params) {
 			y : "50%",
 			offsetX : -17,
 			offsetY : -17
-			
+
 		});
+
+		this.addGui(this.loader);
+		this.loader.$()['css']("opacity", 0);
+		this.loader.setZ(11001);
+		this.loader.hide();
+		// this.mask.children.addGui(loader,"loader");
 	}
 	this.addGui(this.mask);
 	this.mask.$()['css']("opacity", 0);
@@ -77,12 +83,22 @@ BackgroundState.prototype.init = function(params) {
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	this.mask.$()['css']("opacity", 0);
+	if (this.loader != null) {
+		this.loader.$()['css']("opacity", 0);
+		this.loader.fadeTo(1, 1.5 *fadeTime, function() {
+		});
+	}
 	this.mask.$()['css']("background-color", color);
 	this.mask.fadeTo(1, fadeTime, callback);
 };
 
 BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
+	if (this.loader != null) {
+		this.loader.fadeTo(0, 0.1 * fadeTime, function() {
+//			that.loader.hide();
+		});
+	}
 	this.mask.fadeTo(0, fadeTime, function(s) {
 		that.mask.hide();
 		if (callback)
