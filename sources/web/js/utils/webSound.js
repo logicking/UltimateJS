@@ -26,7 +26,7 @@ WebSound.prototype.play = function(sndInst, callback) {
 };
 
 WebSound.prototype.stop = function(sndInst) {
-	if(sndInst){
+	if (sndInst) {
 		sndInst.source.noteOff(0);
 	}
 };
@@ -49,14 +49,13 @@ WebSound.prototype.loadSound = function(name, callback) {
 	// Decode asynchronously
 	request.onload = function() {
 		that.context.decodeAudioData(request.response, function(buffer) {
-			console.log("DECODING");
 			var source = that.context.createBufferSource();
 			source.buffer = buffer;
 			if (callback) {
 				callback(buffer);
 			}
 		}, function() {
-			console.log("ERRRROR ARGS", arguments);
+			console.error("Unable to load sound:" + name + EXTENTION);
 		});
 	};
 	request.send();

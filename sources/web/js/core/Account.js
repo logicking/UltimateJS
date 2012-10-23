@@ -149,6 +149,7 @@ Account.prototype.render = function() {
 	var dt = Date.now() - this.lastRenderTime;
 	$['each'](this.renderEntities, function(id, entity) {
 		if (entity && entity.isVisible && entity.isVisible()) {
+			
 			entity.render(dt);
 		}
 	});

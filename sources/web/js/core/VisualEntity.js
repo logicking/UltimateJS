@@ -21,8 +21,11 @@ VisualEntity.prototype.init = function(params) {
 	this.z = params['z'];
 	this.width = params['width'];
 	this.height = params['height'];
-	this.visible = params['visible'];
+	this.visible = selectValue(params['visible'], true);
 	this.visuals = {}; // associative array of all attached visuals
+	
+	var renderable = selectValue(params['renderable'], true);
+	this.setRenderable(renderable);
 };
 
 VisualEntity.prototype.createVisual = function() {
@@ -36,6 +39,23 @@ VisualEntity.prototype.addVisual = function(visualId, visualInfo) {
 			+ "' is already created.");
 	this.visuals[id] = visualInfo;
 
+};
+
+VisualEntity.prototype.render = null;
+
+VisualEntity.prototype.isRenderable = function() {
+	return this.renderable;
+};
+
+VisualEntity.prototype.setRenderable = function(isTrue) {
+	this.renderable = isTrue;
+	if (typeof (this.render) == "function") {
+		if (isTrue) {
+			Account.instance.addRenderEntity(this);
+		} else {
+			Account.instance.removeRenderEntity(this);
+		}
+	}
 };
 
 VisualEntity.prototype.getVisual = function(visualId) {
