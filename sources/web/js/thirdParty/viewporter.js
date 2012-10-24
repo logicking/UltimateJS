@@ -148,6 +148,9 @@ var viewporter;
 			this._firstUpdateExecuted = true;
 
 		},
+		maximizeDocumentElement : function(){
+			document.documentElement.style.minHeight = '5000px';
+		},
 
 		prepareVisualViewport: function() {
 
@@ -188,9 +191,9 @@ var viewporter;
 				if ( (that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) || iterations < 0) {
 
 					// set minimum height of content to new window height
-					document.documentElement.style.minHeight = window.innerHeight + 'px';
-
-					// set the right height for the body wrapper to allow bottom positioned elements
+//					document.documentElement.style.minHeight = window.innerHeight + 'px';
+//
+//					// set the right height for the body wrapper to allow bottom positioned elements
 					document.getElementById('viewporter').style.position = 'relative';
 					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
 
