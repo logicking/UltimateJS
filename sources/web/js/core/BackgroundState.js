@@ -68,7 +68,7 @@ BackgroundState.prototype.init = function(params) {
 			offsetY : -17
 
 		});
-
+		this.loader.setClickTransparent(true);
 		this.addGui(this.loader);
 		this.loader.$()['css']("opacity", 0);
 		this.loader.setZ(11001);
@@ -76,6 +76,7 @@ BackgroundState.prototype.init = function(params) {
 		// this.mask.children.addGui(loader,"loader");
 	}
 	this.addGui(this.mask);
+	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
 	this.mask.setZ(10000);
 	this.mask.hide();

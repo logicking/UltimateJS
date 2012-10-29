@@ -112,11 +112,12 @@ Account.prototype.removeScheduledEntity = function(entity) {
  */
 var oldWindowRequestAnimationFrame = window.requestAnimationFrame;
 window.requestAnimationFrame = (function() {
-	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
-			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
-			|| window.msRequestAnimationFrame
-			|| function( /* function */callback, /* DOMElement */element) {
-				window.setTimeout(callback, 1000 / 60);
+//	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
+//			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
+//			|| window.msRequestAnimationFrame
+//			||
+	return function( /* function */callback, /* DOMElement */element) {
+				window.setTimeout(callback, 1000 / 50);
 			};
 })();
 
@@ -147,12 +148,14 @@ Account.prototype.removeRenderEntity = function(entity) {
 // Regular render update for registered enities
 Account.prototype.render = function() {
 	var dt = Date.now() - this.lastRenderTime;
-	$['each'](this.renderEntities, function(id, entity) {
-		if (entity && entity.isVisible && entity.isVisible()) {
-			
-			entity.render(dt);
-		}
-	});
+	if(dt != 0){
+		$['each'](this.renderEntities, function(id, entity) {
+			if (entity && entity.isVisible && entity.isVisible()) {
+				
+				entity.render(dt);
+			}
+		});
+	}
 	var that = this;
 	this.lastRenderTime = Date.now();
 	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {

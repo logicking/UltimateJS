@@ -23,7 +23,7 @@ VisualEntity.prototype.init = function(params) {
 	this.height = params['height'];
 	this.visible = selectValue(params['visible'], true);
 	this.visuals = {}; // associative array of all attached visuals
-	
+	this.updateTime = GLOBAL_UPDATE_INTERVAL;
 	var renderable = selectValue(params['renderable'], true);
 	this.setRenderable(renderable);
 };
@@ -41,13 +41,12 @@ VisualEntity.prototype.addVisual = function(visualId, visualInfo) {
 
 };
 
-VisualEntity.prototype.render = null;
 
 VisualEntity.prototype.isRenderable = function() {
 	return this.renderable;
 };
 
-VisualEntity.prototype.setRenderable = function(isTrue) {
+VisualEntity.prototype.setRenderable = function(isTrue, justUpdate) {
 	this.renderable = isTrue;
 	if (typeof (this.render) == "function") {
 		if (isTrue) {
@@ -56,6 +55,7 @@ VisualEntity.prototype.setRenderable = function(isTrue) {
 			Account.instance.removeRenderEntity(this);
 		}
 	}
+	this.justUpdate = justUpdate ? true : false; 
 };
 
 VisualEntity.prototype.getVisual = function(visualId) {
@@ -173,6 +173,44 @@ VisualEntity.prototype.resize = function() {
 	$['each'](this.visuals, function(id, visualInfo) {
 		visualInfo.visual.resize();
 	});
+};
+
+VisualEntity.prototype.update = function(updateTime, x, y){
+	if(x && y){
+		this.stpX = x - this.x;;
+		this.stpY = y - this.y;
+	}
+};
+
+VisualEntity.prototype.render = function(renderTime){
+//	console.log("RENDER", this.newX, this.newY);
+	if(renderTime == 0){
+		return;
+	}
+	if(this.isEnabled()){
+		console.log("enabled");
+	}
+	if(this.isRenderable()){
+//		console.log("renderable");
+	}
+	var interval = GLOBAL_UPDATE_INTERVAL;
+	this.updateTime -= renderTime;
+	if(this.updateTime == 0 ){
+		this.update(interval);
+		this.updateTime = interval;
+		return;
+	}
+	if(this.updateTime < 0 ){
+		this.update(interval);
+		this.updateTime = interval + this.updateTime ;
+		return;
+	}
+	if(this.stpX && this.stpY && !this.justUpdate){
+		this.x += renderTime/interval * this.stpX;//(1 - renderTime/interval) * this.x + renderTime/interval * this.newX;
+		this.y += renderTime/interval * this.stpY;//(1 - renderTime/interval) * this.y + renderTime/interval * this.newY;
+//		console.log("RENDER", renderTime/interval * this.stpX, renderTime/interval * this.stpY);
+		this.setPosition(this.x, this.y);
+	}
 };
 
 VisualEntity.prototype.writeUpdate = function(globalData, entityData) {
