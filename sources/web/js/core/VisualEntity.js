@@ -184,33 +184,33 @@ VisualEntity.prototype.update = function(updateTime, x, y){
 
 VisualEntity.prototype.render = function(renderTime){
 //	console.log("RENDER", this.newX, this.newY);
-	if(renderTime == 0){
-		return;
-	}
-	if(this.isEnabled()){
-		console.log("enabled");
-	}
-	if(this.isRenderable()){
-//		console.log("renderable");
-	}
-	var interval = GLOBAL_UPDATE_INTERVAL;
-	this.updateTime -= renderTime;
-	if(this.updateTime == 0 ){
-		this.update(interval);
-		this.updateTime = interval;
-		return;
-	}
-	if(this.updateTime < 0 ){
-		this.update(interval);
-		this.updateTime = interval + this.updateTime ;
-		return;
-	}
-	if(this.stpX && this.stpY && !this.justUpdate){
-		this.x += renderTime/interval * this.stpX;//(1 - renderTime/interval) * this.x + renderTime/interval * this.newX;
-		this.y += renderTime/interval * this.stpY;//(1 - renderTime/interval) * this.y + renderTime/interval * this.newY;
+//	if(renderTime == 0){
+//		return;
+//	}
+//	if(this.isEnabled()){
+//		console.log("enabled");
+//	}
+//	if(this.isRenderable()){
+////		console.log("renderable");
+//	}
+//	var interval = GLOBAL_UPDATE_INTERVAL;
+//	this.updateTime -= renderTime;
+//	if(this.updateTime == 0 ){
+//		this.update(interval);
+//		this.updateTime = interval;
+//		return;
+//	}
+//	if(this.updateTime < 0 ){
+//		this.update(interval);
+//		this.updateTime = interval + this.updateTime ;
+//		return;
+//	}
+//	if(this.stpX && this.stpY && !this.justUpdate){
+//		this.x += renderTime/interval * this.stpX;//(1 - renderTime/interval) * this.x + renderTime/interval * this.newX;
+//		this.y += renderTime/interval * this.stpY;//(1 - renderTime/interval) * this.y + renderTime/interval * this.newY;
 //		console.log("RENDER", renderTime/interval * this.stpX, renderTime/interval * this.stpY);
-		this.setPosition(this.x, this.y);
-	}
+//		this.setPosition(this.x, this.y);
+//	}
 };
 
 VisualEntity.prototype.writeUpdate = function(globalData, entityData) {

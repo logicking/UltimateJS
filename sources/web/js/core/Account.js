@@ -178,6 +178,10 @@ Account.prototype.setEnable = function(isTrue) {
 // called from outside, to notify entities about
 // screen resize
 Account.prototype.resize = function() {
+	if (this.backgroundState) {
+		console.log("baCKGROUND RESIZE");
+		this.backgroundState.resize();
+	}
 	if (this.children == null)
 		return;
 	$['each'](this.children, function(idx, entity) {
@@ -186,9 +190,6 @@ Account.prototype.resize = function() {
 		}
 	});
 	// console.log(this);
-	if (this.backgroundState) {
-		this.backgroundState.resize();
-	}
 };
 
 /*

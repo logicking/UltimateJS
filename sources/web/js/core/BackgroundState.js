@@ -59,7 +59,7 @@ BackgroundState.prototype.init = function(params) {
 			background : {
 				image : params['loader']
 			},
-			style : "sprite",
+			style : "spite",
 			width : 35,
 			height : 35,
 			x : "50%",
@@ -71,6 +71,9 @@ BackgroundState.prototype.init = function(params) {
 		this.loader.setClickTransparent(true);
 		this.addGui(this.loader);
 		this.loader.$()['css']("opacity", 0);
+		this.loader.$()['css']("position", "fixed");
+		this.loader.$()['css']("top", "50%");
+		this.loader.$()['css']("left", "50%");
 		this.loader.setZ(11001);
 		this.loader.hide();
 		// this.mask.children.addGui(loader,"loader");
@@ -96,7 +99,7 @@ BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
 	if (this.loader != null) {
-		this.loader.fadeTo(0, 0.1 * fadeTime, function() {
+		this.loader.fadeTo(0, 0.3 * fadeTime, function() {
 //			that.loader.hide();
 		});
 	}
@@ -109,6 +112,11 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 
 BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
+	this.loader.resize();
+	this.loader.$()['css']("position", "fixed");
+	this.loader.$()['css']("top", "50%");
+	this.loader.$()['css']("left", "50%");
+	console.log("LOADER RESIZE");
 	$['each'](this.dialogs, function(index, value) {
 		value.resize();
 	});
