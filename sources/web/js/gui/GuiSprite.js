@@ -92,14 +92,18 @@ GuiSprite.prototype.addAnimation = function(animationName, frames, row,
 GuiSprite.prototype.update = function(dt) {
 	if (this.currentAnimation == null)
 		return;
-
 	var curTime = (new Date()).getTime();
-	var dt = curTime - this.lastUpdateTime;
+	if (!dt) {
+		var dt = curTime - this.lastUpdateTime;
+	}
 	this.lastUpdateTime = curTime;
-
+	
 	this.currentFrameTime += dt;
 	while (this.currentFrameTime >= this.currentFrameLength) {
-		this.updateAnimation();
+		var stopped = this.updateAnimation();
+		if(stopped == true){
+			return;
+		}
 		this.currentFrameTime -= this.currentFrameLength;
 	}
 };
@@ -111,7 +115,7 @@ GuiSprite.prototype.updateAnimation = function() {
 		this.currentFrame = 0;
 		if (!this.looped) {
 			this.stopAnimation();
-			return;
+			return true;
 		}
 	}
 
@@ -126,8 +130,8 @@ GuiSprite.prototype.updateAnimation = function() {
 	this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
 			* frame * this.width + Screen.heightRatio() * this.offsetX1)
 			+ "px "
-			+ Math.round(-Screen.heightRatio() * row * this.height + Screen.heightRatio() * this.offsetY1)
-			+ "px ");
+			+ Math.round(-Screen.heightRatio() * row * this.height
+					+ Screen.heightRatio() * this.offsetY1) + "px ");
 	this.frame = frame;
 	this.row = row;
 	this.setRealBackgroundPosition();
@@ -137,7 +141,6 @@ GuiSprite.prototype.updateAnimation = function() {
 		}
 	}
 	this.currentFrame++;
-
 };
 
 GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
@@ -148,7 +151,7 @@ GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
 	// this.frameCallback = null;
 	if (!dontCallCallback && this.animationEndCallback) {
 		// trick with oldCallback is to allow to call setCallback
-		// iside callback itself
+		// inside callback itself
 		var oldCallback = this.animationEndCallback;
 		this.animationEndCallback = null;
 		oldCallback.call(this);

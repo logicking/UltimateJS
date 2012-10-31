@@ -86,6 +86,7 @@ var viewporter;
 			var cachedOrientation = window.orientation;
 			window.addEventListener('orientationchange', function() {
 				if(window.orientation !== cachedOrientation) {
+					alert(cachedOrientation);
 					that.prepareVisualViewport();
 					cachedOrientation = window.orientation;
 				}
@@ -148,9 +149,6 @@ var viewporter;
 			this._firstUpdateExecuted = true;
 
 		},
-		maximizeDocumentElement : function(){
-			document.documentElement.style.minHeight = '5000px';
-		},
 
 		prepareVisualViewport: function() {
 
@@ -161,24 +159,29 @@ var viewporter;
 				return this.postProcess();
 			}
 
+			var oldHeight = document.documentElement.style.minHeight.substring(0, document.documentElement.style.minHeight.indexOf("px"));
 			// maximize the document element's height to be able to scroll away the url bar
-			document.documentElement.style.minHeight = '5000px';
+//			alert(window.innerHeight);
+			document.documentElement.style.minHeight = (window.innerHeight + 500)+ "px";
 
 			var startHeight = window.innerHeight;
 			var deviceProfile = this.getProfile();
 			var orientation = viewporter.isLandscape() ? 'landscape' : 'portrait';
 
 			// try scrolling immediately
-			window.scrollTo(0, that.IS_ANDROID ? 1 : 0); // Android needs to scroll by at least 1px
+			window.scrollTo(0, that.IS_ANDROID ? 230 : 0); // Android needs to scroll by at least 1px
 
 			// start the checker loop
 			var iterations = 40;
 			var check = window.setInterval(function() {
 
 				// retry scrolling
-				window.scrollTo(0, that.IS_ANDROID ? 1 : 0); // Android needs to scroll by at least 1px
+//				window.scrollTo(0, that.IS_ANDROID ? 230 : 0); // Android needs to scroll by at least 1px
 
 				function androidProfileCheck() {
+					if(orientation == "portrait"){
+						return true;
+					}
 					return deviceProfile ? window.innerHeight === deviceProfile[orientation] : false;
 				}
 				function iosInnerHeightCheck() {
@@ -189,14 +192,19 @@ var viewporter;
 
 				// check iterations first to make sure we never get stuck
 				if ( (that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) || iterations < 0) {
-
+					
 					// set minimum height of content to new window height
-//					document.documentElement.style.minHeight = window.innerHeight + 'px';
-//
+					document.documentElement.style.minHeight = window.innerHeight + 'px';
+					
+					if(that.IS_ANDROID) window.scrollTo(0, 1);
 //					// set the right height for the body wrapper to allow bottom positioned elements
 					document.getElementById('viewporter').style.position = 'relative';
 					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
-
+					
+					if(orientation == "portrait"){
+						clearInterval(check);
+						return true;
+					}
 					clearInterval(check);
 
 					// fire events, get ready

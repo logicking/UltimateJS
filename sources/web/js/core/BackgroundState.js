@@ -89,7 +89,7 @@ BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	this.mask.$()['css']("opacity", 0);
 	if (this.loader != null) {
 		this.loader.$()['css']("opacity", 0);
-		this.loader.fadeTo(1, 1.5 *fadeTime, function() {
+		this.loader.fadeTo(1, 1.5 * fadeTime, function() {
 		});
 	}
 	this.mask.$()['css']("background-color", color);
@@ -100,7 +100,7 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
 	if (this.loader != null) {
 		this.loader.fadeTo(0, 0.3 * fadeTime, function() {
-//			that.loader.hide();
+			// that.loader.hide();
 		});
 	}
 	this.mask.fadeTo(0, fadeTime, function(s) {
@@ -112,11 +112,12 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 
 BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
-	this.loader.resize();
-	this.loader.$()['css']("position", "fixed");
-	this.loader.$()['css']("top", "50%");
-	this.loader.$()['css']("left", "50%");
-	console.log("LOADER RESIZE");
+	if (this.loader != null) {
+		this.loader.resize();
+		this.loader.$()['css']("position", "fixed");
+		this.loader.$()['css']("top", "50%");
+		this.loader.$()['css']("left", "50%");
+	}
 	$['each'](this.dialogs, function(index, value) {
 		value.resize();
 	});
