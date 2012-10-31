@@ -86,7 +86,6 @@ var viewporter;
 			var cachedOrientation = window.orientation;
 			window.addEventListener('orientationchange', function() {
 				if(window.orientation !== cachedOrientation) {
-					alert(cachedOrientation);
 					that.prepareVisualViewport();
 					cachedOrientation = window.orientation;
 				}

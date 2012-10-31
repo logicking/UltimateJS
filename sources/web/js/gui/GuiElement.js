@@ -240,6 +240,7 @@ GuiElement.prototype.getPosition = function() {
 
 GuiElement.prototype.setZ = function(z) {
 	this.jObject['css']("z-index", z);
+	this.jObject['css']("-webkit-transform", "translateZ(0)");
 	this.z = z;
 };
 
