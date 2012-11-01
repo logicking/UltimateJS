@@ -5,7 +5,7 @@
 Account.prototype = new BaseState();
 Account.prototype.constructor = Account;
 
-var GLOBAL_UPDATE_INTERVAL = 50;
+var GLOBAL_UPDATE_INTERVAL = 20;
 
 /**
  * @constructor
