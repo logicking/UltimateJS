@@ -27,6 +27,8 @@
 
 				<file name="utils/utils.js" />
 				<file name="utils/assert.js" />
+				<file name="utils/webSound.js" />
+				<file name="utils/jSound.js" />
 				<file name="utils/sound.js" />
 				<file name="utils/screen.js" />
 				<file name="utils/touch.js" />
