@@ -1,5 +1,4 @@
 /*
- * GuiDiv - main GuiElement with background manipulations,
  * viewport and dragn drop functions 
  */
 GuiDiv.prototype = new GuiElement();

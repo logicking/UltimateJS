@@ -30,6 +30,7 @@
     queue: {},
     uid: new Date().getTime(), 
     getTextForSave: function(queue){
+    	console.log("queue", queue);
       var obj = Downloadify.queue[queue];
       if(obj) return obj.getData();
       return "";
@@ -71,6 +72,7 @@
   };
  
   Downloadify.create = function( idOrDOM, options ){
+	  console.log("OLOLO");
     var el = (typeof(idOrDOM) == "string" ? document.getElementById(idOrDOM) : idOrDOM );
     return new Downloadify.Container(el, options);
   };

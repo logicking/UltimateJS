@@ -87,6 +87,19 @@ var viewporter;
 			window.addEventListener('orientationchange', function() {
 				if(window.orientation !== cachedOrientation) {
 					that.prepareVisualViewport();
+					setTimeout( function(){
+						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
+						$(window)['trigger']("resize");
+					}, 200);
+					setTimeout( function(){
+						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
+						$(window)['trigger']("resize");
+					}, 300);
+					setTimeout( function(){
+//						that.prepareVisualViewport();
+						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
+						$(window)['trigger']("resize");
+					}, 400);
 					cachedOrientation = window.orientation;
 				}
 			}, false);
@@ -158,29 +171,31 @@ var viewporter;
 				return this.postProcess();
 			}
 
+			//preventing 1pixel stripe at the bottom of the screen
+			if(that.IS_ANDROID)
+				document.getElementById('root').style.top = 1 + "px";
+			
+			
 			var oldHeight = document.documentElement.style.minHeight.substring(0, document.documentElement.style.minHeight.indexOf("px"));
 			// maximize the document element's height to be able to scroll away the url bar
 //			alert(window.innerHeight);
-			document.documentElement.style.minHeight = (window.innerHeight + 500)+ "px";
+			document.documentElement.style.minHeight = (window.innerHeight + 200)+ "px";
 
 			var startHeight = window.innerHeight;
 			var deviceProfile = this.getProfile();
 			var orientation = viewporter.isLandscape() ? 'landscape' : 'portrait';
 
 			// try scrolling immediately
-			window.scrollTo(0, that.IS_ANDROID ? 230 : 0); // Android needs to scroll by at least 1px
+			window.scrollTo(0, that.IS_ANDROID ? 100 : 0); // Android needs to scroll by at least 1px
 
 			// start the checker loop
 			var iterations = 40;
 			var check = window.setInterval(function() {
 
 				// retry scrolling
-//				window.scrollTo(0, that.IS_ANDROID ? 230 : 0); // Android needs to scroll by at least 1px
-
+				window.scrollTo(0, that.IS_ANDROID ? 1 : 0); // Android needs to scroll by at least 1px
+				
 				function androidProfileCheck() {
-					if(orientation == "portrait"){
-						return true;
-					}
 					return deviceProfile ? window.innerHeight === deviceProfile[orientation] : false;
 				}
 				function iosInnerHeightCheck() {
@@ -189,21 +204,19 @@ var viewporter;
 
 				iterations--;
 
+				//preventing 1pixel stripe at the bottom of the screen
+				if(that.IS_ANDROID)
+					document.getElementById('root').style.top = 1 + "px";
+				
 				// check iterations first to make sure we never get stuck
-				if ( (that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) || iterations < 0) {
+				if (  iterations <= 0||(that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) ) {
 					
 					// set minimum height of content to new window height
 					document.documentElement.style.minHeight = window.innerHeight + 'px';
-					
-					if(that.IS_ANDROID) window.scrollTo(0, 1);
 //					// set the right height for the body wrapper to allow bottom positioned elements
 					document.getElementById('viewporter').style.position = 'relative';
 					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
 					
-					if(orientation == "portrait"){
-						clearInterval(check);
-						return true;
-					}
 					clearInterval(check);
 
 					// fire events, get ready
@@ -211,7 +224,7 @@ var viewporter;
 
 				}
 
-			}, 10);
+			}, 5000);
 
 		},
 
