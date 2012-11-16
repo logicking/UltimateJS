@@ -115,7 +115,6 @@ VisualEntity.prototype.setZ = function(z) {
 	});
 };
 VisualEntity.prototype.setPosition = function(x, y) {
-
 	this.x = x;
 	this.y = y;
 

@@ -461,7 +461,6 @@ GuiElement.prototype.setParent = function(newParent, saveGlobalPosition) {
 	if (parent) {
 		var oldParent = this.parent;
 		this.parent = parent;
-		
 
 		// recalculate entity x,y so it will
 		// stay at the same place on the screen after the parent change
@@ -475,8 +474,7 @@ GuiElement.prototype.setParent = function(newParent, saveGlobalPosition) {
 			var top = oldParentPos.y - newParentPos.y;
 			this.move(left, top);
 		}
-		
-		
+
 		if (this.jObject) {
 			this.jObject['appendTo'](parent.jObject);
 		}
@@ -621,7 +619,7 @@ GuiElement.prototype.enableTouchEvents = function(push) {
 GuiElement.prototype.isPointInsideReal = function(x, y) {
 	var pos = this.jObject.offset();
 	var width = this.jObject.width();
-	var height = this.jObject.height(); 
+	var height = this.jObject.height();
 	if ((x > pos.left && x < (pos.left + width))
 			&& (y > pos.top && y < (pos.top + height))) {
 		return true;
@@ -630,11 +628,15 @@ GuiElement.prototype.isPointInsideReal = function(x, y) {
 	}
 };
 
-GuiElement.prototype.getEventPosition = function(e){
+GuiElement.prototype.getEventPosition = function(e) {
 	var pos = Device.getPositionFromEvent(e);
 	var elementPos = this.jObject['offset']();
-	var needed = {}; 
-	needed.x =  pos.x - elementPos.left;
-	needed.y =  pos.y - elementPos.top;
-	return Screen.calcLogicSize(needed.x, needed.y);
+	var needed = {};
+	needed.x = pos.x - elementPos.left;
+	needed.y = pos.y - elementPos.top;
+	var result = Screen.calcLogicSize(needed.x, needed.y);
+	if (this.visualEntity && this.visualEntity.y < 0) {//hacky thing
+		result.y -= this.y + Screen.offsetY();
+	}
+	return result;
 };

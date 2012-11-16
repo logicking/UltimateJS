@@ -28,8 +28,8 @@ guiFactory.addClass(GuiSprite);
 GuiSprite.prototype.initialize = function(params) {
 	GuiSprite.parent.initialize.call(this, params);
 
-	// .hack temporary disable viewport for sprites at all
-	// this.clampByViewport = this.clampByViewportSimple;
+//	 .hack temporary disable viewport for sprites at all
+	 this.clampByViewport = this.clampByViewportSimple;
 
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
@@ -134,7 +134,7 @@ GuiSprite.prototype.updateAnimation = function() {
 					+ Screen.heightRatio() * this.offsetY1) + "px ");
 	this.frame = frame;
 	this.row = row;
-	this.setRealBackgroundPosition();
+	this.setRealBackgroundPosition();//test
 	if (this.frameCallback != null) {
 		if (this.frameCallback[this.currentAnimation]) {
 			this.frameCallback[this.currentAnimation](this.currentFrame);
@@ -174,6 +174,8 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
+	
+	
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
 
@@ -274,11 +276,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-	// if (this.viewport) {
-	// this.clampByViewport();
-	// } else {
-	this.setRealPosition(x, y);
-	// }
+	 if (this.viewport) {
+		this.clampByViewport();
+	} else {
+		this.setRealPosition(x, y);
+	}
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
