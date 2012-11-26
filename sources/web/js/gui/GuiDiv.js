@@ -176,7 +176,7 @@ GuiDiv.prototype.resizeBackground = function() {
 GuiDiv.prototype.setPosition = function(x, y) {
 	GuiDiv.parent.setPosition.call(this, x, y);
 	if (this.viewport) {
-		this.clampByViewport();
+//		this.clampByViewport();
 	}
 };
 
@@ -203,7 +203,7 @@ GuiDiv.prototype.resize = function() {
 	// TODO make optimization, currently setting size and pos twice
 	// Consider removing this from GuiDiv
 	if (this.viewport) {
-		this.clampByViewport();
+//		this.clampByViewport();
 	}
 };
 

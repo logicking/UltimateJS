@@ -276,11 +276,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-	 if (this.viewport) {
-		this.clampByViewport();
-	} else {
+//	 if (this.viewport) {
+//		this.clampByViewport();
+//	} else {
 		this.setRealPosition(x, y);
-	}
+//	}
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -300,7 +300,7 @@ GuiSprite.prototype.setTransform = function(matrix, angle) {
 
 GuiSprite.prototype.resize = function() {
 	GuiSprite.parent.resize.call(this);
-	this.setRealBackgroundPosition(this.offsetX1, this.offsetY1);
+//	this.setRealBackgroundPosition(0,0);
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {

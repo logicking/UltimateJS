@@ -635,8 +635,5 @@ GuiElement.prototype.getEventPosition = function(e) {
 	needed.x = pos.x - elementPos.left;
 	needed.y = pos.y - elementPos.top;
 	var result = Screen.calcLogicSize(needed.x, needed.y);
-	if (this.visualEntity && this.visualEntity.y < 0) {//hacky thing
-		result.y -= this.y + Screen.offsetY();
-	}
 	return result;
 };
