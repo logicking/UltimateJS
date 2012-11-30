@@ -40,7 +40,7 @@ Entity.prototype.init = function(params) {
 	}
 
 	var enabled = selectValue(params['enabled'], true);
-	this.setEnable(enabled);
+	//this.setEnable(enabled);
 
 	// this.readUpdate(params);
 	this.timeouts = null;

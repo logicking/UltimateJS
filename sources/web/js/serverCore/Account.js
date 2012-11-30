@@ -85,7 +85,7 @@ Account.prototype.addScheduledEntity = function(newEntity) {
 	var dt = this.globalUpdateInterval;
 	// if adding first object to scheduling queue start update interval
 	if (!this.globalUpdateIntervalHandle) {
-		 this.globalUpdateIntervalHandle = this.setInterval(function() {
+		 this.globalUpdateIntervalHandle = setInterval(function() {
 		 that.update(dt);
 		 }, dt);
 	}
