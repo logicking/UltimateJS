@@ -24,6 +24,11 @@ var onConsoleMessage = function(args) {
 	request.post(consoleUrl + "logmsg", {form:json});
 };
 
+//exception handling
+process.on('uncaughtException', function (err) {
+	  console.log('Caught exception: ' + err);
+});
+
 // Inheritance pattern
 Function.prototype.inheritsFrom = function(parentClassOrObject) {
 	if (parentClassOrObject.constructor == Function) {
