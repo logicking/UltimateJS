@@ -26,7 +26,7 @@ var onConsoleMessage = function(args) {
 
 //exception handling
 process.on('uncaughtException', function (err) {
-	  console.log('Caught exception: ' + err);
+	  console.log('Caught exception: ' ,  err);
 });
 
 // Inheritance pattern
