@@ -155,9 +155,9 @@ var uniqueId = (function() {
 })(); // Invoke the outer function after defining it.
 
 // Console hack for IE
-if(typeof console == "undefined") {
-	var console = {log : function()  {}};
-}
+//if(typeof console == "undefined") {
+//	var console = {log : function()  {}};
+//}
 
 
 function eLog(message, tag, level) {
