@@ -86,22 +86,27 @@ BackgroundState.prototype.init = function(params) {
 };
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
-	this.mask.$()['css']("opacity", 0);
+
 	if (this.loader != null) {
 		this.loader.$()['css']("opacity", 0);
-		this.loader.fadeTo(1, 1.5 * fadeTime, function() {
+		this.loader.$()['stop']();
+		this.loader.$()['delay'](0.5 * fadeTime);
+		this.loader.fadeTo(1, 0.5 * fadeTime, function() {
 		});
 	}
+	this.mask.show();
+	this.mask.$()['stop']();
+	this.mask.$()['css']("opacity", 0);
 	this.mask.$()['css']("background-color", color);
 	this.mask.fadeTo(1, fadeTime, callback);
+
 };
 
 BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
 	if (this.loader != null) {
-		this.loader.fadeTo(0, 0.3 * fadeTime, function() {
-			// that.loader.hide();
-		});
+		this.loader.$()['stop']();
+		this.loader.fadeTo(0, 0.3 * fadeTime);
 	}
 	this.mask.fadeTo(0, fadeTime, function(s) {
 		that.mask.hide();
