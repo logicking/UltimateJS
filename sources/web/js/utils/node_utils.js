@@ -1,34 +1,39 @@
 var request = require("request");
 var util = require('util');
 var path = require('path');
-var sconf = require(path.join(__dirname, "../resources/server_config.json"))
+var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
 //reseting log on logserver
 var consoleUrl = "http://127.0.0.1:8765/";
-request.post(consoleUrl + "resetLog", {form:{name:logger}});
+request.post(consoleUrl + "resetLog", {form:{name:logger, time: Date.now()}});
 
 
 (function() {
 	var fn = console.log;
+	var index = 0;
 	console.log = function() {
-		onConsoleMessage(arguments);
+		index = index + 1;
+		time = Date.now();
+		onConsoleMessage(arguments, time, index);
 		return fn.apply(this, arguments);
 	};
 })();
 
-var onConsoleMessage = function(args) {
+var onConsoleMessage = function(args, time, index) {
 	var msg = util.format.apply(util, args);
 	var json = {
 		name : logger,
-		msg : msg
+		msg : msg,
+		time:time,
+		index:index
 	};
 	request.post(consoleUrl + "logmsg", {form:json});
 };
 
 //exception handling
-process.on('uncaughtException', function (err) {
-	  console.log('Caught exception!: ' ,  err);
-});
+//process.on('uncaughtException', function (err) {
+//	  console.log('Caught exception!: ' ,  err);
+//});
 
 // Inheritance pattern
 Function.prototype.inheritsFrom = function(parentClassOrObject) {
