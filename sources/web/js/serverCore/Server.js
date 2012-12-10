@@ -53,74 +53,9 @@ Server.prototype.init = function(sconf){
 	
 //	console.log('(Re)Created Tables entity_data and users_accounts');
 	
-	this.addCommand("getFriends", function(args, session, callback){
-//		var vk = session.initData.vk;
-//		vkApp('users.get', {uid: session.userId, fields: 'uid,first_name' }, function (err, users) {
-//			  console.log("vkApp.users.get: ",users);
-//			  callback(users);
-//			});
-//		console.log("Session.userId:\n", session.userId, "\n\n");
-//		console.log("vkApi fÙ‚˚ÔÂ˚ÛÔÓ‚u1nc:", vkApi);
-		vkApp("friends.get" ,{ uid:session.userId, fields:"uid,first_name,photo" }, function(err, friends){
-			var appUsers = [];
-//			console.log("Friends on getFriends call to vkApi: ",friends);
-			var createCallback = function(current_i){
-				return function(accId){
-					if(accId != null){
-						appUsers.push(friends[current_i]);
-						friends[current_i]["used"] = true;
-					}
-					if(current_i == friends.length-1){
-						var NUM_OF_RANDOMS = 10;
-						var randoms = [];
-						var result = {
-								appUsers: appUsers,
-								randoms: randoms
-						};
-						var i = 0;
-						while( i<NUM_OF_RANDOMS ){
-							var index = Math.floor(Math.random()*friends.length);
-							if( !friends[index]["used"] ){
-								i = i + 1;
-								randoms.push(friends[index]);
-								friends[index]["used"] = true;
-							}							
-						}
-						for(var i = 0;i<randoms.length;i++){
-							delete randoms[i]["used"];
-						}
-						for(var i = 0;i<appUsers.length;i++){
-							delete appUsers[i]["used"];
-						}
-						console.log("getFriends result:\n", result);
-						callback(result);
-					}
-				};
-			};
-
-			for(var i=0; i<friends.length; i++){
-				EntityManager.instance.getAccIdByUserId(friends[i].uid, createCallback(i));
-			}
-
-
-		});
-	});
 	
-	this.addCommand("getLife", function(args, session, callback){
-		console.log("GET LIFE COMMAND!!!");
-		Server.instance.getEntity(session, session.accountId, function(entity){
-//			if(entity.cash >=2){
-				console.log("ACCCCCCC", entity);
-				entity.setProperty("lives", entity.lives?entity.lives+1:1);
-				console.log("CASH 11ON GET LI234FE", entity.cash);
-//				entity.setProperty("cash", entity.cash + 10);
-//			}
-			var changes = session.popChanges();
-			Server.instance.logEntities("after switchState");
-			Server.instance.logCache("after switchState");
-			callback(changes);
-		});
-	});
+	
+	
 	
 	this.addCommand("switchState", function(args, session, callback){
 
