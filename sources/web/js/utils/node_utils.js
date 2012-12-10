@@ -1,7 +1,8 @@
 var request = require("request");
 var util = require('util');
 var path = require('path');
-var logger = "frostik";
+var sconf = require(path.join(__dirname, "../resources/server_config.json"))
+var logger = sconf.username;
 //reseting log on logserver
 var consoleUrl = "http://127.0.0.1:8765/";
 request.post(consoleUrl + "resetLog", {form:{name:logger}});
@@ -26,7 +27,7 @@ var onConsoleMessage = function(args) {
 
 //exception handling
 process.on('uncaughtException', function (err) {
-	  console.log('Caught exception: ' ,  err);
+	  console.log('Caught exception!: ' ,  err);
 });
 
 // Inheritance pattern

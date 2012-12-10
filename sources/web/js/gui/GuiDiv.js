@@ -31,6 +31,7 @@ GuiDiv.prototype.initialize = function(params) {
 			image : params['image']
 		};
 	}
+	this.remote = params['remote'];
 	/*
 	 * if(params['background']instanceof Array){ for(var i = 0;i <
 	 * params['background'].length;i++) {
@@ -91,7 +92,7 @@ GuiDiv.prototype.applyBackground = function(params) {
 			this.setBackgroundFromParams(params[i], j--);
 		}
 	} else if (params) {
-		params['image'] = Resources.getImage(params['image']);
+		params['image'] = this.remote?params['image']:Resources.getImage(params['image']);
 		this.setBackgroundFromParams(params, null);
 	}
 };

@@ -13,12 +13,13 @@ function Entity() {
 Entity.prototype.init = function(params) {
 	this.params = params;
 	this.id = params['id'];
+	console.log("ENTITY PARAMS", this.id, this.params);
 	this.listeners = selectValue(params["listeners"], []);
 //	console.log("Listeners: ",this.listeners);
 	if(params["accountID"]){
-		this.Account = Server.instance.getEntity(null, params["accountID"], null);
+		this.account = Server.instance.getEntity(null, params["accountID"], null);
 	}else{
-		this.Account = this;
+		this.account = this;
 	}
 	// Variables values for synchronizing with server
 	this.properties = {};
@@ -27,7 +28,10 @@ Entity.prototype.init = function(params) {
 	if (this.parent) {
 		// find parent among entities on server
 		if (typeof this.parent == "string") {
-			if( (this.parent = Server.instance.getEntity(null, this.parent, null, true))instanceof Entity ){
+			console.log("NEW PARENT1", this.parent);
+			this.parent = Server.instance.getEntity(null, this.parent, null, true);
+			console.log("NEW PARENT2", this.parent);
+			if( (this.parent)instanceof Entity ){
 				this.parent.addChild(this);
 			}else{
 				console.log("No parent instance found on server for entity with id='" + this.id + "'");
@@ -119,7 +123,7 @@ Entity.prototype.removeChild = function(child) {
 
 Entity.prototype.initChildren = function(params) {
 	if (params && params['children']) {
-		this.Account.readGlobalUpdate(params['children']);
+		this.account.readGlobalUpdate(params['children']);
 	}
 };
 
@@ -145,9 +149,9 @@ Entity.prototype.setEnable = function(isTrue) {
 	this.enabled = isTrue;
 	if (typeof (this.update) == "function") {
 		if (isTrue) {
-			this.Account.addScheduledEntity(this);
+			this.account.addScheduledEntity(this);
 		} else {
-			this.Account.removeScheduledEntity(this);
+			this.account.removeScheduledEntity(this);
 		}
 	}
 };
