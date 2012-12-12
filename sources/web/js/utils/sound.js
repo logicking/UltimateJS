@@ -19,30 +19,29 @@ var Sound = (function() {
 				return this.channels[channel];
 			}
 		},
-		stop : function(channel){
+		stop : function(channel) {
 			var that = this;
-			if(channel){
+			if (channel) {
 				this.instance.stop(this.getChannel(channel));
-			}else{
-				$['each'](this.channels,function(index,value){
+			} else {
+				$['each'](this.channels, function(index, value) {
 					that.instance.stop(value['playing']);
 				});
 			}
 		},
-		isOn : function(){
-			 var on = Device.getStorageItem("soundOn", "true") == "true";
-			 return on;
+		isOn : function() {
+			var on = Device.getStorageItem("soundOn", "true") == "true";
+			return on;
 		},
-		turnOn : function(isOn){
-			 var soundOn = isOn;
-			 Device.setStorageItem("soundOn", soundOn);
-			 if (soundOn){
-				 this.instance.unmute();
-			 }
-			 else{
-				 this.instance.mute();
-				 this.stop();
-			 }
+		turnOn : function(isOn) {
+			var soundOn = isOn;
+			Device.setStorageItem("soundOn", soundOn);
+			if (soundOn) {
+				this.instance.unmute();
+			} else {
+				this.instance.mute();
+				this.stop();
+			}
 		},
 		add : function(id, offset, duration, priority) {
 			if (this.forceSprite) {
@@ -56,7 +55,7 @@ var Sound = (function() {
 		play : function(id, loop, priority, channel) {
 			if (!this.soundBuffers[id])
 				return;
-			
+
 			var ch = this.getChannel(channel);
 			var sound = this.soundBuffers[id];
 			var sndInstance = {
@@ -92,6 +91,10 @@ var Sound = (function() {
 					that.sprite = buf;
 				});
 			}
+			// need timeout to since init of sound object can be not immediate
+			setTimeout(function() {
+				Sound.turnOn(Sound.isOn());
+			}, 1000);
 		}
 	};
 	var context = null;
@@ -99,12 +102,13 @@ var Sound = (function() {
 		context = new webkitAudioContext();
 	} catch (e) {
 		console.log("WEB Audio not supported");
+		context = null;
 	}
 	if (context) {
 		snd.instance = new WebSound(context);
 	} else {
 		snd.instance = new jSound();
 	}
-	
+
 	return snd;
 })();

@@ -5,7 +5,6 @@ var WebSound = function(context) {
 };
 
 WebSound.prototype.play = function(sndInst, callback) {
-	console.log
 	var that = this;
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
