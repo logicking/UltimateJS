@@ -53,10 +53,6 @@ Server.prototype.init = function(sconf){
 	
 //	console.log('(Re)Created Tables entity_data and users_accounts');
 	
-	
-	
-	
-	
 	this.addCommand("switchState", function(args, session, callback){
 
 		var curState = Server.instance.getEntity(session, args[0], null, true);
@@ -111,6 +107,27 @@ Server.prototype.executeCommand = function(name, args, session, callback) {
 
 Server.prototype.addSession = function(session) {
 	Sessions[session.userId] = session;
+};
+
+Server.prototype.getAccountByUserId = function(session, userId, callback){
+	var rows = [];
+	var query = authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
+	query.on( "error", function(error){
+		console.log("Get Account By User Id error\n", error);
+	});
+	
+	query.on('row', function(row){
+		rows.push(row);
+	});
+	
+	query.on("end", function(result){
+		if(result.rowCount == 0){
+			callback(null);
+		}
+		Server.instance.getEntity(session, rows[0].account, function(account){
+			callback(account);
+		}, false, false);
+	});
 };
 
 Server.prototype.removeSession = function(session){
@@ -508,8 +525,11 @@ Server.prototype.onAuth = function(req, res){
 	var session = Server.instance.getSession(userId);
 	if(session){
 		console.log("Found previous session with userId: ", userId);
-		var obj = {};
-		obj[session.accountId] = session.sendData(true);
+		var obj = {
+				accountId : session.accountId,
+				userId : userId,
+				initUpdate:session.sendData(true)
+		};
 		res.end(JSON.stringify(obj));
 		return;
 	}
@@ -525,8 +545,14 @@ Server.prototype.onAuth = function(req, res){
 			Server.instance.logEntities("On auth");
 			Server.instance.logCache("On auth");
 			
-			var obj = {};
-			obj[session.accountId] = session.sendData(true);
+			var obj = {
+					accountId : session.accountId,
+					userId : userId,
+					initUpdate:session.sendData(true)
+			};
+//			obj["accountId"] = session.accountId;
+//			obj["userId"] = userId;
+//			obf["initUpdate"] = session.sendData(true); 
 			res.end(JSON.stringify(obj));
 //			response.end(JSON.stringify(obj));
 //			global.setTimeout(function(){

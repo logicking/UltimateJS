@@ -16,8 +16,8 @@ Entity.prototype.init = function(params) {
 	console.log("ENTITY PARAMS", this.id, this.params);
 	this.listeners = selectValue(params["listeners"], []);
 //	console.log("Listeners: ",this.listeners);
-	if(params["accountID"]){
-		this.account = Server.instance.getEntity(null, params["accountID"], null);
+	if(params["accountId"]){
+		this.account = Server.instance.getEntity(null, params["accountId"], null);
 	}else{
 		this.account = this;
 	}
@@ -205,7 +205,7 @@ Entity.prototype.writeUpdate = function(globalData, entityData) {
 	globalData[this.id] = entityData;
 	entityData['class'] = this.params['class'];
 	entityData['parent'] = (this.parent instanceof Entity)?this['parent']['id']:this['parent'];
-	entityData['accountID'] = this.params['accountID'];
+	entityData['accountId'] = this.params['accountId'];
 //	entityData['id'] = this.params['id'];
 	if (this.children) {
 		for(var index in this.children){
