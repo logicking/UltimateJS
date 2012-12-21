@@ -1,7 +1,7 @@
 /*WebSound*/
 var WebSound = function(context) {
 	this.context = context;
-	this.volume = 0;
+	this.volume = 1;
 };
 
 WebSound.prototype.play = function(sndInst, callback) {
@@ -9,6 +9,7 @@ WebSound.prototype.play = function(sndInst, callback) {
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
 	sndInst.source.connect(this.context.destination);
+	console.log("SOUND BUFF", sndInst.buffer);
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
 	sndInst.source.gain.value = this.volume;
@@ -39,12 +40,15 @@ WebSound.prototype.unmute = function() {
 	this.volume = 1;
 };
 
+WebSound.prototype.loadSprite = function(name, callback){
+	this.loadSound(name, callback);
+};
+
 WebSound.prototype.loadSound = function(name, callback) {
 	var that = this;
 	var EXTENTION = ".mp3";
-	console.log("LoadSound", name + EXTENTION, callback);
 	var request = new XMLHttpRequest();
-	request.open('GET', name + EXTENTION, true);
+	request.open('GET', "sounds/" +name + EXTENTION, true);
 	request.responseType = 'arraybuffer';
 	// Decode asynchronously
 	request.onload = function() {

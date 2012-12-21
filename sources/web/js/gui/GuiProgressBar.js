@@ -30,19 +30,31 @@ GuiProgressBar.prototype.initialize = function(params) {
 	this.min = params['min'] ? params['min'] : 0;
 	this.max = params['max'] ? params['max'] : 0;
 	this.current = params['current'] ? params['current'] : 0;
+	this.vertical = params['vertical'] ? params['vertical'] : false;
 	this.style = params['style'];
 	this.width = params['width'];
+	this.stableHeight = params['bar']['height'];
 	this.stableWidth = params['bar']['width'];// (this.current -
 	// this.min)*params['width']/(this.max-this.min)
 	this.height = (params['height']) ? params['height'] : that.height;
 	var that = this;
+	var barHeight = this.vertical ? (this.current - this.min)
+			* params['bar']['height'] / (this.max - this.min)
+			: params['bar']['height'];
+	var barWidth = this.vertical ? params['bar']['width']
+	: (this.current - this.min) * params['bar']['width']
+	/ (this.max - this.min);
+	console.log("OFFSET", this.stableHeight - barHeight);
 	this.bar = guiFactory.createObject("GuiDiv", {
 		parent : that,
-		background : params['bar']['background'],
+		background : {
+			image :	params['bar']['background']['image'],
+			y : this.stableHeight - barHeight,
+			x : this.stableWidth - barWidth
+		},
 		style : params['bar']['style'],
-		width : (this.current - this.min) * params['bar']['width']
-				/ (this.max - this.min),
-		height : params['bar']['height'],
+		width : this.stableWidth,
+		height : this.stableHeight,
 		x : params['bar']['x'],
 		y : params['bar']['y']
 	});
@@ -72,27 +84,26 @@ GuiProgressBar.prototype.initialize = function(params) {
 };
 
 GuiProgressBar.prototype.setNewValue = function(what, newValue) {
-//	var width = Math.round(this.bar.width * (this.max - this.min)
-//			/ (this.current - this.min));if (this.entities['Account01']['experience'] >= 5000) {
-//	entities[id] = {};
-//	entities[id]['id'] = id;
-//	entities[id].newEntity = true;
-//	entities[id]['class'] = "Item";
-//	entities[id].parent = "Inventory01";
-//	entities[id].description = args[0];
-//}
 	this[what] = Math.floor(newValue);
 	if (this.current >= this.max) {
 		this.current = this.max;
 	}
-	
-	this.label.change(this.current);
-	this.bar.width = Math.round((this.current - this.min) * this.stableWidth
-			/ (this.max - this.min));
-	this.bar.setSize(this.bar.width, this.bar.height);
-	this.resize();
-};
 
+	if(this.label){
+		this.label.change(this.current);
+	}
+	
+	if(this.vertical){
+		var height = Math.round((this.current - this.min) * this.stableHeight
+				/ (this.max - this.min));	
+		this.bar.setBackgroundPosition(0, this.stableHeight - height);
+	}else{
+		var width = Math.round((this.current - this.min) * this.stableWidth
+				/ (this.max - this.min));
+		this.bar.setBackgroundPosition(0, this.stableWidth - width);
+	}
+//	this.resize();
+};
 
 GuiProgressBar.prototype.resize = function() {
 	GuiProgressBar.parent.resize.call(this);

@@ -27,6 +27,11 @@ var Screen = (function() {
 	var fullWidth, fullHeight, currentFullWidth, currentFullHeight;
 
 	var rotateMsgHeightWidthRatio;
+	
+	
+	//if fixed
+	var fixedWidth = null;
+	var fixedHeight = null;
 
 	var widthRatio = 1;
 	var heightRatio = 1;
@@ -143,6 +148,13 @@ var Screen = (function() {
 	};
 	
 	function windowOnResize(event, w, h) {
+		console.log("RESRRESRERSD", fixedWidth, fixedHeight);
+		if(fixedWidth){
+			w = fixedWidth;
+		}
+		if(fixedHeight){
+			h = fixedHeight;
+		}
 		// alert("resize " + Screen.isCorrectOrientation());
 		if (!Screen.isCorrectOrientation()) {
 			resizeRotateMsg(w, h);
@@ -168,6 +180,7 @@ var Screen = (function() {
 			appInstance = application;
 
 			params = selectValue(params, {});
+			
 
 			// inverse default values
 			if (isLandscape === false) {
@@ -188,20 +201,41 @@ var Screen = (function() {
 				MAX_WIDTH = buffer;
 			}
 			// read user provided values if any
-			BASE_WIDTH = selectValue(params['BASE_WIDTH'], BASE_WIDTH);
-			BASE_HEIGHT = selectValue(params['BASE_HEIGHT'], BASE_HEIGHT);
-			MAX_WIDTH = selectValue(params['MAX_WIDTH'], MAX_WIDTH);
-			MAX_HEIGHT = selectValue(params['MAX_HEIGHT'], MAX_HEIGHT);
-			ENHANCED_BASE_WIDTH = selectValue(params['ENHANCED_BASE_WIDTH'],
-					ENHANCED_BASE_WIDTH);
-			ENHANCED_BASE_HEIGHT = selectValue(params['ENHANCED_BASE_HEIGHT'],
-					ENHANCED_BASE_HEIGHT);
-			ENHANCED_BASE_MARGIN_WIDTH = selectValue(
-					params['ENHANCED_BASE_MARGIN_WIDTH'],
-					ENHANCED_BASE_MARGIN_WIDTH);
-			ENHANCED_BASE_MARGIN_HEIGHT = selectValue(
-					params['ENHANCED_BASE_MARGIN_HEIGHT'],
-					ENHANCED_BASE_MARGIN_HEIGHT);
+			if(isLandscape === "fixed"){
+				fixedWidth = params['width'];
+				fixedHeight = params['height'];
+//				console.log("FIXED");
+//				BASE_WIDTH = selectValue(params['MAX_WIDTH'], BASE_WIDTH);
+//				console.log("BASE_WIDTH", BASE_WIDTH);
+//				BASE_HEIGHT = selectValue(params['MAX_HEIGHT'], BASE_HEIGHT);
+//				console.log("BASE_HEIGHT", BASE_HEIGHT);
+//				MAX_WIDTH = selectValue(params['MAX_WIDTH'], MAX_WIDTH);
+//				MAX_HEIGHT = selectValue(params['MAX_HEIGHT'], MAX_HEIGHT);
+//				ENHANCED_BASE_WIDTH = selectValue(params['MAX_WIDTH'],
+//						ENHANCED_BASE_WIDTH);
+//				ENHANCED_BASE_HEIGHT = selectValue(params['MAX_HEIGHT'],
+//						ENHANCED_BASE_HEIGHT);
+//				ENHANCED_BASE_MARGIN_WIDTH = 0;
+//				ENHANCED_BASE_MARGIN_HEIGHT = 0;
+				
+				
+			}else{
+				BASE_WIDTH = selectValue(params['BASE_WIDTH'], BASE_WIDTH);
+				BASE_HEIGHT = selectValue(params['BASE_HEIGHT'], BASE_HEIGHT);
+				MAX_WIDTH = selectValue(params['MAX_WIDTH'], MAX_WIDTH);
+				MAX_HEIGHT = selectValue(params['MAX_HEIGHT'], MAX_HEIGHT);
+				ENHANCED_BASE_WIDTH = selectValue(params['ENHANCED_BASE_WIDTH'],
+						ENHANCED_BASE_WIDTH);
+				ENHANCED_BASE_HEIGHT = selectValue(params['ENHANCED_BASE_HEIGHT'],
+						ENHANCED_BASE_HEIGHT);
+				ENHANCED_BASE_MARGIN_WIDTH = selectValue(
+						params['ENHANCED_BASE_MARGIN_WIDTH'],
+						ENHANCED_BASE_MARGIN_WIDTH);
+				ENHANCED_BASE_MARGIN_HEIGHT = selectValue(
+						params['ENHANCED_BASE_MARGIN_HEIGHT'],
+						ENHANCED_BASE_MARGIN_HEIGHT);
+			}
+			
 
 			screenConsts = {
 				"BASE_WIDTH" : BASE_WIDTH,
@@ -261,6 +295,7 @@ var Screen = (function() {
 
 		// some portals (like Spil Games) will require manual resize function
 		windowOnResize : function(w, h) {
+			console.log("WH", w, h);
 			windowOnResize(null, w, h);
 		},
 		
@@ -353,3 +388,5 @@ var Screen = (function() {
 		}
 	};
 })();
+
+
