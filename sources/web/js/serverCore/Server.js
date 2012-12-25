@@ -2,7 +2,7 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 60*1000;
+var CACHE_LIFETIME = 7*1000;
 
 function Server(){
 	var fileServer = null;
@@ -561,6 +561,7 @@ Server.prototype.onAuth = function(req, res){
 			Server.instance.logCache("On auth");
 			if(Server.instance.authCallback){
 				Server.instance.authCallback(session, function(){
+					console.log("next() on auth callback entry point");
 					var obj = {
 							accountId : session.accountId,
 							userId : userId,
