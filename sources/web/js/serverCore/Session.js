@@ -2,7 +2,7 @@
 /* 
  * Session - authorization, account manager 
  */
-var SESSION_LIFETIME = 5*60*1000;
+var SESSION_LIFETIME = 3*60*1000;
 
 function Session(){
 	var propertyQueue = null;
@@ -78,7 +78,7 @@ Session.prototype.setInitData = function(initData){
 	}
 	this.initData = initData;
 	this.vk = vkApi(this.initData.access_token);
-}
+};
 
 Session.prototype.sendData = function(initUpdate){
 	var entities = Server.instance.entities;
@@ -95,7 +95,7 @@ Session.prototype.sendData = function(initUpdate){
 //				console.log("Entity.id: %s; parentId: %s", entity.id, parentId);
 				if ( ((entity.parent instanceof Entity) ? (entity.parent.id==parentId) : (entity.parent == parentId)) ) {
 					entity.writeUpdate(globalData, {});
-					console.log("Entity: %s; wrote update", entity.id);
+//					console.log("Entity: %s; wrote update", entity.id);
 					addByParent(globalData, entity.id);
 				}
 			}
@@ -144,7 +144,6 @@ Session.receiveData = function(data){
 
 Session.prototype.popChanges = function(){
 	var data = {};
-	var entity;
 	while(propertyQueue.length > 0){
 		var prop = propertyQueue.shift();
 		extend(data, prop);

@@ -13,7 +13,7 @@ function Entity() {
 Entity.prototype.init = function(params) {
 	this.params = params;
 	this.id = params['id'];
-	console.log("ENTITY PARAMS", this.id, this.params);
+//	console.log("ENTITY PARAMS", this.id, this.params);
 	this.listeners = selectValue(params["listeners"], []);
 //	console.log("Listeners: ",this.listeners);
 	if(params["accountId"]){
@@ -28,9 +28,9 @@ Entity.prototype.init = function(params) {
 	if (this.parent) {
 		// find parent among entities on server
 		if (typeof this.parent == "string") {
-			console.log("NEW PARENT1", this.parent);
+//			console.log("NEW PARENT1", this.parent);
 			this.parent = Server.instance.getEntity(null, this.parent, null, true);
-			console.log("NEW PARENT2", this.parent);
+//			console.log("NEW PARENT2", this.parent);
 			if( (this.parent)instanceof Entity ){
 				this.parent.addChild(this);
 			}else{
@@ -137,11 +137,13 @@ Entity.prototype.isEnabled = function() {
 Entity.prototype.setEntityTimeout = function(func, time) {
 //	console.log(this);
 	var that = this;
-	global.setTimeout(function() {
+	
+	var id = global.setTimeout(function() {
 		Server.instance.getEntity(null, that.id, function(entity){	
 			func(entity);
 		});
 	}, time);	
+	return id;
 };
 
 

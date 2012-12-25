@@ -5,7 +5,12 @@ var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
 //reseting log on logserver
 var consoleUrl = "http://127.0.0.1:8765/";
-request.post(consoleUrl + "resetLog", {form:{name:logger, time: Date.now()}});
+request.post(consoleUrl + "resetLog", {
+	form : {
+		name : logger,
+		time : Date.now()
+	}
+});
 
 
 (function() {

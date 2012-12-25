@@ -31,11 +31,11 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 		names[name] = id;
 		object[id] = template[name];
 	}
-	console.log("names: ",names);
+//	console.log("names: ",names);
 //	console.log("obj: ", object);
 	for(var id in object){
 		var curJSON = object[id];
-		console.log("Current JSON:", curJSON);
+//		console.log("Current JSON:", curJSON);
 		for(var propName in curJSON){
 			var rememberedName;
 			if(rememberedName = names[curJSON[propName]]){
@@ -166,7 +166,7 @@ EntityManager.prototype.getEntity = function(id, addParams, callback){
 
 //field ID should be specified in JSON
 EntityManager.prototype.createEntity = function(json){
-	console.log("trying to create from: ", json);
+//	console.log("trying to create from: ", json);
 	return entityFactory.createObject(json["class"], json);
 };
 

@@ -2,7 +2,7 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 2*1000;
+var CACHE_LIFETIME = 60*1000;
 
 function Server(){
 	var fileServer = null;
@@ -181,7 +181,7 @@ Server.prototype.addToCache = function(entity){
 	var cache = Server.instance.cache,
 		id = entity.id;
 	entity.log("adding to cache");
-	entity.logChildren("on addToCache");
+//	entity.logChildren("on addToCache");
 	//case of overwriting(there is an old instance of entity in cache)
 	if(cache[id])
 		if(cache[id] != entity){//case when we update existing cache(in ideal world this never happens)
@@ -246,7 +246,7 @@ Server.prototype.resetCacheTimeout = function(entity){
 Server.prototype.removeTimeout = function(entity){
 	var timeoutId;
 	if(timeoutId = entity.timeoutId ){
-		entity.log("Removing timeout");
+//		entity.log("Removing timeout");
 		global.clearTimeout(timeoutId);
 		delete entity.timeoutId;
 	}
@@ -311,7 +311,7 @@ Server.prototype.getCache = function(id, listener){
 		for(var i = 0; i<addedList.length; i++){
 			addedList[i].writeUpdate(notifydata, {});
 		}
-		console.log("Got entities description on getCache: ", notifydata);
+//		console.log("Got entities description on getCache: ", notifydata);
 		Server.instance.receiveData(notifydata, listener);
 	}else{
 		Server.instance.resetCacheTimeout(entity);
@@ -342,7 +342,7 @@ Server.prototype.clearCache = function(){
 };
 
 Server.prototype.addEntityInstance = function(entity, listeners){
-	console.log("Entity to add: ", entity);
+//	console.log("Entity to add: ", entity);
 	assert(entity instanceof Entity, "'entity' in not Entity instance.");
 	if (	!(entity instanceof Account)&&
 			(	(entity.parent == null) || 
@@ -441,11 +441,11 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 			return;
 		}
 		EntityManager.instance.collectByParent(id, function(data){
-			console.log("Collected by parent: ", data);
+//			console.log("Collected by parent: ", data);
 			for(var id in data){
 				addedIdList.push(id);
 			}
-			console.log("addedIdList =", addedIdList);
+//			console.log("addedIdList =", addedIdList);
 			Server.instance.extendEntities(data, session);
 			for(var i in addedIdList){
 				Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
@@ -504,6 +504,10 @@ Server.prototype.receiveData = function(data, session){
 };
 
 
+Server.prototype.setAuthCallback = function(callback){
+	this.authCallback = callback;
+};
+
 Server.prototype.onAuth = function(req, res){
 	
 //	session.userId = req.body.userId;
@@ -525,12 +529,23 @@ Server.prototype.onAuth = function(req, res){
 	var session = Server.instance.getSession(userId);
 	if(session){
 		console.log("Found previous session with userId: ", userId);
-		var obj = {
-				accountId : session.accountId,
-				userId : userId,
-				initUpdate:session.sendData(true)
-		};
-		res.end(JSON.stringify(obj));
+		if(Server.instance.authCallback){
+			Server.instance.authCallback(session, function(){
+				var obj = {
+						accountId : session.accountId,
+						userId : userId,
+						initUpdate:session.sendData(true)
+				};
+				res.end(JSON.stringify(obj));
+			});
+		}else{
+			var obj = {
+					accountId : session.accountId,
+					userId : userId,
+					initUpdate:session.sendData(true)
+			};
+			res.end(JSON.stringify(obj));
+		}
 		return;
 	}
 	var session = new Session();
@@ -544,21 +559,23 @@ Server.prototype.onAuth = function(req, res){
 			
 			Server.instance.logEntities("On auth");
 			Server.instance.logCache("On auth");
-			
-			var obj = {
-					accountId : session.accountId,
-					userId : userId,
-					initUpdate:session.sendData(true)
-			};
-//			obj["accountId"] = session.accountId;
-//			obj["userId"] = userId;
-//			obf["initUpdate"] = session.sendData(true); 
-			res.end(JSON.stringify(obj));
-//			response.end(JSON.stringify(obj));
-//			global.setTimeout(function(){
-//			var args = ["1", "2"];
-//			Server.instance.executeCommand("switchState", args);
-//			}, 20000);
+			if(Server.instance.authCallback){
+				Server.instance.authCallback(session, function(){
+					var obj = {
+							accountId : session.accountId,
+							userId : userId,
+							initUpdate:session.sendData(true)
+					};
+					res.end(JSON.stringify(obj));
+				});
+			}else{
+				var obj = {
+						accountId : session.accountId,
+						userId : userId,
+						initUpdate:session.sendData(true)
+				};
+				res.end(JSON.stringify(obj));
+			}
 		})
 	});
 	
