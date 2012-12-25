@@ -2,7 +2,7 @@
 /* 
  * Session - authorization, account manager 
  */
-var SESSION_LIFETIME = 3*60*1000;
+var SESSION_LIFETIME = 15*1000;
 
 function Session(){
 	var propertyQueue = null;
@@ -45,8 +45,8 @@ Session.prototype.init = function(params){
 			});
 			return;
 		}
-		console.log("Account ID: ", that.accountId);
 		that.accountId = rows[0].account;
+		console.log("Account ID: ", that.accountId);
 ////		that.account = new BasicAccount();
 		Server.instance.getEntity(that, that.accountId, function(account){
 			Server.instance.addSession(that);
@@ -102,6 +102,7 @@ Session.prototype.sendData = function(initUpdate){
 		};
 //		console.log("entities on server: \n", entities, '\n\n\n');
 //		console.log(entities[this.accountId] instanceof Entity);
+		Server.instance.logEntities("on init update");
 		entities[this.accountId].writeUpdate(data, {});
 		addByParent(data, this.accountId);
 		

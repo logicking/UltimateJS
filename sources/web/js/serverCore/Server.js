@@ -287,7 +287,7 @@ Server.prototype.getCache = function(id, listener){
 	
 	var that = this;
 	var addByParent = function(parent){
-		if( ! Server.instance.isInEntities(getParentId(parent)) ){
+		if( !Server.instance.isInEntities(getParentId(parent)) && !(parent instanceof Account) ){
 			parent.log("has no active parrent");
 			return;
 		}
