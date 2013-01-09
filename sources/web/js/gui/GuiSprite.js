@@ -28,8 +28,8 @@ guiFactory.addClass(GuiSprite);
 GuiSprite.prototype.initialize = function(params) {
 	GuiSprite.parent.initialize.call(this, params);
 
-//	 .hack temporary disable viewport for sprites at all
-	 this.clampByViewport = this.clampByViewportSimple;
+	// .hack temporary disable viewport for sprites at all
+	this.clampByViewport = this.clampByViewportSimple;
 
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
@@ -55,6 +55,7 @@ GuiSprite.prototype.initialize = function(params) {
 	this.setBackground(this.totalSrc);
 
 	this.currentAnimation = null;
+	this.spatialAnimation = null;
 	this.animations = new Object();
 
 	var that = this;
@@ -76,7 +77,8 @@ GuiSprite.prototype.addSpriteAnimation = function(name, description) {
 	this.animations[name] = {
 		frames : description['frames'],
 		row : description['row'],
-		frameDuration : description['frameDuration']
+		frameDuration : description['frameDuration'],
+		spatial : description['spatial']
 	};
 };
 
@@ -90,22 +92,51 @@ GuiSprite.prototype.addAnimation = function(animationName, frames, row,
 };
 
 GuiSprite.prototype.update = function(dt) {
-	if (this.currentAnimation == null)
+	if (this.currentAnimation == null && this.spatialAnimation == null) {
 		return;
+	}
+
 	var curTime = (new Date()).getTime();
 	if (!dt) {
 		var dt = curTime - this.lastUpdateTime;
 	}
 	this.lastUpdateTime = curTime;
-	
 	this.currentFrameTime += dt;
+
+	if (this.spatialAnimation !== null) {
+		console.log("UPDuhuhuATE ANIMATION");
+		this.updateSpatialAnimation(dt);
+	}
 	while (this.currentFrameTime >= this.currentFrameLength) {
 		var stopped = this.updateAnimation();
-		if(stopped == true){
+		if (stopped == true) {
 			return;
 		}
 		this.currentFrameTime -= this.currentFrameLength;
 	}
+};
+
+GuiSprite.prototype.updateSpatialAnimation = function(dt) {
+	if (this.spatialAnimation == null) {
+		return;
+	}
+	var part = dt / this.spatialAnimation.duration;
+	if (this.spatialAnimation.timeLeft > dt) {
+		this.move(this.spatialAnimation.dx * part, this.spatialAnimation.dy
+				* part);
+	} else {
+		part = this.spatialAnimation.timeLeft / this.spatialAnimation.duration;
+		this.move(this.spatialAnimation.dx * part, this.spatialAnimation.dy
+				* part);
+		if (this.spatialAnimation.callback) {
+			this.spatialAnimation.callback();
+		}
+		this.spatialAnimation = null;
+	}
+	if (this.spatialAnimation) {
+		this.spatialAnimation.timeLeft -= dt;
+	}
+	this.resize();
 };
 
 GuiSprite.prototype.updateAnimation = function() {
@@ -119,7 +150,6 @@ GuiSprite.prototype.updateAnimation = function() {
 		}
 	}
 
-	// console.log("Frames " + this.currentFrame);
 	var rowFramesLength = Math.round(this.totalWidth / this.width);
 	var frame = this.animations[this.currentAnimation].frames[this.currentFrame];
 	var remainder = frame % rowFramesLength;
@@ -134,7 +164,7 @@ GuiSprite.prototype.updateAnimation = function() {
 					+ Screen.heightRatio() * this.offsetY1) + "px ");
 	this.frame = frame;
 	this.row = row;
-	this.setRealBackgroundPosition();//test
+	this.setRealBackgroundPosition();// test
 	if (this.frameCallback != null) {
 		if (this.frameCallback[this.currentAnimation]) {
 			this.frameCallback[this.currentAnimation](this.currentFrame);
@@ -174,8 +204,7 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
-	
-	
+
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
 
@@ -212,23 +241,51 @@ GuiSprite.prototype.isPlayingAnimation = function(animationName) {
 	return this.currentAnimation == animationName;
 };
 
-GuiSprite.prototype.animate = function(moveVector, duration) {
+// GuiSprite.prototype.animate = function(moveVector, duration) {
+// var that = this;
+// this.jObject['animate']({
+// left : moveVector.x * Screen.widthRatio() + 'px',
+// top : moveVector.y * Screen.heightRatio() + 'px'
+// }, {
+// duration : duration,
+// easing : "linear",
+// complete : function() {
+// that.stopAnimation();
+// // that.x = $("#" + that.id)['css']("left");
+// }
+// // ,
+// // step : function(now, fx) {
+// // console.log($("#" + that.id)['css']("left"));
+// // }
+// });
+// };
+
+GuiSprite.prototype.animate = function(animation, callback) {
 	var that = this;
-	this.jObject['animate']({
-		left : moveVector.x * Screen.widthRatio() + 'px',
-		top : moveVector.y * Screen.heightRatio() + 'px'
-	}, {
-		duration : duration,
-		easing : "linear",
-		complete : function() {
-			that.stopAnimation();
-			// that.x = $("#" + that.id)['css']("left");
-		}
-	// ,
-	// step : function(now, fx) {
-	// console.log($("#" + that.id)['css']("left"));
-	// }
-	});
+	var dx = 0;
+	var dy = 0;
+	if (animation.x) {
+		var dx = animation.x - this.x;
+	}
+	if (animation.y) {
+		var dy = animation.y - this.y;
+	}
+	this.spatialAnimation = {
+		dx : dx,
+		dy : dy,
+		duration : animation.duration,
+		timeLeft : animation.duration
+	};
+	if (animation.fade) {
+		this.fadeTo(0, animation.duration - 100, function() {
+			that.spatialAnimation = null;
+			if (callback) {
+				callback();
+			}
+		});
+	} else {
+		this.spatialAnimation['callback'] = callback;
+	}
 };
 
 GuiSprite.prototype.flip = function(needToBeFlipped) {
@@ -276,11 +333,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-//	 if (this.viewport) {
-//		this.clampByViewport();
-//	} else {
-		this.setRealPosition(x, y);
-//	}
+	// if (this.viewport) {
+	// this.clampByViewport();
+	// } else {
+	this.setRealPosition(x, y);
+	// }
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -300,7 +357,6 @@ GuiSprite.prototype.setTransform = function(matrix, angle) {
 
 GuiSprite.prototype.resize = function() {
 	GuiSprite.parent.resize.call(this);
-//	this.setRealBackgroundPosition(0,0);
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {

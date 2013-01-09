@@ -202,6 +202,7 @@ var Screen = (function() {
 			}
 			// read user provided values if any
 			if(isLandscape === "fixed"){
+				this.fixedSize = true;
 				fixedWidth = params['width'];
 				fixedHeight = params['height'];
 //				console.log("FIXED");

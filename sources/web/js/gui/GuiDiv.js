@@ -70,9 +70,9 @@ GuiDiv.prototype.initialize = function(params) {
 	assert(!this.innerScene || this.parent.enhancedScene,
 			"inner scene should always be child to enhanced scene");
 
-	if (this.innerScene) {
-		this.clampByParentViewport();
-	}
+		if (this.innerScene) {
+			this.clampByParentViewport();
+		}
 };
 
 GuiDiv.prototype.generate = function(src) {
@@ -316,6 +316,10 @@ GuiDiv.prototype.clampByParentViewport = function(isTrue) {
 };
 
 GuiDiv.prototype.setViewport = function(rect, isParent) {
+	if(Screen.fixedSize){
+		this.viewport = null;
+		return;
+	}
 	this.viewport = rect;
 	this.isParentsViewport = isParent;
 
