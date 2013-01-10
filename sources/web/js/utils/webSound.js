@@ -40,15 +40,31 @@ WebSound.prototype.unmute = function() {
 	this.volume = 1;
 };
 
-WebSound.prototype.loadSprite = function(name, callback){
+WebSound.prototype.loadSprite = function(name, callback) {
 	this.loadSound(name, callback);
 };
 
 WebSound.prototype.loadSound = function(name, callback) {
 	var that = this;
-	var EXTENTION = ".mp3";
+	
+	var canPlayMp3, canPlayOgg = null;
+	var myAudio = document.createElement('audio');
+	if (myAudio.canPlayType) {
+		canPlayMp3 = !!myAudio.canPlayType
+				&& "" != myAudio.canPlayType('audio/mpeg');
+		canPlayOgg = !!myAudio.canPlayType
+				&& "" != myAudio.canPlayType('audio/ogg; codecs="vorbis"');
+	}
+	var ext;
+	if(canPlayOgg) {
+		ext = ".ogg";
+	} else {
+		ext = ".mp3";
+		//this.soundOffset = this.mp3offset;
+	}
+
 	var request = new XMLHttpRequest();
-	request.open('GET', "sounds/" +name + EXTENTION, true);
+	request.open('GET', name + ext, true);
 	request.responseType = 'arraybuffer';
 	// Decode asynchronously
 	request.onload = function() {

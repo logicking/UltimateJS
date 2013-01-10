@@ -131,7 +131,7 @@ jSound.prototype.unmute = function() {
 	}
 };
 
-jSound.prototype.loadSound = function(audioSpriteName) {
+jSound.prototype.loadSound = function(audioSpriteName, callback) {
 	var that = this;
 	var PATH_TO_JPLAYER_SWF = "js/";
 	if (Device.isAppleMobile()) {
@@ -183,6 +183,10 @@ jSound.prototype.loadSound = function(audioSpriteName) {
 									}
 								});
 					});
+	
+	if(callback) {
+		setTimeout(callback, 1000);
+	}
 };
 
 jSound.prototype.loadSprite = function(audioSpriteName) {

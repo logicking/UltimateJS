@@ -23,45 +23,44 @@ var Sound = (function() {
 				return this.channels[channel];
 			}
 		},
-		stop : function(channel){
+		stop : function(channel) {
 			var that = this;
-			if(channel){
+			if (channel) {
 				this.instance.stop(this.getChannel(channel)['playing']);
-			}else{
-				$['each'](this.channels,function(index,value){
+			} else {
+				$['each'](this.channels, function(index, value) {
 					that.instance.stop(value['playing']);
 				});
 			}
 		},
-		isOn : function(){
-			 var on = Device.getStorageItem("soundOn", "true") == "true";
-			 return on;
+		isOn : function() {
+			var on = Device.getStorageItem("soundOn", "true") == "true";
+			return on;
 		},
-		turnOn : function(isOn){
-			 var soundOn = isOn;
-			 Device.setStorageItem("soundOn", soundOn);
-			 if (soundOn){
-				 this.instance.unmute();
-			 }
-			 else{
-				 this.instance.mute();
-				 this.stop();
-			 }
+		turnOn : function(isOn) {
+			var soundOn = isOn;
+			Device.setStorageItem("soundOn", soundOn);
+			if (soundOn) {
+				this.instance.unmute();
+			} else {
+				this.instance.mute();
+				this.stop();
+			}
 		},
 		add : function(id, offset, duration, spriteName, priority) {
-//			if (this.forceSprite) {
-				this.soundBuffers[id] = {
-					priority : priority ? priority : 0,
-					offset : offset,
-					spriteName : spriteName?spriteName:id,
-					duration : duration
-				};
-//			}
+			// if (this.forceSprite) {
+			this.soundBuffers[id] = {
+				priority : priority ? priority : 0,
+				offset : offset,
+				spriteName : spriteName ? spriteName : id,
+				duration : duration
+			};
+			// }
 		},
 		play : function(id, loop, priority, channel) {
 			if (!this.soundBuffers[id])
 				return;
-			
+
 			var ch = this.getChannel(channel);
 			var sound = this.soundBuffers[id];
 			var sndInstance = {
@@ -71,7 +70,8 @@ var Sound = (function() {
 				offset : sound.offset,
 				duration : sound.duration,
 				spriteName : sound.spriteName,
-				buffer : this.sprites[sound.spriteName]?this.sprites[sound.spriteName]:this.sprite
+				buffer : this.sprites[sound.spriteName] ? this.sprites[sound.spriteName]
+						: this.sprite
 			};
 			if (ch.playing != null) {
 				if (ch.playing.priority > sndInstance.priority) {
@@ -90,26 +90,29 @@ var Sound = (function() {
 				});
 			}
 		},
-		init : function(name, forceSprite) {//use when only one spriteis needed 
+		init : function(name, forceSprite) {// use when only one spriteis needed
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
 				this.instance.loadSound(name, function(buf) {
 					that.sprite = buf;
+					//set initial mute state
+					Sound.turnOn(Sound.isOn());
 				});
 			}
 		},
-		addSprite : function(name){
+		addSprite : function(name) {
 			var that = this;
-//			this.forceSprite = forceSprite ? true : false;
-//			if (this.forceSprite) {
-				this.instance.loadSprite(name, function(buf) {
-					that.sprites[name] = buf;
-				});
-//			}
+			// this.forceSprite = forceSprite ? true : false;
+			// if (this.forceSprite) {
+			this.instance.loadSprite(name, function(buf) {
+				that.sprites[name] = buf;
+			});
+			// }
 		}
 	};
 	var context = null;
+	
 	try {
 		context = new webkitAudioContext();
 	} catch (e) {
@@ -118,8 +121,9 @@ var Sound = (function() {
 	if (context) {
 		snd.instance = new WebSound(context);
 	} else {
-		snd.instance = new jSound();
+		//snd.instance = new jSound();
+		snd.instance = new htmlSound();
 	}
-	
+
 	return snd;
 })();

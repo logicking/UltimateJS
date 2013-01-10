@@ -71,6 +71,8 @@ GuiSprite.prototype.initialize = function(params) {
 			+ "px "
 			+ Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
 			+ "px");
+	
+	this.resize();
 };
 
 GuiSprite.prototype.addSpriteAnimation = function(name, description) {
@@ -98,13 +100,12 @@ GuiSprite.prototype.update = function(dt) {
 
 	var curTime = (new Date()).getTime();
 	if (!dt) {
-		var dt = curTime - this.lastUpdateTime;
+		dt = curTime - this.lastUpdateTime;
 	}
 	this.lastUpdateTime = curTime;
 	this.currentFrameTime += dt;
 
 	if (this.spatialAnimation !== null) {
-		console.log("UPDuhuhuATE ANIMATION");
 		this.updateSpatialAnimation(dt);
 	}
 	while (this.currentFrameTime >= this.currentFrameLength) {
@@ -265,10 +266,10 @@ GuiSprite.prototype.animate = function(animation, callback) {
 	var dx = 0;
 	var dy = 0;
 	if (animation.x) {
-		var dx = animation.x - this.x;
+		dx = animation.x - this.x;
 	}
 	if (animation.y) {
-		var dy = animation.y - this.y;
+		dy = animation.y - this.y;
 	}
 	this.spatialAnimation = {
 		dx : dx,
@@ -333,11 +334,11 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-	// if (this.viewport) {
-	// this.clampByViewport();
-	// } else {
-	this.setRealPosition(x, y);
-	// }
+	if (this.viewport) {
+		this.clampByViewport();
+	} else {
+		this.setRealPosition(x, y);
+	}
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -357,6 +358,7 @@ GuiSprite.prototype.setTransform = function(matrix, angle) {
 
 GuiSprite.prototype.resize = function() {
 	GuiSprite.parent.resize.call(this);
+	this.setRealBackgroundPosition(this.offsetX1, this.offsetY1);
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
