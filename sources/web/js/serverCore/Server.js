@@ -2,7 +2,7 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 7*1000;
+var CACHE_LIFETIME = 2*60*1000;
 
 function Server(){
 	var fileServer = null;
@@ -65,9 +65,16 @@ Server.prototype.init = function(sconf){
 		}
 		var parentId = getParentId(curState);
 		console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
+		if(!parentId){
+			console.log("Current state has no parent");
+			return;
+		}
 		curState.setParent(null);
+//		console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
+//		curState.setParent(null);
 //		Server.instance.removeEntity(curState.id, true);
 		Server.instance.getEntity(session, args[1], function(entity){
+		
 			entity.setParent(parentId);
 			console.log("NewState's parent: ", getParentId(entity));
 			console.log("OldState's parent: ", getParentId(curState));
@@ -193,8 +200,6 @@ Server.prototype.addToCache = function(entity){
 			console.log("Already have entity(id=%s) in server cache", id);
 			return;
 		}
-	
-	
 	cache[id] = entity;
 	entity.listeners = []; //adding to cache means "destroy" to client so there is nothing to notify 
 	var parentId = getParentId(entity);
@@ -227,7 +232,7 @@ Server.prototype.resetCacheTimeout = function(entity){
 		}
 		console.log("Resetting timeout for entity with id=%s", entity.id);
 		entity.timeoutId = global.setTimeout(function(){
-			console.log("\nKilling entity(id=%s) with children", entity.id);
+			console.log("\nKilling entity(id=%s)", entity.id);
 			Server.instance.killCached(entity.id);
 		}, CACHE_LIFETIME);
 	};
@@ -611,12 +616,13 @@ Server.prototype.onCommunicate = function(req, res, next){
 	//console.log(session.entities);
 	res.json(session.sendData(false));
 //	next();
-	EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
-
-	});
+//	EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+//
+//	});
 };
 
 Server.prototype.onCommand = function(req, res, next){
+	var entryTime = Date.now();
 	var userId;
 	if(req.session.iFrameAuth){
 		userId = req.session.userId;
@@ -640,9 +646,11 @@ Server.prototype.onCommand = function(req, res, next){
 		args = json['args'];
 	console.log("received command: %s;\nwith args: ", command, args, "\nfrom user: ", userId );
 	Server.instance.executeCommand(command, args, session,function(result){
-		EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
-			res.json(result);
-		});
+//		EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+//
+//		});
+		console.log("Command execution time: ", Date.now() - entryTime);
+		res.json(result);
 	});
 };
 

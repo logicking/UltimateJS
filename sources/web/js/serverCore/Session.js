@@ -2,7 +2,7 @@
 /* 
  * Session - authorization, account manager 
  */
-var SESSION_LIFETIME = 15*1000;
+var SESSION_LIFETIME = 15*60*1000;
 
 function Session(){
 	var propertyQueue = null;

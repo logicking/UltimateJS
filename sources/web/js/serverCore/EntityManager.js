@@ -42,30 +42,6 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 				curJSON[propName] = rememberedName;
 			}
 		}
-//		if(object[id]["parent"]){
-//			object[id]["parent"] = names[object[id]["parent"]];
-//		}
-//		if(object[id]["scene"]){
-//			object[id]["scene"] = names[object[id]["scene"]];
-//		}
-//		if(object[id]["character"]){
-//			object[id]["character"] = names[object[id]["character"]];
-//		}
-//		if(object[id]["menuState"]){
-//			object[id]["menuState"] = names[object[id]["menuState"]];
-//		}
-//		if(object[id]["gamestate"]){
-//			object[id]["gamestate"] = names[object[id]["gamestate"]];
-//		}
-//		if(object[id]["map"]){
-//			object[id]["map"] = names[object[id]["map"]];
-//		}
-//		if(object[id]["mapState"]){
-//			object[id]["mapState"] = names[object[id]["mapState"]];
-//		}
-//		if(object[id]["accountID"]){
-//			object[id]["accountID"] = names[object[id]["accountID"]];
-//		}
 	}	
 	console.log("Created Entities record with unique IDs: ", object);
 	//account.readGlobalUpdate(obj);
