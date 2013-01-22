@@ -105,7 +105,13 @@ Server.prototype.addCommand = function(name, func){
 Server.prototype.executeCommand = function(name, args, session, callback) {
 	var command = commands[name];
 	if (command) {
-		command(args, session, callback);
+		try{
+			command(args, session, callback);
+		}catch(err){
+			callback({
+				error : err
+				});
+		}
 		return;
 	} else {
 		console.log("Unknow command: ", name);
