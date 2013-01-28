@@ -80,6 +80,11 @@ var Resources = (function() {
 		// returnes string
 		getString : function(stringId) {
 			if (strings[stringId]) {
+			var str = strings[stringId];
+				if(strings[stringId] instanceof Array){
+					var lbl = str[Math.floor(Math.random() * strings[stringId].length)];
+					return lbl; 
+				}
 				return strings[stringId];
 			} else {
 				// console.error(stringId + " Not Found");
@@ -137,7 +142,10 @@ var Resources = (function() {
 			if (preloadCallback && image && image.complete) {
 				preloadCallback();
 			}
-
+			
+			if(assets[name]){
+//				console.log("IN ASS", assets[name].complete);
+			}
 			return imageFilename;
 		},
 
@@ -200,6 +208,7 @@ var Resources = (function() {
 				obj.onload = function() {
 					++j;
 
+//					console.log("LOADED", this, this.complete);
 					// if progress callback, give information of assets loaded,
 					// total and percent
 					if (onprogress) {

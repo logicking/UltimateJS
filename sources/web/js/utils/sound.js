@@ -115,7 +115,7 @@ var Sound = (function() {
 	
 	try {
 		context = new webkitAudioContext();
-		context = null;
+//		context = null;
 	} catch (e) {
 		console.log("WEB Audio not supported");
 	}

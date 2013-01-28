@@ -571,9 +571,15 @@ GuiElement.prototype.left = function() {
 GuiElement.prototype.setClickTransparent = function(isTrue) {
 	// TODO add IE and Opera support
 	if (isTrue) {
+//		this.jObject.bind("mousemove mousedown mouseup", function(e){
+//			$(this).next().trigger(e);
+//		});
+		
 		this.jObject['css']("pointer-events", "none");
+		
 	} else {
 		this.jObject['css']("pointer-events", "auto");
+		
 	}
 };
 
