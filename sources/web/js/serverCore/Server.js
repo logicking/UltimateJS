@@ -108,8 +108,12 @@ Server.prototype.executeCommand = function(name, args, session, callback) {
 		try{
 			command(args, session, callback);
 		}catch(err){
+			console.log("Error on command execution:");
+			console.log("Error: ", err, "\n");
+			console.log(err.stack);
 			callback({
-				error : err
+				error : err,
+				stack : err.stack
 				});
 		}
 		return;
@@ -442,7 +446,11 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	var addedIdList = [];
 	var notifydata = {};
 	EntityManager.instance.getEntity(id, {}, function(entity){
-		
+		if( (!entity) || (entity == null)){
+			console.log("Entity no found with id: ", id);
+			callback(null);
+			return;
+		}
 //		console.log("Entity with id=%s on EnityManager.getEntity", entity.id);
 		Server.instance.addEntityInstance(entity, session);
 		console.log("Created entity on server.getEntity with id=", entity.id);

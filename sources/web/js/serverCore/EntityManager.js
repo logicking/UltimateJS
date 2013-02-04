@@ -117,6 +117,7 @@ EntityManager.prototype.backupEntity = function(entity, callback){
 };
 
 EntityManager.prototype.getEntity = function(id, addParams, callback){
+	var callbacked = false;
 	if((typeof addParams == Function )&&(!callback)){
 		callback = addParams;
 		addParams = {};
@@ -136,6 +137,15 @@ EntityManager.prototype.getEntity = function(id, addParams, callback){
 		if(callback){
 //			entity.log("on Manager getEntity callback");
 			callback(entity);
+			callbacked = true;
+		}
+	});
+	
+	query.on("end", function(){
+		if(!callbacked){
+			if(callback){
+				callback(null);
+			}
 		}
 	});
 };

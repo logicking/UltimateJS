@@ -7,13 +7,16 @@ var logger = sconf.username;
 try{
 	var consoleUrl = "http://127.0.0.1:8765/";
 	console.log("Connecting to console server");
-	request.post(consoleUrl + "resetLog", {
-		form : {
-			name : logger,
-			time : Date.now()
-		}
-	});
+	if(!LOCAL){
+		request.post(consoleUrl + "resetLog", {
+			form : {
+				name : logger,
+				time : Date.now()
+			}
+		});
 
+	}
+	
 
 	(function() {
 		var fn = console.log;
@@ -30,14 +33,20 @@ try{
 	var onConsoleMessage = function(args, time, index) {
 		var msg = util.format.apply(util, args);
 		var json = {
-			name : logger,
-			msg : msg,
-			time:time,
-			index:index
+				name : logger,
+				msg : msg,
+				time:time,
+				index:index
 		};
-		request.post(consoleUrl + "logmsg", {
-			form : json
-		});
+		try{
+			if(!LOCAL){
+				request.post(consoleUrl + "logmsg", {
+					form : json
+				});
+
+			}
+		}catch(err){}
+
 	};
 }catch(err){
 	console.log(err);

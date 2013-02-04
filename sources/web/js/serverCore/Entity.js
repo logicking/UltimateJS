@@ -19,7 +19,9 @@ Entity.prototype.init = function(params) {
 	if(params["accountId"]){
 		this.account = Server.instance.getEntity(null, params["accountId"], null);
 	}else{
-		this.account = this;
+		if(this instanceof Account){
+			this.account = this;
+		}
 	}
 	// Variables values for synchronizing with server
 	this.properties = {};
