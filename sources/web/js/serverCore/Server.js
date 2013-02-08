@@ -197,11 +197,12 @@ Server.prototype.killCached = function(id){
 Server.prototype.addToCache = function(entity){
 	var cache = Server.instance.cache,
 		id = entity.id;
-	entity.log("adding to cache");
+	entity.log(" adding to cache.");
 //	entity.logChildren("on addToCache");
 	//case of overwriting(there is an old instance of entity in cache)
 	if(cache[id])
 		if(cache[id] != entity){//case when we update existing cache(in ideal world this never happens)
+			console.log("Entity has equal ids on addToCache");
 			if(cache[id].timeoutId){
 				global.clearTimeout(cache[id].timeoutId);
 			}
@@ -302,7 +303,7 @@ Server.prototype.getCache = function(id, listener){
 	
 	var that = this;
 	var addByParent = function(parent){
-		if( !Server.instance.isInEntities(getParentId(parent)) && !(parent instanceof Account) ){
+		if( !Server.instance.isInEntities(getParentId(parent)) && !((parent instanceof Account)&&(parent.userId) )){
 			parent.log("has no active parrent");
 			return;
 		}
@@ -359,11 +360,11 @@ Server.prototype.clearCache = function(){
 Server.prototype.addEntityInstance = function(entity, listeners){
 //	console.log("Entity to add: ", entity);
 	assert(entity instanceof Entity, "'entity' in not Entity instance.");
-	if (	!(entity instanceof Account)&&
+	if (	!( (entity instanceof Account) && (entity.userId != null) )&& //entity is loaded from session.init();
 			(	(entity.parent == null) || 
 				(typeof entity.parent == String) ||
 				Server.instance.isInCache(getParentId(entity))  ) ) {
-		entity.log("does not satisfy all conditions to be added as working");
+		entity.log("is invalid. Cant be pushed to working.");
 		Server.instance.addToCache(entity);
 		return;
 	}
@@ -397,9 +398,13 @@ Server.prototype.removeEntity = function(id, removeChildren){
 		return;
 	}
 	var entity = this.entities[id];
-	//true when sever.removeEntity called from previous Entity.destroy() call
-	entity.notifyListeners("destroy", true);
 	
+	//true when server.removeEntity called from previous Entity.destroy() call
+	
+	entity.notifyListeners("destroy", true);
+	if((entity instanceof Account)&&(entity.userId)){
+		delete entity.userId;
+	}
 	Server.instance.addToCache(entity);
 	if(removeChildren){
 		var removeByParent = function(parent){
@@ -421,10 +426,27 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	 * 	2) from cache (tries to add to working )
 	 * 	3) from DB
 	 */
-	
+	var addedIdList = [];
+	var notifydata = {};
 /* 1) */
 	var entity = this.entities[id];
 	if(entity){
+		if(createChildren && ((!entity.children)||(entity.children.length == 0))){
+			EntityManager.instance.collectByParent(id, function(data){
+//				console.log("Collected by parent: ", data);
+				for(var id in data){
+					addedIdList.push(id);
+				}
+//				console.log("addedIdList =", addedIdList);
+				Server.instance.extendEntities(data, session);
+				for(var i in addedIdList){
+					Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
+				}
+				Server.instance.receiveData(notifydata, null);
+				callback(entity);
+			});
+			return null;
+		}
 		if(callback){
 			callback(entity);
 		}
@@ -433,6 +455,22 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	
 /* 2) */
 	if(entity = Server.instance.getCache(id, session)){
+		if(createChildren && ((!entity.children)||(entity.children.length == 0))){
+			EntityManager.instance.collectByParent(id, function(data){
+//				console.log("Collected by parent: ", data);
+				for(var id in data){
+					addedIdList.push(id);
+				}
+//				console.log("addedIdList =", addedIdList);
+				Server.instance.extendEntities(data, session);
+				for(var i in addedIdList){
+					Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
+				}
+				Server.instance.receiveData(notifydata, null);
+				callback(entity);
+			});
+			return null;
+		}
 		if(callback){
 			callback(entity);
 		}
@@ -443,8 +481,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	}
 	
 /* 3) */
-	var addedIdList = [];
-	var notifydata = {};
+	
 	EntityManager.instance.getEntity(id, {}, function(entity){
 		if( (!entity) || (entity == null)){
 			console.log("Entity no found with id: ", id);
@@ -537,11 +574,13 @@ Server.prototype.onAuth = function(req, res){
 	if(req.session.iFrameAuth){
 		userId = req.session.userId;
 	}else{
-		if(req.user.provider == "facebook"){
-			userId = req.user.id;
-		}
-		if(req.user.provider == "vkontakte"){
-			userId = req.user.uid;
+		if(req.user && req.user.provider){
+			if(req.user.provider == "facebook"){
+				userId = req.user.id;
+			}
+			if(req.user.provider == "vkontakte"){
+				userId = req.user.uid;
+			}
 		}
 	}
 	console.log("\nAuth request from user : ", userId);

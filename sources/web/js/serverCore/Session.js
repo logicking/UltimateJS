@@ -19,7 +19,7 @@ Session.prototype.init = function(params){
 	console.log("Session init on userId: ", this.userId);
 	var query = authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ this.userId ] );
 	query.on( "error", function(error){
-		console.log("Session INIT Error on Request FROM DB\n", error);
+		console.log("Session INIT Error on Request to DB\n", error);
 	});
 	
 	query.on('row', function(row){
@@ -29,19 +29,20 @@ Session.prototype.init = function(params){
 	query.on("end", function(result){
 		if(result.rowCount == 0){
 			that.accountId = uniqueId().toString();
-//			account = new BasicAccount();
-//			account.init( { "id" : that.accountId } );
-//			console.log("Initialized Account: ", that.account );
 			authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
 			Server.instance.extendEntities(EntityManager.instance.getAccountDefaultUpdate(that.accountId), that );
-//			EntityManager.instance.createSessionRecord(that);
+			console.log("=======Extended entites=======");
 			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
-//				Server.instance.addAccount(account);
-				Server.instance.addSession(that);
-				that.reportActivity();
-				if(callback){
-					callback();
-				}
+				Server.instance.getEntity(that, that.accountId, function(account){
+					Server.instance.addSession(that);
+					account.userId = that.userId;
+					console.log("Set userId to account on session init");
+					Server.instance.restoreFromCache(account.id, that);
+					that.reportActivity();
+					if(callback){
+						callback();
+					}
+				}, false, true);
 			});
 			return;
 		}
@@ -50,6 +51,8 @@ Session.prototype.init = function(params){
 ////		that.account = new BasicAccount();
 		Server.instance.getEntity(that, that.accountId, function(account){
 			Server.instance.addSession(that);
+			account.userId = that.userId;
+			Server.instance.restoreFromCache(account.id, that);
 			that.reportActivity();
 			if(callback){
 				callback();
