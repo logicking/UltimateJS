@@ -55,6 +55,7 @@ GuiLabel.prototype.create = function(src) {
 };
 
 GuiLabel.prototype.change = function(src) {
+	src = Resources.getString(src);
 	$("#" + this.cellId).text(src);
 	$("#" + this.cellId)['css']("font-size", Math.floor(this.fontSize
 			* Math.min(Screen.widthRatio(), Screen.heightRatio()))
