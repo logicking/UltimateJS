@@ -21,13 +21,14 @@ guiFactory.addClass(GuiButton);
 
 GuiButton.prototype.generate = function(src) {
 	var htmlText = "<div id='" + this.id + "' class='" + this.style
-			+ " unselectable'>";
-	htmlText += "</div>";
+		+ " unselectable'"+((this.divname)?("name='"+ this.divname +"'>"):(">"));
+		htmlText += "</div>";
 
 	return htmlText;
 };
 
 GuiButton.prototype.initialize = function(params) {
+	this.divname = params['divname'];	
 	GuiButton.parent.initialize.call(this, params);
 	
 	// buttons is supposed to be small, so clamping it simple

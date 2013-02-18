@@ -24,6 +24,7 @@ GuiLabel.prototype.createInstance = function(params) {
 guiFactory.addClass(GuiLabel);
 
 GuiLabel.prototype.initialize = function(params) {
+	this.divname = params['divname'];
 	GuiLabel.parent.initialize.call(this, params);
 
 	this.fontSize = params['fontSize'] ? params['fontSize'] : 20;
@@ -41,9 +42,9 @@ GuiLabel.prototype.generate = function(src) {
 	this.rowId = this.id + "_row";
 	this.cellId = this.id + "_cell";
 	return "<div id='" + this.id + "' class='" + this.style + " unselectable'>"
-			+ "<div id='" + this.rowId + "' style='display:table-row;cursor: default; '>"
-			+ "<div id='" + this.cellId + "' style='display:table-cell;cursor: default;'>"
-			+ src + "</div></div></div>";
+	+ "<div id='" + this.rowId + "' style='display:table-row;cursor: default; '>"
+	+ "<div id='" + this.cellId +"'"+((this.divname)?(" name='"+ this.divname +"'"):(""))+ " style='display:table-cell;cursor: default;'>"
+	+ src + "</div></div></div>";
 };
 
 GuiLabel.prototype.create = function(src) {

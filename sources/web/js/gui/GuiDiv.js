@@ -23,7 +23,7 @@ GuiDiv.prototype.createInstance = function(params) {
 guiFactory.addClass(GuiDiv);
 
 GuiDiv.prototype.initialize = function(params) {
-
+	this.divname = params['divname'];
 	this.backgrounds = new Array();
 	// short alias for background
 	if (params['image']) {
@@ -77,7 +77,7 @@ GuiDiv.prototype.initialize = function(params) {
 
 GuiDiv.prototype.generate = function(src) {
 	return "<div id=\"" + this.id + "\" class=\"" + this.style
-			+ " unselectable\"></div>";
+	+ " unselectable\""+((this.divname)?("name=\""+ this.divname +"\""):("")) +"></div>";
 };
 
 GuiDiv.prototype.empty = function() {
