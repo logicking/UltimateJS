@@ -532,6 +532,36 @@ GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 			that.show();
 		}, 1);
 	}
+	// console.log("ANIMATION!!FUCK IF DEFINED",
+	// CSSAnimations.get("fadeTo"+this.id));
+	// var fadeTo = CSSAnimations.create("fadeTo"+this.id);
+	// console.log("START OPACIY", this.jObject['css']("opacity"));
+	// fadeTo.setKeyframe('0%', {
+	// "opacity" : "" + this.jObject['css']("opacity")
+	// });
+	// fadeTo.setKeyframe('100%', {
+	// "opacity" : "" + fadeValue
+	// });
+	// var obj = document.getElementById(this.id);
+	// console.log(obj);
+	// obj.style.webkitAnimationName = fadeTo.name;
+	// obj.style.webkitAnimationDuration = (time / 1000) + "s";
+	//
+	// // obj.style.animationName=this.anim.fadeTo.name;
+	// // obj.style.animationDuration=(time/1000)+"s";
+	//
+	// obj.addEventListener('webkitAnimationEnd', function() {
+	// CSSAnimations.remove(fadeTo.name);
+	// if(!CSSAnimations.get("fadeTo"+that.id)){
+	// console.log("DELETED!!!!", "fadeTo"+that.id, fadeTo.name);
+	// }else{
+	// console.log("DSGLSDHGSDHGLDSGHLDSGHSDKJGNOTDELETED!!!!",
+	// "fadeTo"+that.id, fadeTo.name);
+	// }
+	// if(callback){
+	// callback();
+	// }
+	// });
 	this.jObject['animate']({
 		opacity : fadeValue
 	}, time, callback);
@@ -571,15 +601,15 @@ GuiElement.prototype.left = function() {
 GuiElement.prototype.setClickTransparent = function(isTrue) {
 	// TODO add IE and Opera support
 	if (isTrue) {
-//		this.jObject.bind("mousemove mousedown mouseup", function(e){
-//			$(this).next().trigger(e);
-//		});
-		
+		// this.jObject.bind("mousemove mousedown mouseup", function(e){
+		// $(this).next().trigger(e);
+		// });
+
 		this.jObject['css']("pointer-events", "none");
-		
+
 	} else {
 		this.jObject['css']("pointer-events", "auto");
-		
+
 	}
 };
 

@@ -32,6 +32,11 @@ var viewporter;
 			if((/webos/i).test(navigator.userAgent)) {
 				return true;
 			}
+			
+			//if firefox phone
+			if(window.navigator.mozApps && window.navigator.mozApps.install){
+				return false;
+			}
 
 			// touch enabled devices
 			if('ontouchstart' in window) {

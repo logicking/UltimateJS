@@ -52,6 +52,7 @@ GuiDialog.prototype.initialize = function(params) {
 		"x" : 0,
 		"y" : 0
 	});
+	this.maskDiv.setPosition(this.parent.width/2 - this.maskDiv.width, this.parent.height/2 - this.maskDiv.height);
 	this.maskDiv.setBackground("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=");
 	this.maskDiv.bind(function(e) {
 		e.preventDefault();

@@ -119,7 +119,7 @@ GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX,
 	};
 
 	this.showBackground();
-	this.resizeBackground();
+//	this.resizeBackground();
 };
 GuiDiv.prototype.setBackgroundFromParams = function(param, j) {
 	var x = param['x'] ? Screen.macro(param['x']) : 0;
@@ -316,7 +316,7 @@ GuiDiv.prototype.clampByParentViewport = function(isTrue) {
 };
 
 GuiDiv.prototype.setViewport = function(rect, isParent) {
-	if(Screen.fixedSize){
+	if(Screen.fixedSize || this.viewportDisable){
 		this.viewport = null;
 		return;
 	}
@@ -326,6 +326,10 @@ GuiDiv.prototype.setViewport = function(rect, isParent) {
 	if (this.jObject && this.viewport) {
 		this.clampByViewport();
 	}
+};
+
+GuiDiv.prototype.disableViewport = function(){
+	this.viewportDisable = true;
 };
 
 GuiDiv.prototype.globalOffset = function() {

@@ -36,6 +36,7 @@ GuiButton.prototype.initialize = function(params) {
 	this.jObject['css']("cursor", "pointer");
 	this.params = params;
 	var that = this;
+	this.label = {};
 	var labelParams;
 	var normalParams = {};
 	// this.$()['css']("border", "solid");
@@ -176,6 +177,7 @@ GuiButton.prototype.initialize = function(params) {
 	if (params['normal']) {
 		normalParams = params['normal'];
 		var resultNormal = prepareButtonState(params['normal']);
+		that.label['normal'] = resultNormal.label;
 		that.imageNormal = resultNormal.image;
 		that.normalState = function() {
 			resultNormal.callback.call(that);
@@ -188,6 +190,7 @@ GuiButton.prototype.initialize = function(params) {
 	if (!Device.isTouch()) {
 		if (params['hover']) {
 			var result = prepareButtonState(params['hover']);
+			that.label['hover'] = result.label;
 			that.imageHover = result.image;
 			that.hoverState = result.callback;
 		}
@@ -195,6 +198,7 @@ GuiButton.prototype.initialize = function(params) {
 		if (params['active']) {
 			var result = prepareButtonState(params['active']);
 			that.imageActive = result.image;
+			that.label['active'] = result.label;
 			that.activeState = result.callback;
 		} else {
 			if (params['hover']) {
@@ -208,6 +212,12 @@ GuiButton.prototype.initialize = function(params) {
 			that.activeState = result.callback;
 		}
 	}
+};
+
+GuiButton.prototype.changeLabel = function(text){
+	$['each'](this.label, function(index, value){
+		value.change(text);
+	});
 };
 
 GuiButton.prototype.bind = function(pushFunction) {
@@ -315,6 +325,10 @@ GuiButton.prototype.highlight = function(isOn) {
 		}
 	}
 	
+	
+};
+
+GuiButton.prototype.resize = function() {
 	
 };
 

@@ -89,9 +89,13 @@ Account.prototype.addScheduledEntity = function(newEntity) {
 	var dt = this.globalUpdateInterval;
 	// if adding first object to scheduling queue start update interval
 	if (!this.globalUpdateIntervalHandle) {
-		this.globalUpdateIntervalHandle = this.setInterval(function() {
+		that.prevUpdateTime = Date.now();
+//		this.globalUpdateIntervalHandle = this.setInterval(function() {
+//			that.update(dt);
+//		}, dt);
+		this.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
 			that.update(dt);
-		}, dt);
+		});
 
 	}
 	this.scheduledEntities[newEntity.id] = newEntity;
@@ -112,11 +116,10 @@ Account.prototype.removeScheduledEntity = function(entity) {
  */
 var oldWindowRequestAnimationFrame = window.requestAnimationFrame;
 window.requestAnimationFrame = (function() {
-//	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
-//			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
-//			|| window.msRequestAnimationFrame
-//			||
-	return function( /* function */callback, /* DOMElement */element) {
+	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
+			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
+			|| window.msRequestAnimationFrame
+			|| function( /* function */callback, /* DOMElement */element) {
 				window.setTimeout(callback, 1000 / 50);
 			};
 })();
@@ -165,10 +168,22 @@ Account.prototype.render = function() {
 
 // Regular scheduled update for registered enities
 Account.prototype.update = function(dt) {
-	$['each'](this.scheduledEntities, function(id, entity) {
-		if (entity && entity.isEnabled()) {
-			entity.update(dt);
-		}
+	var that = this;
+	var date = Date.now();
+	if(date - this.prevUpdateTime >= this.globalUpdateInterval){
+		dt = date - this.prevUpdateTime;
+//		dt = this.globalUpdateInterval;
+		this.prevUpdateTime = Date.now();
+		$['each'](this.scheduledEntities, function(id, entity) {
+			if (entity && entity.isEnabled()) {
+				entity.update(dt);
+			}
+		});
+	}else{
+		dt += date - this.prevUpdateTime;
+	}
+	window.requestAnimationFrame(function() {
+		that.update(dt);
 	});
 };
 Account.prototype.setEnable = function(isTrue) {

@@ -88,6 +88,7 @@ BackgroundState.prototype.init = function(params) {
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	var that = this;
 	if (this.loader != null) {
+		this.loader.show();
 		this.loader.$()['css']("opacity", 0);
 		this.loader.$()['stop']();
 		this.loader.$()['delay'](0.5 * fadeTime);
@@ -100,7 +101,7 @@ BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	this.mask.$()['css']("background-color", color);
 	this.mask.fadeTo(1, fadeTime, function(){
 		that.faded = true;
-		that.mask.show();
+//		that.mask.show();
 		if (callback)
 			callback();
 	});
@@ -110,7 +111,8 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
 	if (this.loader != null) {
 		this.loader.$()['stop']();
-		this.loader.fadeTo(0, 0.3 * fadeTime);
+		this.loader.hide();
+//		this.loader.fadeTo(0, 0.3 * fadeTime);
 	}
 	this.mask.fadeTo(0, fadeTime, function() {
 		that.faded = false;

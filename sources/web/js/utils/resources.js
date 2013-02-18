@@ -207,8 +207,6 @@ var Resources = (function() {
 
 				obj.onload = function() {
 					++j;
-
-//					console.log("LOADED", this, this.complete);
 					// if progress callback, give information of assets loaded,
 					// total and percent
 					if (onprogress) {
