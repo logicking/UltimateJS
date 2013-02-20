@@ -277,3 +277,110 @@ function selectValue() {
 	var result = arguments[arguments.length - 1];
 	return result;
 }
+
+var Recorder = (function(){
+	var content = [],
+		refTime = -1,
+		isRecording = false;
+	obj = {};
+	function recordAction(action, target, params) {
+		if(!isRecording){
+			return;
+		}
+		content.push({
+			action : action,
+			target : target,
+			params : params,
+			time : (refTime!=-1)?(Date.now()-refTime):refTime
+		});
+		console.log("Recorded Action: ", content[content.length-1]);
+	};
+	
+	function clearContent(){
+		content = [];
+		refTime = -1;
+		console.log("Cleared recorder content");
+	};
+	
+	function setRefTime(){
+		refTime = Date.now();
+		console.log("Setting ref time to ", new Date(refTime));
+	};
+	
+	function saveToFile(){
+		var string = "";
+		console.log("content on saveToFile: ", content)
+		for(var i=0;i<content.length;i++){
+			var temp = "" +content[i].action +
+				";" + content[i].target +
+				";" + content[i].time + ";";
+			
+			
+			if(content[i].action == "clickedAt"){
+				temp = temp + content[i].params.x +
+					","+content[i].params.y+";";
+			}
+			
+			
+			temp = temp + "\n";
+			string = string + temp;
+		}
+		uriContent = "data:application/octet-stream," + encodeURIComponent(string);
+		newWindow=window.open(uriContent, 'neuesDokument');
+	};
+	
+	function startRecord(){
+		clearContent();
+		setRefTime();
+		isRecording = true;
+	};
+	
+	function stopRecord(){
+		isRecording = false;
+		refTime = -1;
+		saveToFile();
+	};
+	
+	
+	obj["recordAction"] = recordAction;
+	obj["clearContent"] = clearContent;
+	obj["setRefTime"] = setRefTime;
+	obj["saveToFile"] = saveToFile;
+	obj["startRecord"] = startRecord;
+	obj["stopRecord"] = stopRecord;
+	obj["getState"] = function(){
+		return (function(state){
+			return state;
+		})(isRecording);
+	};
+	return obj;
+})();
+
+
+function RandomNumberGenerator(seed){
+	function nextRandomNumber(){
+		var hi = this.seed / this.Q;
+		var lo = this.seed % this.Q;
+		var test = this.A * lo - this.R * hi;
+		if(test > 0){
+			this.seed = test;
+		} else {
+			this.seed = test + this.M;
+		}
+		return (this.seed * this.oneOverM);
+	}  
+
+	var d = new Date();
+	this.seed = seed;
+	if(!this.seed){
+		this.seed = 2345678901 + (d.getSeconds() * 0xFFFFFF) + (d.getMinutes() * 0xFFFF); 
+	}
+	this.A = 48271;
+	this.M = 2147483647;
+	this.Q = this.M / this.A;
+	this.R = this.M % this.A;
+	this.oneOverM = 1.0 / this.M;
+	this.next = nextRandomNumber;
+	return this;
+}
+
