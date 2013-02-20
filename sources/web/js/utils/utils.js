@@ -357,30 +357,46 @@ var Recorder = (function(){
 })();
 
 
-function RandomNumberGenerator(seed){
-	function nextRandomNumber(){
-		var hi = this.seed / this.Q;
-		var lo = this.seed % this.Q;
-		var test = this.A * lo - this.R * hi;
-		if(test > 0){
-			this.seed = test;
-		} else {
-			this.seed = test + this.M;
+function RandomNumberGenerator(seed)
+{
+	var keySchedule = [];
+	var keySchedule_i = 0;
+	var keySchedule_j = 0;
+	
+	function init(seed) {
+		for (var i = 0; i < 256; i++)
+			keySchedule[i] = i;
+		
+		var j = 0;
+		for (var i = 0; i < 256; i++)
+		{
+			j = (j + keySchedule[i] + seed.charCodeAt(i % seed.length)) % 256;
+			
+			var t = keySchedule[i];
+			keySchedule[i] = keySchedule[j];
+			keySchedule[j] = t;
 		}
-		return (this.seed * this.oneOverM);
-	}  
-
-	var d = new Date();
-	this.seed = seed;
-	if(!this.seed){
-		this.seed = 2345678901 + (d.getSeconds() * 0xFFFFFF) + (d.getMinutes() * 0xFFFF); 
 	}
-	this.A = 48271;
-	this.M = 2147483647;
-	this.Q = this.M / this.A;
-	this.R = this.M % this.A;
-	this.oneOverM = 1.0 / this.M;
-	this.next = nextRandomNumber;
-	return this;
+	init(seed);
+	
+	function getRandomByte() {
+		keySchedule_i = (keySchedule_i + 1) % 256;
+		keySchedule_j = (keySchedule_j + keySchedule[keySchedule_i]) % 256;
+		
+		var t = keySchedule[keySchedule_i];
+		keySchedule[keySchedule_i] = keySchedule[keySchedule_j];
+		keySchedule[keySchedule_j] = t;
+		
+		return keySchedule[(keySchedule[keySchedule_i] + keySchedule[keySchedule_j]) % 256];
+	}
+	
+	this.next = function() {
+		var number = 0;
+		var multiplier = 1;
+		for (var i = 0; i < 8; i++) {
+			number += getRandomByte() * multiplier;
+			multiplier *= 256;
+		}
+		return number / 18446744073709551616;
+	}
 }
-
