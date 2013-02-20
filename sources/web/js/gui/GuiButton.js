@@ -221,6 +221,19 @@ GuiButton.prototype.changeLabel = function(text){
 	});
 };
 
+GuiButton.prototype.hideLabel = function(){
+	$['each'](this.label, function(index, value){
+		value.hide();
+	});
+};
+
+GuiButton.prototype.showLabel = function(){
+	$['each'](this.label, function(index, value){
+		value.show();
+	});
+};
+
+
 GuiButton.prototype.bind = function(pushFunction) {
 	// simple onclick event without any effects for button
 	if (!this.activeState) {
