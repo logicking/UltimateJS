@@ -99,7 +99,6 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 			console.log(that.audioSpriteInstance.currentTime, that.endTime);
 			
 			if(that.audioSpriteInstance.currentTime < that.startTime) {
-				alert(that.audioSpriteInstance.currentTime + " - " + that.startTime);
 				that.audioSpriteInstance.currentTime = that.startTime;
 			}
 			if(that.audioSpriteInstance.currentTime >= that.endTime) {
