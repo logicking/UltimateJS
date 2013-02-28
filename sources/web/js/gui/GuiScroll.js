@@ -149,8 +149,10 @@ GuiScroll.prototype.clearList = function() {
 };
 
 GuiScroll.prototype.remove = function() {
-	this.scroll['destroy']();
-	delete this.scroll;
+	if(this.scroll){
+		this.scroll['destroy']();
+		delete this.scroll;
+	}
 	GuiScroll.parent.remove.call(this);
 };
 

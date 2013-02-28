@@ -24,6 +24,9 @@ guiFactory.createGuiFromJson = function(json, state) {
 		console.warn("For object '" + name + "' wrong parent '" + params['parent'] + "' is provided.");
 	}, function(name, obj) {
 		state.addGui(obj, name);
+		if(obj.parent && obj.parent.children){
+			obj.parent.children.addGui(obj, name);
+		}
 		obj.name = name;
 	});
 };
