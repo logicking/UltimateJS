@@ -15,6 +15,14 @@ var Loader = (function() {
 	if (globalBackground) {
 		globalBackground['style']['zIndex'] = "9998";
 	}
+	if (loadingStateStroke) 
+	{
+		var barIn = document.createElement("img");
+
+		barIn.src = "images/barIn.png";
+		loadingStateStroke.appendChild(barIn);
+
+	}
 
 	return {
 
@@ -34,6 +42,12 @@ var Loader = (function() {
 				loadingStateText
 						.appendChild(loadingStateText.ownerDocument
 								.createTextNode(pecentage + "%"));
+			}
+			// a simple loading stroke
+			if (loadingStateStroke) {
+
+				innerStroke.style.width =  ((1-pecentage/100)*580);
+				innerStroke.style.left = 10 + ((pecentage/100)*580);
 			}
 		},
 		showLoadingMessage : function() {
