@@ -20,7 +20,9 @@ GuiButton.prototype.createInstance = function(params) {
 guiFactory.addClass(GuiButton);
 
 GuiButton.prototype.generate = function(src) {
-	var htmlText = "<div id='" + this.id + "' class='" + this.style + " unselectable'" + ((this.divname) ? ("name='" + this.divname + "'>") : (">"));
+	var htmlText = "<div id='" + this.id + "' class='" + this.style
+			+ " unselectable'"
+			+ ((this.divname) ? ("name='" + this.divname + "'>") : (">"));
 	htmlText += "</div>";
 
 	return htmlText;
@@ -33,7 +35,6 @@ GuiButton.prototype.initialize = function(params) {
 	// buttons is supposed to be small, so clamping it simple
 	this.clampByViewport = GuiDiv.prototype.clampByViewportSimple;
 
-	this.jObject['css']("cursor", "pointer");
 	this.params = params;
 	var that = this;
 	this.label = {};
@@ -45,14 +46,16 @@ GuiButton.prototype.initialize = function(params) {
 	var prepareButtonState = function(params) {
 
 		params['image'] = Resources.getImage(params['image']);
-		var image = GuiDiv.prototype.createInstance({
-			parent : that,
-			style : params['imageStyle'] ? params['imageStyle'] : "buttonImage",
-			width : that.width,
-			height : that.height,
-			x : params['x'] ? params['x'] : "50%",
-			y : params['y'] ? params['y'] : "50%"
-		});
+		var image = GuiDiv.prototype
+				.createInstance({
+					parent : that,
+					style : params['imageStyle'] ? params['imageStyle']
+							: "buttonImage",
+					width : that.width,
+					height : that.height,
+					x : params['x'] ? params['x'] : "50%",
+					y : params['y'] ? params['y'] : "50%"
+				});
 
 		// image.$()['css']("border", "solid");
 		// image.$()['css']("border-color", "black");
@@ -60,7 +63,8 @@ GuiButton.prototype.initialize = function(params) {
 		that.children.addGui(image);
 
 		var w = selectValue(params['width'], normalParams['width'], that.width);
-		var h = selectValue(params['height'], normalParams['height'], that.height);
+		var h = selectValue(params['height'], normalParams['height'],
+				that.height);
 		// if scale parameter exists scale size, scale specifies in percents
 		if (params['scale']) {
 			w = Math.round(w * params['scale'] / 100);
@@ -89,31 +93,48 @@ GuiButton.prototype.initialize = function(params) {
 				scale = params['scale'] / 100;
 			}
 
-			w = selectValue(params['label']['width'], labelParams['width'], that.width) * scale;
-			h = selectValue(params['label']['height'], labelParams['height'], that.height) * scale;
+			w = selectValue(params['label']['width'], labelParams['width'],
+					that.width)
+					* scale;
+			h = selectValue(params['label']['height'], labelParams['height'],
+					that.height)
+					* scale;
 
-			fontSize = selectValue(params['label']['fontSize'], labelParams['fontSize']) * scale;
+			fontSize = selectValue(params['label']['fontSize'],
+					labelParams['fontSize'])
+					* scale;
 
-			offsetX = selectValue(params['label']['offsetX'], labelParams['offsetX'], -Math.round(w / 2));
-			offsetY = selectValue(params['label']['offsetY'], labelParams['offsetY'], -Math.round(h / 2));
+			offsetX = selectValue(params['label']['offsetX'],
+					labelParams['offsetX'], -Math.round(w / 2));
+			offsetY = selectValue(params['label']['offsetY'],
+					labelParams['offsetY'], -Math.round(h / 2));
 
 			w = Math.round(w);
 			h = Math.round(h);
 
-			label = guiFactory.createObject("GuiLabel", {
-				parent : image,
-				style : selectValue(params['label']['style'], labelParams['style']),
-				width : w,
-				height : h,
-				text : selectValue(params['label']['text'], labelParams['text']),
-				fontSize : fontSize,
-				align : selectValue(params['label']['align'], labelParams['align'], "center"),
-				verticalAlign : selectValue(params['label']['align'], labelParams['align'], "middle"),
-				x : selectValue(params['label']['x'], labelParams['x'], "50%"),
-				y : selectValue(params['label']['y'], labelParams['y'], "50%"),
-				offsetX : params['label']['offsetX'] ? offsetX + params['label']['offsetX'] : offsetX,
-				offsetY : params['label']['offsetY'] ? offsetY + params['label']['offsetY'] : offsetY
-			});
+			label = guiFactory.createObject("GuiLabel",
+					{
+						parent : image,
+						style : selectValue(params['label']['style'],
+								labelParams['style']),
+						width : w,
+						height : h,
+						text : selectValue(params['label']['text'],
+								labelParams['text']),
+						fontSize : fontSize,
+						align : selectValue(params['label']['align'],
+								labelParams['align'], "center"),
+						verticalAlign : selectValue(params['label']['align'],
+								labelParams['align'], "middle"),
+						x : selectValue(params['label']['x'], labelParams['x'],
+								"50%"),
+						y : selectValue(params['label']['y'], labelParams['y'],
+								"50%"),
+						offsetX : params['label']['offsetX'] ? offsetX
+								+ params['label']['offsetX'] : offsetX,
+						offsetY : params['label']['offsetY'] ? offsetY
+								+ params['label']['offsetY'] : offsetY
+					});
 			that.children.addGui(label);
 			label.hide();
 		}
@@ -126,7 +147,6 @@ GuiButton.prototype.initialize = function(params) {
 			} else {
 				that.currentStateParams = params;
 			}
-
 			var oldCurrentImage = that.currentImage;
 			var oldCurrentLabel = that.currentLabel;
 
@@ -231,7 +251,8 @@ GuiButton.prototype.bind = function(pushFunction) {
 	if (pushFunction) {
 		this.pushFunction = pushFunction;
 	}
-	var backToNormalCallback = this.hoverState ? this.hoverState : this.normalState;
+	var backToNormalCallback = this.hoverState ? this.hoverState
+			: this.normalState;
 
 	var callbackCaller = function(event) {
 		if (that.isEnabled()) {
@@ -272,23 +293,27 @@ GuiButton.prototype.bind = function(pushFunction) {
 				that.backedToNormal = false;
 			});
 			this.jObject.bind("touchend", callbackCaller);
-			this.jObject.bind("touchmove", function(e) {
-				if (that.backedToNormal) {
-					return;
-				}
+			this.jObject.bind("touchmove",
+					function(e) {
+						if (that.backedToNormal) {
+							return;
+						}
 
-				e.preventDefault();
-				var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-				var obj = $(document.elementFromPoint(touch.pageX, touch.pageY));
+						e.preventDefault();
+						var touch = e.originalEvent.touches[0]
+								|| e.originalEvent.changedTouches[0];
+						var obj = $(document.elementFromPoint(touch.pageX,
+								touch.pageY));
 
-				if (!that.isPointInsideReal(touch.pageX, touch.pageY)) {
-					backToNormalCallback.call(that);
-					that.backedToNormal = true;
-				}
-			});
+						if (!that.isPointInsideReal(touch.pageX, touch.pageY)) {
+							backToNormalCallback.call(that);
+							that.backedToNormal = true;
+						}
+					});
 		}
 
 	}
+	this.jObject['css']("cursor", "pointer");
 };
 
 // change background in all of button states

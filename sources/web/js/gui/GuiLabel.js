@@ -42,8 +42,8 @@ GuiLabel.prototype.generate = function(src) {
 	this.rowId = this.id + "_row";
 	this.cellId = this.id + "_cell";
 	return "<div id='" + this.id + "' class='" + this.style + " unselectable'>"
-	+ "<div id='" + this.rowId + "' style='display:table-row;cursor: default; '>"
-	+ "<div id='" + this.cellId +"'"+((this.divname)?(" name='"+ this.divname +"'"):(""))+ " style='display:table-cell;cursor: default;'>"
+	+ "<div id='" + this.rowId + "' style='display:table-row; '>"
+	+ "<div id='" + this.cellId +"'"+((this.divname)?(" name='"+ this.divname +"'"):(""))+ " style='display:table-cell;'>"
 	+ src + "</div></div></div>";
 };
 

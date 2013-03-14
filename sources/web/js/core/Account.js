@@ -25,6 +25,9 @@ Account.prototype.init = function(params) {
 	this.scheduledEntities = new Object();
 	this.renderEntities = new Object();
 
+	//GuiSprites that have separate from visual entities updates
+	this.staticSprites = {};
+	
 	// time interval for scheduled synchronization with server
 	this.syncWithServerInterval = params['syncWithServerInterval'];
 	// adding itself to allEntities for reading updates
@@ -179,6 +182,11 @@ Account.prototype.update = function(dt) {
 				entity.update(dt);
 			}
 		});
+		
+		$['each'](this.staticSprites, function(name, sprite) {
+			sprite.update(dt);
+		});
+		
 	}else{
 		dt += date - this.prevUpdateTime;
 	}

@@ -71,8 +71,24 @@ GuiSprite.prototype.initialize = function(params) {
 			+ "px "
 			+ Math.floor(Screen.heightRatio() * this.height * this.totalTile.y)
 			+ "px");
-	
+
 	this.resize();
+
+	if (params['startAnimation']) {
+		this.playAnimation(params['startAnimation']['name'],
+				params['startAnimation']['duration'],
+				params['startAnimation']['loop']);
+		this.setStaticUpdate(true);
+	}
+
+};
+
+GuiSprite.prototype.setStaticUpdate = function(isStatic){
+	if(isStatic === false){
+		delete Account.instance.staticSprites[this.id];
+	}else{
+		Account.instance.staticSprites[this.id] = this;
+	}
 };
 
 GuiSprite.prototype.addSpriteAnimation = function(name, description) {

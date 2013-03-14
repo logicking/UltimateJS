@@ -94,6 +94,7 @@ var Sound = (function() {
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
+				console.log("INIT");
 				this.instance.loadSound(name, function(buf) {
 					that.sprite = buf;
 					//set initial mute state
