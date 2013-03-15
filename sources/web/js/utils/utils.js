@@ -309,7 +309,7 @@ var Recorder = (function(){
 	
 	function saveToFile(){
 		var string = "";
-		console.log("content on saveToFile: ", content)
+		console.log("content on saveToFile: ", content);
 		for(var i=0;i<content.length;i++){
 			var temp = "" +content[i].action +
 				";" + content[i].target +
@@ -398,5 +398,5 @@ function RandomNumberGenerator(seed)
 			multiplier *= 256;
 		}
 		return number / 18446744073709551616;
-	}
-}
+	};
+};

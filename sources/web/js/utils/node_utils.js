@@ -3,31 +3,44 @@ var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
+var ENABLE_REMOTE_CONSOLE = true;
+var DISABLE_CONSOLE = false;
 //reseting log on logserver
-try{
+//try{
 	var consoleUrl = "http://127.0.0.1:8765/";
 	console.log("Connecting to console server");
-	if(!LOCAL){
+	if(ENABLE_REMOTE_CONSOLE){
 		request.post(consoleUrl + "resetLog", {
 			form : {
 				name : logger,
 				time : Date.now()
 			}
+		}, function(error, response, body){
+			if(error){
+				console.log("Error reseting logs for ", logger);
+				console.log("Error: ", error);
+				return;
+			}
+			console.log("Success reseting log for ", logger);
 		});
 
 	}
 	
 
 	(function() {
-		var fn = console.log;
-		var index = 0;
-		console.log = function() {
-			var that = this;
-			index = index + 1;
-			time = Date.now();
-			onConsoleMessage(arguments, time, index);
-			return fn.apply(this, arguments);
-		};
+		if(ENABLE_REMOTE_CONSOLE|| DISABLE_CONSOLE){
+			var fn = console.log;
+			var index = 0;
+			console.log = function() {
+				if(!DISABLE_CONSOLE){
+					var that = this;
+					index = index + 1;
+					time = Date.now();
+					onConsoleMessage(arguments, time, index);
+					return fn.apply(this, arguments);
+				}
+			};
+		}
 	})();
 
 	var onConsoleMessage = function(args, time, index) {
@@ -39,23 +52,25 @@ try{
 				index:index
 		};
 		try{
-			if(!LOCAL){
+			if(ENABLE_REMOTE_CONSOLE){
 				request.post(consoleUrl + "logmsg", {
 					form : json
 				});
 
 			}
-		}catch(err){}
+		}catch(err){
+			console.log("Caught error sending log: ", json);
+		}
 
 	};
-}catch(err){
-	console.log(err);
-}
+//}catch(err){
+//	console.log(err);
+//}
 
 
 //exception handling
 process.on('uncaughtException', function (err) {
-	  console.log('Caught exception!: ' ,  err);
+	  console.log('Caught uncaught exception: ' ,  err);
 	  console.log( err.stack );
 });
 

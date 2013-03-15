@@ -6,90 +6,134 @@ var CACHE_LIFETIME = 2*60*1000;
 
 function Server(){
 	var fileServer = null;
-	var client = null;
-	var authClient = null;
+	this.client = null;
 	var Accounts = null;
 	var Sessions = null;
 	var commands = null;
 };
 
-Server.prototype.init = function(sconf){
+Server.prototype.init = function(sconf, callback){
+	var that = this;
 	this.config = sconf;
-	var conString = "tcp://"+ sconf.username +":"+ sconf.userpasswd +"@"+ sconf.dburl +"/"+ sconf.dbname ;
+	
+	try{//for test
+		if(Sessions){
+			for(var id in Sessions){
+				var session = Sessions[id];
+				global.clearTimeout(session.timeoutId);
+			}
+		}
+	}catch(e){}
+	finally{//for test
 
-	client = new pg.Client(conString);
-	authClient = new pg.Client(conString);
-	Accounts = {};
-	Sessions = {};
-	(new EntityManager()).init({
-		entityClient: client,
-		authClient: authClient
-	});
-	this.entities = {};
-	this.cache = {};
-	commands = {};
-	Server.instance = this;
-	client.connect();
-	authClient.connect();
-	
-	client.on('error', function(error){
-		console.log(error);
-	});
-	
-	client.on('notice', function(msg) {
-		console.log("-----------------");
-		console.log("notice: %j", msg);
-		console.log("-----------------");
-	});
-	
-//	client.query( 'DROP TABLE IF EXISTS account_data');
-	client.query( 'DELETE FROM ' + sconf.entity_table);
-	client.query( 'DELETE FROM ' + sconf.users_accounts_table);
-	
-//	authClient.query( 'DROP TABLE IF EXISTS users_accounts');
-//	client.query( 'CREATE TABLE account_data(account varchar(30), data text )' );
-//	client.query( 'CREATE TABLE entity_data(id varchar(30), data text, parentid varchar(30) )' );
-//	authClient.query( 'CREATE TABLE users_accounts(userid varchar(30), account varchar(30) )' );
-	
-//	console.log('(Re)Created Tables entity_data and users_accounts');
-	
-	this.addCommand("switchState", function(args, session, callback){
 
-		var curState = Server.instance.getEntity(session, args[0], null, true);
-//		parentId;
-		if(!session){
-			callback( {error:"No such session on server"} );
+
+
+		if(this.cache){
+			for(var id in this.cache){
+				var cached = this.cache[id];
+				global.clearTimeout(cached.timeoutId);
+			}
+		if(this.entities){
+			for(var id in this.entities){
+				this.entities[id].clearTimeouts();
+			}
 		}
-		if(!curState){
-			callback( {error:"No such state on server"} );
+
 		}
-		var parentId = getParentId(curState);
-		console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
-		if(!parentId){
-			console.log("Current state has no parent");
-			return;
-		}
-		curState.setParent(null);
-//		console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
-//		curState.setParent(null);
-//		Server.instance.removeEntity(curState.id, true);
-		Server.instance.getEntity(session, args[1], function(entity){
+		var conString = "tcp://"+ sconf.username +":"+ sconf.userpasswd +"@"+ sconf.dburl +"/"+ sconf.dbname ;
 		
-			entity.setParent(parentId);
-			console.log("NewState's parent: ", getParentId(entity));
-			console.log("OldState's parent: ", getParentId(curState));
-//			Server.instance.getEntity(session, entity.id);
-			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
-				EntityManager.instance.backupAllEntities(Server.instance.cache, function(){
-					var changes = session.popChanges();
-					Server.instance.logEntities("after switchState");
-					Server.instance.logCache("after switchState");
-					callback(changes);
-				});
+		if(!that.client){
+			console.log("INITING CLIENT FOR THE FIRST TIME\n------\n------\n------\n------\n------\n------\n------\n------\n------\n------");
+			that.client = new pg.Client(conString);
+			that.client.connect();
+		}
+		console.log("that.client is defined server init: ", !(!that.client));
+		Accounts = {};
+		Sessions = {};
+		(new EntityManager()).init({
+			entityClient: that.client
+		});
+		this.entities = {};
+		this.cache = {};
+		commands = {};
+		Server.instance = this;
+
+		
+//		that.client.on('error', function(error){
+//			console.log(error);
+//		});
+//
+//		that.client.on('notice', function(msg) {
+//			console.log("-----------------");
+//			console.log("notice: %j", msg);
+//			console.log("-----------------");
+//		});
+		var entity_table_delquery = that.client.query( 'DELETE FROM ' + that.config.entity_table);
+		entity_table_delquery.on("end", function(){
+			var users_accounts_delquery = that.client.query( 'DELETE FROM ' + that.config.users_accounts_table);
+			users_accounts_delquery.on("end", function(){
+				if(callback){
+					callback();
+				}
 			});
-			
-		}, false, true);
-	});
+		});
+
+//		client.query( 'DROP TABLE IF EXISTS account_data');
+//		authClient.query( 'DROP TABLE IF EXISTS users_accounts');
+//		client.query( 'CREATE TABLE account_data(account varchar(30), data text )' );
+//		client.query( 'CREATE TABLE entity_data(id varchar(30), data text, parentid varchar(30) )' );
+//		authClient.query( 'CREATE TABLE users_accounts(userid varchar(30), account varchar(30) )' );
+
+//		console.log('(Re)Created Tables entity_data and users_accounts');
+
+		this.addCommand("switchState", function(args, session, callback){
+			var et = Date.now();
+			var curState = Server.instance.getEntity(session, args[0], null, true);
+			console.log("Get CUrrent state time: ____________", Date.now() - et);
+//			parentId;
+			if(!session){
+				callback( {error:"No such session on server"} );
+				return;
+			}
+			if(!curState){
+				callback( {error:"No such state on server"} );
+				return;
+			}
+			var parentId = getParentId(curState);
+			console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
+			if(!parentId){
+				console.log("Current state has no parent");
+				callback( {error:"Current state has no parent"} );
+				return;
+			}
+			et = Date.now();
+			curState.setParent(null);
+			console.log("Current state setPArent(null) time: ____________", Date.now() - et);
+//			console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
+//			curState.setParent(null);
+//			Server.instance.removeEntity(curState.id, true);
+			et = Date.now();
+			Server.instance.getEntity(session, args[1], function(entity){
+				console.log("Get new State Time: _____________", Date.now() - et);
+				entity.setParent(parentId);
+//				console.log("NewState's parent: ", getParentId(entity));
+//				console.log("OldState's parent: ", getParentId(curState));
+//				Server.instance.getEntity(session, entity.id);
+//				EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+//					EntityManager.instance.backupAllEntities(Server.instance.cache, function(){4
+						et = Date.now();
+						var changes = session.popChanges();
+						console.log("Pop changes time: _____________", Date.now() - et);
+//						Server.instance.logEntities("after switchState");
+//						Server.instance.logCache("after switchState");
+						callback(changes);
+//					});
+//				});
+
+			}, false, true);
+		});
+	}
 };
 
 //passed func should take 3 args - args array, session, callback(see below)
@@ -126,9 +170,11 @@ Server.prototype.addSession = function(session) {
 	Sessions[session.userId] = session;
 };
 
+
 Server.prototype.getAccountByUserId = function(session, userId, callback){
+	var that = Server.instance;
 	var rows = [];
-	var query = authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
+	var query = that.client.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
 	query.on( "error", function(error){
 		console.log("Get Account By User Id error\n", error);
 	});
@@ -155,7 +201,7 @@ Server.prototype.removeSession = function(session){
 	if(typeof session == "string" ){
 		delete Sessions[session];
 	}
-	console.log("Sessions: ", Sessions);
+//	console.log("Sessions: ", Sessions);
 };
 
 Server.prototype.getSession = function(userId){
@@ -197,7 +243,7 @@ Server.prototype.killCached = function(id){
 Server.prototype.addToCache = function(entity){
 	var cache = Server.instance.cache,
 		id = entity.id;
-	entity.log(" adding to cache.");
+//	entity.log(" adding to cache.");
 //	entity.logChildren("on addToCache");
 	//case of overwriting(there is an old instance of entity in cache)
 	if(cache[id])
@@ -241,9 +287,9 @@ Server.prototype.resetCacheTimeout = function(entity){
 		if(entity.timeoutId){
 			global.clearTimeout(entity.timeoutId);
 		}
-		console.log("Resetting timeout for entity with id=%s", entity.id);
+//		console.log("Resetting timeout for entity with id=%s", entity.id);
 		entity.timeoutId = global.setTimeout(function(){
-			console.log("\nKilling entity(id=%s)", entity.id);
+//			console.log("\nKilling entity(id=%s)", entity.id);
 			Server.instance.killCached(entity.id);
 		}, CACHE_LIFETIME);
 	};
@@ -288,7 +334,7 @@ Server.prototype.getCache = function(id, listener){
 		console.log(console.log("No such entity in cache"));
 		return null;
 	}
-	console.log("Getting entity from cache id=%s", id);
+//	console.log("Getting entity from cache id=%s", id);
 	var entity = this.cache[id],
 		cache = this.cache;
 	var addedList = [];
@@ -297,19 +343,19 @@ Server.prototype.getCache = function(id, listener){
 	var parentId = getParentId(entity);
 	if(parentId && this.isInEntities(parentId)){
 		var parent = this.entities[parentId];
-		console.log("Adding child to entity on getCache to parent(id=%s)", parentId);
+//		console.log("Adding child to entity on getCache to parent(id=%s)", parentId);
 		parent.addChild(entity);
 	}
 	
 	var that = this;
 	var addByParent = function(parent){
 		if( !Server.instance.isInEntities(getParentId(parent)) && !((parent instanceof Account)&&(parent.userId) )){
-			parent.log("has no active parrent");
+//			parent.log("has no active parrent");
 			return;
 		}
 		addedList.push(parent);
 		Server.instance.addEntityInstance(parent, listener);
-		parent.log("setting as active");
+//		parent.log("setting as active");
 //		parent.logChildren("on getCache byParent");
 		delete cache[parent.id];
 		if(parent.children){
@@ -336,7 +382,7 @@ Server.prototype.getCache = function(id, listener){
 };
 
 Server.prototype.restoreFromCache = function(id, listener){
-	console.log("Restoring id=%s", id);
+//	console.log("Restoring id=%s", id);
 	if(!this.isInCache(id)){
 		console.log("Can't restore. Id=%s is not in cache.", id);
 		return;
@@ -364,7 +410,7 @@ Server.prototype.addEntityInstance = function(entity, listeners){
 			(	(entity.parent == null) || 
 				(typeof entity.parent == String) ||
 				Server.instance.isInCache(getParentId(entity))  ) ) {
-		entity.log("is invalid. Cant be pushed to working.");
+//		entity.log("is invalid. Cant be pushed to working.");
 		Server.instance.addToCache(entity);
 		return;
 	}
@@ -375,8 +421,8 @@ Server.prototype.addEntityInstance = function(entity, listeners){
 			console.log("Trying to add the same entity. Id=", id);
 			return;
 		}
-		console.log("Server alredy has entity with id: ", id);
-		console.log("Replacing existing");
+//		console.log("Server alredy has entity with id: ", id);
+//		console.log("Replacing existing");
 		var children = Server.instance.entities[id].children;
 		if(children){
 			for(var i=0; i<children.length; i++){
@@ -426,6 +472,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	 * 	2) from cache (tries to add to working )
 	 * 	3) from DB
 	 */
+	var et = Date.now();
 	var addedIdList = [];
 	var notifydata = {};
 /* 1) */
@@ -443,12 +490,22 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 					Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
 				}
 				Server.instance.receiveData(notifydata, null);
-				callback(entity);
+				if(callback){
+//					console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+					process.nextTick(function(){
+						callback(entity);	
+					});
+					
+				}
+				
 			});
 			return null;
 		}
 		if(callback){
-			callback(entity);
+//			console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+//			process.nextTick(function(){
+				callback(entity);	
+//			});
 		}
 		return entity;
 	}
@@ -467,12 +524,21 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 					Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
 				}
 				Server.instance.receiveData(notifydata, null);
-				callback(entity);
+				if(callback){
+//					console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+					process.nextTick(function(){
+						callback(entity);	
+					});
+				}
+				
 			});
 			return null;
 		}
 		if(callback){
-			callback(entity);
+//			console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+			process.nextTick(function(){
+				callback(entity);	
+			});
 		}
 		return entity;
 	}
@@ -484,16 +550,22 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 	
 	EntityManager.instance.getEntity(id, {}, function(entity){
 		if( (!entity) || (entity == null)){
-			console.log("Entity no found with id: ", id);
-			callback(null);
+			console.log("Entity id \"%s\" does not exist.", id);
+//			console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+			process.nextTick(function(){
+				callback(null);	
+			});
 			return;
 		}
 //		console.log("Entity with id=%s on EnityManager.getEntity", entity.id);
 		Server.instance.addEntityInstance(entity, session);
-		console.log("Created entity on server.getEntity with id=", entity.id);
+//		console.log("Created entity on server.getEntity with id=", entity.id);
 	
 		if(!createChildren){
-			callback(entity);
+//			console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+			process.nextTick(function(){
+				callback(entity);	
+			});
 			return;
 		}
 		EntityManager.instance.collectByParent(id, function(data){
@@ -507,13 +579,19 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 				Server.instance.getEntity(null, addedIdList[i], null, true).writeUpdate(notifydata, {});
 			}
 			Server.instance.receiveData(notifydata, null);
-			callback(entity);
+			if(callback){
+//				console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
+				process.nextTick(function(){
+					callback(entity);	
+				});
+			}
+			
 		});
 	});	
 };
 
 Server.prototype.extendEntities = function(data, session) {
-	
+//	var et = Date.now();
 	for ( var id in data) {
 		if (data[id] instanceof Entity) {
 			this.addEntityInstance(data[id], session?[session]:null);
@@ -526,10 +604,12 @@ Server.prototype.extendEntities = function(data, session) {
 //			this.addEntityInstance(entity, session?[session]:null);
 
 		}
+		
 //		var writeData = {};
 //		this.entities[id].writeUpdate(writeData, {});
 //		this.receiveData(writeData, session);
 	}
+//	console.log("Extention time: ", Date.now() - et);
 };
 
 
@@ -546,7 +626,7 @@ Server.prototype.removeAccount = function(account){
 
 
 Server.prototype.receiveData = function(data, session){
-	console.log("Received data: ", data);
+//	console.log("Received data: ", data);
 	var value = null; 
 	for(var index in data){
 		value = data[index];
@@ -564,13 +644,22 @@ Server.prototype.setAuthCallback = function(callback){
 	this.authCallback = callback;
 };
 
+Server.prototype.setTransactionHandler = function(func){
+	this.transactionHandler = func;
+};
+
+Server.prototype.getTransactionHandler = function(){
+	return this.trunsactionHandler;
+};
+
 Server.prototype.onAuth = function(req, res){
-	
+	var entryTime = Date.now();
 //	session.userId = req.body.userId;
 //	if(!req.isAuthenticated()){
 //		Server.instance.onIFrameAuth(req.data.);
 //	}
 	var userId;
+	var et = Date.now();
 	if(req.session.iFrameAuth){
 		userId = req.session.userId;
 	}else{
@@ -583,58 +672,95 @@ Server.prototype.onAuth = function(req, res){
 			}
 		}
 	}
-	console.log("\nAuth request from user : ", userId);
+	console.log("111111111111111: ", Date.now() - et);
+//	console.log("\nAuth request from user : ", userId);
+	et = Date.now(); 
 	var session = Server.instance.getSession(userId);
+	console.log("22222222222222222: ", Date.now() - et);
 	if(session){
-		console.log("Found previous session with userId: ", userId);
+//		console.log("Found previous session with userId: ", userId);
 		if(Server.instance.authCallback){
-			Server.instance.authCallback(session, function(){
-				var obj = {
-						accountId : session.accountId,
-						userId : userId,
-						initUpdate:session.sendData(true)
-				};
-				res.end(JSON.stringify(obj));
-			});
-		}else{
-			var obj = {
-					accountId : session.accountId,
-					userId : userId,
-					initUpdate:session.sendData(true)
-			};
-			res.end(JSON.stringify(obj));
-		}
-		return;
-	}
-	var session = new Session();
-	session.init({
-		"userId" : userId,
-		"initData": req.session.initData,
-		"callback": (function(){
-//			res.writeContinue();
-			console.log("Created Account with ID: ", session.accountId);
-			console.log("Auth complete!");
-			
-			Server.instance.logEntities("On auth");
-			Server.instance.logCache("On auth");
-			if(Server.instance.authCallback){
+			process.nextTick(function(){
 				Server.instance.authCallback(session, function(){
-					console.log("next() on auth callback entry point");
 					var obj = {
 							accountId : session.accountId,
 							userId : userId,
 							initUpdate:session.sendData(true)
 					};
 					res.end(JSON.stringify(obj));
+					console.log("Auth time:", Date.now() - entryTime);
 				});
-			}else{
+			});
+		}else{
+			process.nextTick(function(){
 				var obj = {
 						accountId : session.accountId,
 						userId : userId,
 						initUpdate:session.sendData(true)
 				};
+				et = Date.now();
 				res.end(JSON.stringify(obj));
-			}
+				console.log("Res end time: ", Date.now() - et);
+				console.log("Auth time:", Date.now() - entryTime);
+			});
+		}
+			
+		return;
+	}
+	et = Date.now();
+	var session = new Session();
+	console.log("33333333333333333333: ", Date.now() - et);
+	
+	et = Date.now();
+	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
+	session.init({
+		"userId" : userId,
+		"authClient" : Server.instance.client, 
+//		"initData": req.session.initData,
+		"callback": (function(){
+			process.nextTick(function(){
+				console.log("444444444444444444: ", Date.now() - et);
+				var et2 = Date.now();
+//				res.writeContinue();
+				console.log("Created Account with ID: ", session.accountId);
+				console.log("Auth complete!");
+				
+//				Server.instance.logEntities("On auth");
+//				Server.instance.logCache("On auth");
+				if(Server.instance.authCallback){
+					process.nextTick(function(){
+					
+						Server.instance.authCallback(session, function(){
+							var obj = {
+									accountId : session.accountId,
+									userId : userId,
+									initUpdate:session.sendData(true)
+							};
+							et = Date.now();
+							res.end(JSON.stringify(obj));
+							console.log("AAAAAAAAAAAAAAAAA: ", Date.now() - et);
+							console.log("Auth time:", Date.now() - entryTime);
+							console.log("555555555555555555555 ", Date.now() - et2);
+						});
+					});
+				}else{
+					process.nextTick(function(){
+						
+						var obj = {
+								accountId : session.accountId,
+								userId : userId,
+								initUpdate:session.sendData(true)
+						};
+					
+						res.end(JSON.stringify(obj));
+						console.log("AAAAAAAAAAAAAAAAA: ", Date.now() - et);
+						console.log("Auth time:", Date.now() - entryTime);
+						console.log("555555555555555555555 ", Date.now() - et2);
+					});
+				}
+				
+			});
+			
 		})
 	});
 	
@@ -661,7 +787,7 @@ Server.prototype.onCommunicate = function(req, res, next){
 		return;
 	}
 	var	data = req.body;
-	console.log("Request to change smth from user : ", userId);
+//	console.log("Request to change smth from user : ", userId);
 //	console.log("Change data: ", data);
 	Server.instance.receiveData(data, session);
 //	EntityManager.instance.backupSession(session);	
@@ -726,18 +852,21 @@ Server.prototype.cleanUp = function(){
 };
 
 
-Server.prototype.start = function(app){
-	
+Server.prototype.start = function(app, callback){
+	var that = this;
 	
 	function onClose(){
-		 client.end();
-		 authClient.end();
+		 that.client.end();
 	};
 
 	this.httpServer = http.createServer(app);	
 	this.httpServer.on('close', onClose);
 	this.httpServer.listen(app.get("port"), function(){
+
 		console.log("Server has started on "+ app.get("port"));
+		if(callback){
+			callback();
+		}
 	});
 };
 

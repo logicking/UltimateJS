@@ -2,22 +2,25 @@
 /* 
  * Session - authorization, account manager 
  */
-var SESSION_LIFETIME = 15*60*1000;
+var SESSION_LIFETIME = 20*60*1000;
 
 function Session(){
 	var propertyQueue = null;
 };
 
 Session.prototype.init = function(params){
+	var that = this;
 	this.userId = params["userId"];
-	this.setInitData(params["initData"]);
 	this.accountId = "default";
 	var callback = params["callback"];
 	var that = this;
 	var rows = [];
 	propertyQueue = [];
+	that.authClient = params["authClient"];
+	console.log("that.authClient is defined on session init: ", !(!that.authClient));
 	console.log("Session init on userId: ", this.userId);
-	var query = authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ this.userId ] );
+	var et = Date.now(); 
+	var query = that.authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ this.userId ] );
 	query.on( "error", function(error){
 		console.log("Session INIT Error on Request to DB\n", error);
 	});
@@ -27,37 +30,71 @@ Session.prototype.init = function(params){
 	});
 	
 	query.on("end", function(result){
-		if(result.rowCount == 0){
-			that.accountId = uniqueId().toString();
-			authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
-			Server.instance.extendEntities(EntityManager.instance.getAccountDefaultUpdate(that.accountId), that );
-			console.log("=======Extended entites=======");
-			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+		process.nextTick(function(){
+			console.log("Auth account request time: ", Date.now() - et);
+			
+			if((result.rowCount == 0)&&(rows.length == 0)){
+				that.accountId = uniqueId().toString();
+				that.authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
+				et = Date.now();
+				Server.instance.extendEntities(EntityManager.instance.getAccountDefaultUpdate(that.accountId), that );
+//				console.log("=======Extended entites=======");
+				console.log("Extention time: ", Date.now() - et);
+				et = Date.now();
 				Server.instance.getEntity(that, that.accountId, function(account){
+					console.log("get Account entity time: ", Date.now() - et);
 					Server.instance.addSession(that);
 					account.userId = that.userId;
-					console.log("Set userId to account on session init");
+					that.account = account;
+//					console.log("Set userId to account on session init");
+					et = Date.now();
 					Server.instance.restoreFromCache(account.id, that);
+					console.log("Restore from cache time: ", Date.now() - et);
 					that.reportActivity();
 					if(callback){
 						callback();
 					}
 				}, false, true);
-			});
-			return;
-		}
-		that.accountId = rows[0].account;
-		console.log("Account ID: ", that.accountId);
-////		that.account = new BasicAccount();
-		Server.instance.getEntity(that, that.accountId, function(account){
-			Server.instance.addSession(that);
-			account.userId = that.userId;
-			Server.instance.restoreFromCache(account.id, that);
-			that.reportActivity();
-			if(callback){
-				callback();
+//				EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+//				
+//				});
+				return;
 			}
-		}, false, true);
+			that.accountId = rows[0].account;
+//			console.log("Account ID: ", that.accountId);
+////			that.account = new BasicAccount();
+			et = Date.now();
+			Server.instance.getEntity(that, that.accountId, function(account){
+				console.log("get Account entity time: ", Date.now() - et);
+//				if(!account){
+//					Server.instance.extendEntities(EntityManager.instance.getAccountDefaultUpdate(that.accountId), that );
+//					EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
+//						Server.instance.getEntity(that, that.accountId, function(account){
+//							Server.instance.addSession(that);
+//							account.userId = that.userId;
+//							console.log("Set userId to account on session init");
+//							Server.instance.restoreFromCache(account.id, that);
+//							that.reportActivity();
+//							if(callback){
+//								callback();
+//							}
+//						}, false, true);
+//					});
+////					
+//				}
+				Server.instance.addSession(that);
+				account.userId = that.userId;
+				et = Date.now();
+				Server.instance.restoreFromCache(account.id, that);
+				console.log("Restore from cache time: ", Date.now() - et);
+				that.account = account;
+				that.reportActivity();
+				if(callback){
+					callback();
+				}
+			}, false, true);
+			
+		});
 		
 //		EntityManager.instance.getEntity(that.accountId, function(entity){ 
 ////			console.log(that.account);
@@ -105,7 +142,7 @@ Session.prototype.sendData = function(initUpdate){
 		};
 //		console.log("entities on server: \n", entities, '\n\n\n');
 //		console.log(entities[this.accountId] instanceof Entity);
-		Server.instance.logEntities("on init update");
+//		Server.instance.logEntities("on init update");
 		entities[this.accountId].writeUpdate(data, {});
 		addByParent(data, this.accountId);
 		
@@ -118,7 +155,7 @@ Session.prototype.sendData = function(initUpdate){
 				delete entity["destroy"];
 			}
 		}
-		console.log("Data on init: ", data);
+//		console.log("Data on init: ", data);
 		//this.updateAccount(data);
 	}else{
 		data = this.popChanges();
@@ -138,6 +175,10 @@ Session.prototype.pushProperty = function(id, name, value){
 	prop[name] = value;
 	data[id] = prop;
 //	console.log("Changed: ", data);
+	propertyQueue.push(data);
+};
+
+Session.prototype.pushData = function(data){
 	propertyQueue.push(data);
 };
 
@@ -171,9 +212,9 @@ Session.prototype.reportActivity = function(){
 Session.prototype.destroy = function(){
 	var session = this;
 	Server.instance.removeSession(session.userId);
-	console.log("Killing session (", session.userId, ")");
+//	console.log("Killing session (", session.userId, ")");
 	Server.instance.removeEntity(session.accountId, true);
-	Server.instance.logEntities("After session destroy");
-	Server.instance.logCache("After session destroy");
+//	Server.instance.logEntities("After session destroy");
+//	Server.instance.logCache("After session destroy");
 	//session.suicide();
 };

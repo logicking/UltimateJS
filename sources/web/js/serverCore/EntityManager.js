@@ -12,7 +12,6 @@ function EntityManager(){
 
 EntityManager.prototype.init = function(params){
 	this.eClient = params["entityClient"];
-	this.aClient = params["authClient"];
 	commands = new Object();
 };
 
@@ -49,14 +48,14 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 	return object;
 };
 
-
-EntityManager.prototype.backupSession = function(session){
-	assert(session || session instanceof Session, "Bad session arg on backup");
-	this.eClient.query("UPDATE account_data SET data = $1 WHERE account = $2",
-	[ JSON.stringify(session.sendData()), session.accountID ]).on("error", function(error){
-		console.log(error);
-	});
-};
+//
+//EntityManager.prototype.backupSession = function(session){
+//	assert(session || session instanceof Session, "Bad session arg on backup");
+//	this.eClient.query("UPDATE account_data SET data = $1 WHERE account = $2",
+//	[ JSON.stringify(session.sendData()), session.accountID ]).on("error", function(error){
+//		console.log(error);
+//	});
+//};
 
 EntityManager.prototype.getAccountEntities = function(accountID, callback){
 	assert(Server.instance.entities[accountID], "No such Account in Entities with accID ", accountID);
@@ -70,18 +69,18 @@ EntityManager.prototype.getAccountEntities = function(accountID, callback){
 		}
 	});
 };
-
-EntityManager.prototype.createSessionRecord = function(session){
-	assert(session || session instanceof Session, "Bad session arg on createRecord");
-	console.log("Creating Record");
-	var query = this.eClient.query("INSERT INTO account_data(account, data) VALUES  ($1, $2)", [  session.accountID, JSON.stringify( session.sendData() ) ]);
-	query.on("error", function(error){
-		console.log(error);
-	});
-	query.on("end", function(){
-		console.log("Created Record for userID: %s with accID: %s", session.userId, session.accountID );
-	});
-};
+//
+//EntityManager.prototype.createSessionRecord = function(session){
+//	assert(session || session instanceof Session, "Bad session arg on createRecord");
+//	console.log("Creating Record");
+//	var query = this.eClient.query("INSERT INTO " + s + "(account, data) VALUES  ($1, $2)", [  session.accountID, JSON.stringify( session.sendData() ) ]);
+//	query.on("error", function(error){
+//		console.log(error);
+//	});
+//	query.on("end", function(){
+//		console.log("Created Record for userID: %s with accID: %s", session.userId, session.accountID );
+//	});
+//};
 
 
 EntityManager.prototype.backupEntity = function(entity, callback){
@@ -141,8 +140,8 @@ EntityManager.prototype.getEntity = function(id, addParams, callback){
 		}
 	});
 	
-	query.on("end", function(){
-		if(!callbacked){
+	query.on("end", function(result){
+		if(!callbacked && (result.rowCount == 0)){
 			if(callback){
 				callback(null);
 			}
@@ -223,7 +222,7 @@ EntityManager.prototype.getEntityByParent = function(parentID, callback){
 	});
 	query.on("end", function(result){
 		if(callback){
-			console.log("Got entities by parentID: %s; data = ", parentID, data);
+//			console.log("Got entities by parentID: %s; data = ", parentID, data);
 			callback(data);
 		}
 	});
@@ -267,7 +266,8 @@ EntityManager.prototype.stringify = function(data, forbiddenKeys){
 
 EntityManager.prototype.getAccIdByUserId = function(userId, callback){
 	var rows = [];
-	var query = this.aClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
+//	console.log(this);
+	var query = this.eClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
 	query.on( "error", function(error){
 		console.log("Session INIT Error on Request FROM DB\n", error);
 	});
@@ -282,6 +282,72 @@ EntityManager.prototype.getAccIdByUserId = function(userId, callback){
 			return;
 		}
 		callback(rows[0].account);
+	});
+};
+
+
+EntityManager.prototype.getAccountIdsByUserIds = function(ids, callback){
+	var that = this;
+	var rows = [];
+	if(ids.length == 0){
+		callback(rows);
+		return;
+	}
+	if(ids.length > 50){
+		console.log("ids length before: ", ids.length);
+		var ids50 = ids.splice(0, 50);
+		console.log("ids length after: ", ids.length);
+		that.getAccountIdsByUserIds(ids50, function(srows){
+			if(srows){
+				rows = rows.concat(srows);
+			}
+			that.getAccountIdsByUserIds(ids, function(srows){
+				if(srows){
+					rows = rows.concat(srows);
+				}
+				callback(rows);
+			});
+		});
+		return;
+	}
+	var queryString = "SELECT * FROM " + sconf.users_accounts_table + " WHERE ";
+	for(var i=0;i<ids.length;i++){
+		queryString += "userId = $" + (i+1).toString() + " ";
+		if(i<ids.length-1){
+			queryString += "OR ";
+		}
+	}
+//	console.log("QueryString: ", queryString);
+	console.log("======getAccountIdsByUserIds executive call.========");
+	var query = this.eClient.query(queryString, ids);
+	query.on("error", function(error){
+		console.log("Get Account Ids error happened");
+		console.log(error);
+		if(callback){
+			callback(null);
+		}
+	
+	});
+	
+	query.on("row", function(row){
+		rows.push(row);
+	});
+	
+	query.on("end", function(result){
+		process.nextTick(function(){
+			if(!result){
+				if(callback){
+					callback(null);
+				}
+				return;
+			}
+			if(result.rowCount == 0){
+				callback(null);
+				return;
+			}
+			callback(rows);
+		});
+		
 	});
 };
 

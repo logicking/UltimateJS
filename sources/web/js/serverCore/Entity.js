@@ -49,7 +49,7 @@ Entity.prototype.init = function(params) {
 	//this.setEnable(enabled);
 
 	// this.readUpdate(params);
-	this.timeouts = null;
+	this.timeouts = [];
 	this.intervals = null;
 };
 
@@ -139,15 +139,23 @@ Entity.prototype.isEnabled = function() {
 Entity.prototype.setEntityTimeout = function(func, time) {
 //	console.log(this);
 	var that = this;
-	
+	var entityId = that.id;
 	var id = global.setTimeout(function() {
-		Server.instance.getEntity(null, that.id, function(entity){	
+		Server.instance.getEntity(null, entityId, function(entity){	
 			func(entity);
 		});
 	}, time);	
+	this.timeouts.push(id);
 	return id;
 };
 
+
+Entity.prototype.clearTimeouts = function(){
+	for(var i=0;i<this.timeouts.length;i++){
+		global.clearTimeout(this.timeouts[i]);
+	}
+	this.timeouts = [];
+};
 
 Entity.prototype.setEnable = function(isTrue) {
 	this.enabled = isTrue;
@@ -243,6 +251,15 @@ Entity.prototype.addListener = function(listener){
 
 //Notifies Listeners about certain property change 
 // name - prop name , value = value
+
+Entity.prototype.notifyExistance = function(){
+	var data = {};
+	this.writeUpdate(data, {});
+	for(var index in this.listeners){
+		this.listeners[index].pushData(data);
+	}
+};
+
 Entity.prototype.notifyListeners = function(name, value){
 	for(var index in this.listeners){
 		this.listeners[index].pushProperty(this.id, name, value);
