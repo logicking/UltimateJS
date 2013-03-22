@@ -15,7 +15,7 @@ function Server() {
 Server.prototype.init = function(sconf, callback) {
 	var that = this;
 	this.config = sconf;
-
+	this.authCallbacks = [];
 	try {// for test
 		if (Sessions) {
 			for ( var id in Sessions) {
@@ -649,7 +649,12 @@ Server.prototype.receiveData = function(data, session) {
 };
 
 Server.prototype.setAuthCallback = function(callback) {
-	this.authCallback = callback;
+	this.authCallbacks = [];
+	this.authCallbacks.push(callback);
+};
+
+Server.prototype.addAuthCallback = function(callback){
+	this.authCallbacks.push(callback);
 };
 
 Server.prototype.setTransactionHandler = function(func) {
@@ -666,6 +671,7 @@ Server.prototype.onAuth = function(req, res) {
 	// if(!req.isAuthenticated()){
 	// Server.instance.onIFrameAuth(req.data.);
 	// }
+	var that = Server.instance;
 	var userId;
 	var et = Date.now();
 	if (req.session.iFrameAuth) {
@@ -680,94 +686,61 @@ Server.prototype.onAuth = function(req, res) {
 			}
 		}
 	}
-	console.log("111111111111111: ", Date.now() - et);
+	
+	function runAuthCallbacks(session, cb){
+		var walker = function(index){
+			return function(){
+				process.nextTick(function(){
+					if(index < that.authCallbacks.length){
+						that.authCallbacks[index](session, walker(index+1));
+					}else{
+						if(cb){
+							cb();
+						}
+					}
+				});
+			};
+			
+		};
+		walker(0)();
+	}
+	
+//	console.log("111111111111111: ", Date.now() - et);
 	// console.log("\nAuth request from user : ", userId);
-	et = Date.now();
 	var session = Server.instance.getSession(userId);
-	console.log("22222222222222222: ", Date.now() - et);
+//	console.log("22222222222222222: ", Date.now() - et);
 	if (session) {
 		// console.log("Found previous session with userId: ", userId);
-		if (Server.instance.authCallback) {
-			process.nextTick(function() {
-				Server.instance.authCallback(session, function() {
-					var obj = {
-						accountId : session.accountId,
-						userId : userId,
-						initUpdate : session.sendData(true)
-					};
-					res.end(JSON.stringify(obj));
-					console.log("Auth time:", Date.now() - entryTime);
-				});
-			});
-		} else {
-			process.nextTick(function() {
-				var obj = {
+		runAuthCallbacks(session, function() {
+			var obj = {
 					accountId : session.accountId,
 					userId : userId,
 					initUpdate : session.sendData(true)
 				};
-				et = Date.now();
 				res.end(JSON.stringify(obj));
-				console.log("Res end time: ", Date.now() - et);
-				console.log("Auth time:", Date.now() - entryTime);
 			});
-		}
 
 		return;
 	}
 	et = Date.now();
 	var session = new Session();
-	console.log("33333333333333333333: ", Date.now() - et);
+//	console.log("33333333333333333333: ", Date.now() - et);
 
 	et = Date.now();
-	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
+//	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
 	session.init({
 		"userId" : userId,
 		"authClient" : Server.instance.client,
 		// "initData": req.session.initData,
 		"callback" : (function() {
-			process.nextTick(function() {
-				console.log("444444444444444444: ", Date.now() - et);
-				var et2 = Date.now();
-				// res.writeContinue();
-				console.log("Created Account with ID: ", session.accountId);
-				console.log("Auth complete!");
-
-				// Server.instance.logEntities("On auth");
-				// Server.instance.logCache("On auth");
-				if (Server.instance.authCallback) {
-					process.nextTick(function() {
-
-						Server.instance.authCallback(session, function() {
-							var obj = {
-								accountId : session.accountId,
-								userId : userId,
-								initUpdate : session.sendData(true)
-							};
-							et = Date.now();
-							res.end(JSON.stringify(obj));
-							console.log("AAAAAAAAAAAAAAAAA: ", Date.now() - et);
-							console.log("Auth time:", Date.now() - entryTime);
-							console.log("555555555555555555555 ", Date.now() - et2);
-						});
-					});
-				} else {
-					process.nextTick(function() {
-
-						var obj = {
-							accountId : session.accountId,
-							userId : userId,
-							initUpdate : session.sendData(true)
-						};
-
-						res.end(JSON.stringify(obj));
-						console.log("AAAAAAAAAAAAAAAAA: ", Date.now() - et);
-						console.log("Auth time:", Date.now() - entryTime);
-						console.log("555555555555555555555 ", Date.now() - et2);
-					});
-				}
-
-			});
+			runAuthCallbacks(session, function() {
+				var obj = {
+						accountId : session.accountId,
+						userId : userId,
+						initUpdate : session.sendData(true)
+					};
+					res.end(JSON.stringify(obj));
+				});
 
 		})
 	});
