@@ -3,10 +3,9 @@ var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
-var ENABLE_REMOTE_CONSOLE = true;
+var ENABLE_REMOTE_CONSOLE = false;
 var DISABLE_CONSOLE = false;
 //reseting log on logserver
-//try{
 	var consoleUrl = "http://127.0.0.1:8765/";
 	console.log("Connecting to console server");
 	if(ENABLE_REMOTE_CONSOLE){
@@ -63,9 +62,6 @@ var DISABLE_CONSOLE = false;
 		}
 
 	};
-//}catch(err){
-//	console.log(err);
-//}
 
 
 //exception handling
