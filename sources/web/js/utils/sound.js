@@ -61,6 +61,7 @@ var Sound = (function() {
 			if (!this.soundBuffers[id])
 				return;
 
+			console.log("SPRITES",this.sprites);
 			var ch = this.getChannel(channel);
 			var sound = this.soundBuffers[id];
 			var sndInstance = {
@@ -90,13 +91,13 @@ var Sound = (function() {
 				});
 			}
 		},
-		init : function(name, forceSprite) {// use when only one spriteis needed
+		init : function(name, forceSprite) {
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
 				console.log("INIT");
 				this.instance.loadSound(name, function(buf) {
-					that.sprite = buf;
+					that.sprites[name] = buf;
 					//set initial mute state
 					Sound.turnOn(Sound.isOn());
 				});

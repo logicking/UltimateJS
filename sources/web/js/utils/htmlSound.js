@@ -5,6 +5,7 @@
 var htmlSound = function() {
 	this.soundOffset = 0;
 	this.mp3offset = -0.05;
+	this.audioSpriteInstance = {};
 	
 
 	this.startTime = 0;
@@ -13,19 +14,19 @@ var htmlSound = function() {
 
 htmlSound.prototype.play = function(sndInst, callback) {
 	var that = this;
-
-	if (this.audioSpriteInstance == null) {
+	console.log("SND INST",sndInst, "SPRITE",  this.audioSpriteInstance);
+	if (this.audioSpriteInstance[sndInst.spriteName] == null) {
 		return;
 	}
 	
 	this.stopCallback = callback;
-	var audio = this.audioSpriteInstance; 
+	var audio = this.audioSpriteInstance[sndInst.spriteName]; 
 	audio.pause();
 	
 	that.startTime = sndInst.offset + this.soundOffset;
 	that.endTime = that.startTime + sndInst.duration;
 	audio.currentTime = that.startTime;
-	
+	console.log("PPPPPPPPLLLLLLLLLAAAAAAAAYYYYYYY!")
 	audio.play();
 
 	
@@ -46,20 +47,20 @@ htmlSound.prototype.stop = function() {
 	if (this.audioSpriteInstance == null) {
 		return;
 	}
+	$['each'](this.audioSpriteInstance, function(index, value){
+		if(index == "muted") return;
+		value.pause();
+	});
 
-//	if (this.audioSpriteTimeoutHandler) {
-//		clearTimeout(this.audioSpriteTimeoutHandler);
-//		audioSpriteTimeoutHandler = null;
-//	}
-	this.audioSpriteInstance.pause();
+//	this.audioSpriteInstance.pause();
 };
 
 htmlSound.prototype.mute = function() {
 	if (this.audioSpriteInstance == null) {
 		return;
 	}
-
 	this.audioSpriteInstance.muted = true;
+	this.stop();
 };
 
 htmlSound.prototype.unmute = function() {
@@ -91,17 +92,16 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	var that = this;
 	if (callback) {
 		audio.addEventListener('canplaythrough', function() {
-			that.audioSpriteInstance = audio;
-			callback(that.audioSpriteInstance);
+			that.audioSpriteInstance[audioSpriteName] = audio;
+			console.log("AUDIO SPRITE INST", that.audioSpriteInstance);
+			callback(that.audioSpriteInstance[audioSpriteName]);
 		}, false);
-		
 		audio.addEventListener('timeupdate', function() {
-			console.log(that.audioSpriteInstance.currentTime, that.endTime);
-			
-			if(that.audioSpriteInstance.currentTime < that.startTime) {
-				that.audioSpriteInstance.currentTime = that.startTime;
+			console.log(that.audioSpriteInstance[audioSpriteName].currentTime, that.endTime);
+			if(that.audioSpriteInstance[audioSpriteName].currentTime < that.startTime) {
+				that.audioSpriteInstance[audioSpriteName].currentTime = that.startTime;
 			}
-			if(that.audioSpriteInstance.currentTime >= that.endTime) {
+			if(that.audioSpriteInstance[audioSpriteName].currentTime >= that.endTime) {
 				that.stop();
 				if (that.stopCallback) {
 					that.stopCallback();
@@ -109,6 +109,6 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 			}
 		}, false);
 	} else {
-		that.audioSpriteInstance = audio;
+		that.audioSpriteInstance[audioSpriteName] = audio;
 	}
 };

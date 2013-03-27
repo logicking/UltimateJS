@@ -37,7 +37,9 @@ GuiButton.prototype.initialize = function(params) {
 
 	this.params = params;
 	var that = this;
-	this.label = {};
+	this.label = {
+			"hide" : false
+	};
 	var labelParams;
 	var normalParams = {};
 	// this.$()['css']("border", "solid");
@@ -156,7 +158,7 @@ GuiButton.prototype.initialize = function(params) {
 			}
 
 			that.currentLabel = label;
-			if (that.currentLabel) {
+			if (that.currentLabel && that.label.hide === false) {
 				that.currentLabel.show();
 			}
 			if (oldCurrentLabel) {
@@ -216,18 +218,29 @@ GuiButton.prototype.initialize = function(params) {
 
 GuiButton.prototype.changeLabel = function(text) {
 	$['each'](this.label, function(index, value) {
+		if(index == "hide"){
+			return;
+		}
 		value.change(text);
 	});
 };
 
 GuiButton.prototype.hideLabel = function() {
+	this.label.hide = true;
 	$['each'](this.label, function(index, value) {
+		if(index == "hide"){
+			return;
+		}
 		value.hide();
 	});
 };
 
 GuiButton.prototype.showLabel = function() {
+	this.label.hide = false;
 	$['each'](this.label, function(index, value) {
+		if(index == "hide"){
+			return;
+		}
 		value.show();
 	});
 };
@@ -353,9 +366,6 @@ GuiButton.prototype.highlight = function(isOn) {
 
 };
 
-GuiButton.prototype.resize = function() {
-
-};
 
 GuiButton.prototype.resize = function() {
 	GuiButton.parent.resize.call(this);
