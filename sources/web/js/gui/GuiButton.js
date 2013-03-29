@@ -38,8 +38,15 @@ GuiButton.prototype.initialize = function(params) {
 	this.params = params;
 	var that = this;
 	this.label = {
-			"hide" : false
+		"hide" : false
 	};
+
+	if (params['active'] === false) {
+		this.active = false;
+	} else {
+		this.active = true;
+	}
+
 	var labelParams;
 	var normalParams = {};
 	// this.$()['css']("border", "solid");
@@ -58,9 +65,6 @@ GuiButton.prototype.initialize = function(params) {
 					x : params['x'] ? params['x'] : "50%",
 					y : params['y'] ? params['y'] : "50%"
 				});
-
-		// image.$()['css']("border", "solid");
-		// image.$()['css']("border-color", "black");
 
 		that.children.addGui(image);
 
@@ -214,11 +218,25 @@ GuiButton.prototype.initialize = function(params) {
 			that.activeState = result.callback;
 		}
 	}
+	// passive state (button cannot be clicked)
+	if (params['passive']) {
+		passiveParams = params['passive'];
+		var resultPassive = prepareButtonState(params['passive']);
+		that.label['passive'] = resultPassive.label;
+		that.imagePassive = resultPassive.image;
+		that.passiveState = function() {
+			resultPassive.callback.call(that);
+			that.clickAllowed = false;
+		};
+		if (!that.active) {
+			that.passiveState.call(that);
+		}
+	}
 };
 
 GuiButton.prototype.changeLabel = function(text) {
 	$['each'](this.label, function(index, value) {
-		if(index == "hide"){
+		if (index == "hide") {
 			return;
 		}
 		value.change(text);
@@ -228,7 +246,7 @@ GuiButton.prototype.changeLabel = function(text) {
 GuiButton.prototype.hideLabel = function() {
 	this.label.hide = true;
 	$['each'](this.label, function(index, value) {
-		if(index == "hide"){
+		if (index == "hide") {
 			return;
 		}
 		value.hide();
@@ -238,7 +256,7 @@ GuiButton.prototype.hideLabel = function() {
 GuiButton.prototype.showLabel = function() {
 	this.label.hide = false;
 	$['each'](this.label, function(index, value) {
-		if(index == "hide"){
+		if (index == "hide") {
 			return;
 		}
 		value.show();
@@ -257,8 +275,18 @@ GuiButton.prototype.bind = function(pushFunction) {
 	this.clickAllowed = false;
 	this.unbind();
 	if (this.hoverState && !Device.isTouch()) {
-		this.jObject.bind("mouseenter.guiElementEvents", this.hoverState);
-		this.jObject.bind("mouseleave.guiElementEvents", this.normalState);
+		this.jObject.bind("mouseenter.guiElementEvents", function() {
+			if(!that.active){
+				return;
+			}
+			that.hoverState();
+		});
+		this.jObject.bind("mouseleave.guiElementEvents", function(){
+			if(!that.active){
+				return;
+			}
+			that.normalState();
+		});
 	}
 
 	if (pushFunction) {
@@ -268,13 +296,13 @@ GuiButton.prototype.bind = function(pushFunction) {
 			: this.normalState;
 
 	var callbackCaller = function(event) {
+		if (!that.active)
+			return;
 		if (that.isEnabled()) {
 			if (that.clickAllowed) {
 				if (that.pushFunction) {
 					var name = event.currentTarget.getAttribute("name");
 					if (name) {
-						console.log("MY NAME IS ", name);
-						console.log("event: ", event);
 						if (name == "screen") {
 							Recorder.recordAction("clickedAt", name, {
 								x : event.offsetX,
@@ -295,12 +323,16 @@ GuiButton.prototype.bind = function(pushFunction) {
 	if (this.activeState) {
 		if (!Device.isTouch()) {
 			this.jObject.bind("mousedown", function() {
+				if (!that.active)
+					return;
 				that.activeState.call(that);
 				that.clickAllowed = true;
 			});
 			this.jObject.bind("mouseup", callbackCaller);
 		} else {
 			this.jObject.bind("touchstart", function() {
+				if (!this.active)
+					return;
 				that.activeState.call(that);
 				that.clickAllowed = true;
 				that.backedToNormal = false;
@@ -308,6 +340,8 @@ GuiButton.prototype.bind = function(pushFunction) {
 			this.jObject.bind("touchend", callbackCaller);
 			this.jObject.bind("touchmove",
 					function(e) {
+						if (!that.active)
+							return;
 						if (that.backedToNormal) {
 							return;
 						}
@@ -340,6 +374,9 @@ GuiButton.prototype.changeButtonBackgrounds = function(params, idx) {
 	if (this.imageActive) {
 		this.imageActive.setBackgroundFromParams(params, idx);
 	}
+	if (this.imagePassive) {
+		this.imagePassive.setBackgroundFromParams(params, idx);
+	}
 };
 
 // show or hides background
@@ -348,7 +385,8 @@ GuiButton.prototype.highlight = function(isOn) {
 	if (this.params['highlight']) {
 		if (isOn) {
 			this.img = this.params['background']['image'];
-			this.setBackground(this.params['highlight']['image']);
+			this.setBackground(Resources
+					.getImage(this.params['highlight']['image']));
 			this.backgroundShown = isOn;
 			this.showBackground();
 		} else {
@@ -366,6 +404,22 @@ GuiButton.prototype.highlight = function(isOn) {
 
 };
 
+GuiButton.prototype.isActive = function() {
+	return this.active;
+};
+
+GuiButton.prototype.activate = function(isActive) {
+	if(!this.params['passive']){
+		return;
+	}
+	if (isActive === false) {
+		this.passiveState.call(this);
+		this.active = false;
+	} else {
+		this.active = true;
+		this.normalState.call(this);
+	}
+};
 
 GuiButton.prototype.resize = function() {
 	GuiButton.parent.resize.call(this);
