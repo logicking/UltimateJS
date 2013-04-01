@@ -6,6 +6,7 @@ var Loader = (function() {
 	var firstTimeHide = true;
 	var isShowed = true;
 	var loadingStateText;
+	var loadingStateStroke = null;
 	var loadingMsg = document['getElementById']("loadingMsg");
 	if (loadingMsg) {
 		loadingMsg['style']['zIndex'] = "9999";
