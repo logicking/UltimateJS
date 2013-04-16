@@ -12,6 +12,7 @@ var Sound = (function() {
 				playing : null
 			}
 		},
+		spriteName : null,
 		sprite : {},
 		sprites : {},
 		forceSprite : false,
@@ -50,18 +51,19 @@ var Sound = (function() {
 		add : function(id, offset, duration, spriteName, priority) {
 			// if (this.forceSprite) {
 			this.soundBuffers[id] = {
-				priority : priority ? priority : 0,
+				priority : (priority ? priority : 0),
 				offset : offset,
-				spriteName : spriteName ? spriteName : id,
+				spriteName : (spriteName ? spriteName : this.spriteName),
 				duration : duration
 			};
+//			console.log("BUBUBUBDUHFMASDGBFKADBSFKADKJHFGDM"+id, this.soundBuffers[id]);
 			// }
 		},
 		play : function(id, loop, priority, channel) {
 			if (!this.soundBuffers[id])
 				return;
 
-			console.log("SPRITES",this.sprites);
+//			console.log("SPRITES",this.sprites);
 			var ch = this.getChannel(channel);
 			var sound = this.soundBuffers[id];
 			var sndInstance = {
@@ -94,8 +96,11 @@ var Sound = (function() {
 		init : function(name, forceSprite) {
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
+			if(!this.spriteName){
+				this.spriteName = name;
+			}
 			if (this.forceSprite) {
-				console.log("INIT");
+//				console.log("INIT");
 				this.instance.loadSound(name, function(buf) {
 					that.sprites[name] = buf;
 					//set initial mute state
