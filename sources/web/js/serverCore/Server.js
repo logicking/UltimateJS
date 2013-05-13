@@ -2,8 +2,8 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 2 * 60 * 1000;
-
+var CACHE_LIFETIME = 15 * 60 * 1000;
+ 
 function Server() {
 	var fileServer = null;
 	this.client = null;
@@ -87,9 +87,11 @@ Server.prototype.init = function(sconf, callback) {
 		// console.log('(Re)Created Tables entity_data and users_accounts');
 
 		this.addCommand("switchState", function(args, session, callback) {
-			var et = Date.now();
+//			var et = Date.now();
+			
+			//args[0] - id of current state, args[1] - new state's id
 			var curState = Server.instance.getEntity(session, args[0], null, true);
-			console.log("Get CUrrent state time: ____________", Date.now() - et);
+//			console.log("Get CUrrent state time: ____________", Date.now() - et);
 			// parentId;
 			if (!session) {
 				callback({
@@ -112,16 +114,24 @@ Server.prototype.init = function(sconf, callback) {
 				});
 				return;
 			}
-			et = Date.now();
+//			et = Date.now();
+
+
+			Server.instance.getEntity(null, session.accountId, function(account){
+				if(args[0] == account.initialState){
+					account.recActivity("LE");
+				}
+				
+			});
 			curState.setParent(null);
-			console.log("Current state setPArent(null) time: ____________", Date.now() - et);
+//			console.log("Current state setPArent(null) time: ____________", Date.now() - et);
 			// console.log("CurrentState(id=%s) has parent with id=%s",
 			// curState.id, parentId);
 			// curState.setParent(null);
 			// Server.instance.removeEntity(curState.id, true);
 			et = Date.now();
 			Server.instance.getEntity(session, args[1], function(entity) {
-				console.log("Get new State Time: _____________", Date.now() - et);
+//				console.log("Get new State Time: _____________", Date.now() - et);
 				entity.setParent(parentId);
 				// console.log("NewState's parent: ", getParentId(entity));
 				// console.log("OldState's parent: ", getParentId(curState));
@@ -132,7 +142,7 @@ Server.prototype.init = function(sconf, callback) {
 				// function(){4
 				et = Date.now();
 				var changes = session.popChanges();
-				console.log("Pop changes time: _____________", Date.now() - et);
+//				console.log("Pop changes time: _____________", Date.now() - et);
 				// Server.instance.logEntities("after switchState");
 				// Server.instance.logCache("after switchState");
 				callback(changes);
@@ -245,7 +255,7 @@ Server.prototype.killCached = function(id) {
 // adds single entity(without children)
 Server.prototype.addToCache = function(entity) {
 	var cache = Server.instance.cache, id = entity.id;
-	// entity.log(" adding to cache.");
+	 entity.log(" adding to cache.");
 	// entity.logChildren("on addToCache");
 	// case of overwriting(there is an old instance of entity in cache)
 	if (cache[id])
@@ -290,9 +300,9 @@ Server.prototype.resetCacheTimeout = function(entity) {
 		if (entity.timeoutId) {
 			global.clearTimeout(entity.timeoutId);
 		}
-		// console.log("Resetting timeout for entity with id=%s", entity.id);
+//		 console.log("Resetting timeout for entity with id=%s", entity.id);
 		entity.timeoutId = global.setTimeout(function() {
-			// console.log("\nKilling entity(id=%s)", entity.id);
+			console.log("Killing entity(id=%s)", entity.id);
 			Server.instance.killCached(entity.id);
 		}, CACHE_LIFETIME);
 	};
@@ -345,8 +355,7 @@ Server.prototype.getCache = function(id, listener) {
 	var parentId = getParentId(entity);
 	if (parentId && this.isInEntities(parentId)) {
 		var parent = this.entities[parentId];
-		// console.log("Adding child to entity on getCache to parent(id=%s)",
-		// parentId);
+		// console.log("Adding child to entity on getCache to parent(id=%s)", parentId);
 		parent.addChild(entity);
 	}
 
@@ -358,7 +367,7 @@ Server.prototype.getCache = function(id, listener) {
 		}
 		addedList.push(parent);
 		Server.instance.addEntityInstance(parent, listener);
-		// parent.log("setting as active");
+		 parent.log(" setting as active");
 		// parent.logChildren("on getCache byParent");
 		delete cache[parent.id];
 		if (parent.children) {
@@ -754,11 +763,22 @@ Server.prototype.onCommunicate = function(req, res, next) {
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if (req.user.provider == "facebook") {
-			userId = req.user.id;
-		}
-		if (req.user.provider == "vkontakte") {
-			userId = req.user.uid;
+		if(req.provider){
+			if (req.user.provider == "facebook") {
+				userId = req.user.id;
+			}
+			if (req.user.provider == "vkontakte") {
+				userId = req.user.uid;
+			}
+		}else{
+			console.log("WRONG req.session: ", req.session);
+			res.json({
+				error : {
+					description : "Wrong cookie",
+					code : 2
+				}
+			});
+			return;
 		}
 	}
 	var session = Server.instance.getSession(userId);
@@ -814,13 +834,13 @@ Server.prototype.onCommand = function(req, res, next) {
 
 	var json = req.body;
 	var command = json['command'], args = json['args'];
-	console.log("Command: %s: ", command, "; from user: ", userId);
+	
 	Server.instance.executeCommand(command, args, session, function(result) {
 		// EntityManager.instance.backupAllEntities(Server.instance.entities,
 		// function(){
 		//
 		// });
-		console.log("Command execution time: ", Date.now() - entryTime);
+		console.log("Command: %s; from user: %s; execution time=%s", command, userId, Date.now() - entryTime+ "");
 		res.json(result);
 	});
 };

@@ -294,9 +294,9 @@ EntityManager.prototype.getAccountIdsByUserIds = function(ids, callback){
 		return;
 	}
 	if(ids.length > 50){
-		console.log("ids length before: ", ids.length);
+//		console.log("ids length before: ", ids.length);
 		var ids50 = ids.splice(0, 50);
-		console.log("ids length after: ", ids.length);
+//		console.log("ids length after: ", ids.length);
 		that.getAccountIdsByUserIds(ids50, function(srows){
 			if(srows){
 				rows = rows.concat(srows);
@@ -318,10 +318,8 @@ EntityManager.prototype.getAccountIdsByUserIds = function(ids, callback){
 		}
 	}
 //	console.log("QueryString: ", queryString);
-	console.log("======getAccountIdsByUserIds executive call.========");
 	var query = this.eClient.query(queryString, ids);
 	query.on("error", function(error){
-		console.log("Get Account Ids error happened");
 		console.log(error);
 		if(callback){
 			callback(null);

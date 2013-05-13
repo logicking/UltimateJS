@@ -45,7 +45,8 @@ Session.prototype.init = function(params){
 					console.log("get Account entity time: ", Date.now() - et);
 					Server.instance.addSession(that);
 					account.userId = that.userId;
-					that.account = account;
+					account.userLogin = true;
+					account.recActivity("SI");// for stat
 //					console.log("Set userId to account on session init");
 					et = Date.now();
 					Server.instance.restoreFromCache(account.id, that);
@@ -84,10 +85,10 @@ Session.prototype.init = function(params){
 //				}
 				Server.instance.addSession(that);
 				account.userId = that.userId;
+				account.userLogin = true;
 				et = Date.now();
 				Server.instance.restoreFromCache(account.id, that);
 				console.log("Restore from cache time: ", Date.now() - et);
-				that.account = account;
 				that.reportActivity();
 				if(callback){
 					callback();
@@ -122,7 +123,7 @@ Session.prototype.setInitData = function(initData){
 
 Session.prototype.sendData = function(initUpdate){
 	var entities = Server.instance.entities;
-	var data = this.popChanges();
+	var data =  this.popChanges();
 	var entity;
 	if(initUpdate){
 		//preparation for sending entities info on server to client
@@ -213,7 +214,11 @@ Session.prototype.destroy = function(){
 	var session = this;
 	Server.instance.removeSession(session.userId);
 //	console.log("Killing session (", session.userId, ")");
+	Server.instance.getEntity(null, session.accountId, function(account){
+		account.recActivity("SD");// for stat
+	});
 	Server.instance.removeEntity(session.accountId, true);
+	
 //	Server.instance.logEntities("After session destroy");
 //	Server.instance.logCache("After session destroy");
 	//session.suicide();

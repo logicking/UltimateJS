@@ -1,6 +1,6 @@
 /*
  *  Entity is a main logic item of simulation. 
- *  Entities is a mirroring of server object on client. 
+ *  Entities are a mirroring of server object on client. 
  */
 
 /**
