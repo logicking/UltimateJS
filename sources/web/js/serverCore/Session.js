@@ -122,7 +122,7 @@ Session.prototype.setInitData = function(initData){
 
 Session.prototype.sendData = function(initUpdate){
 	var entities = Server.instance.entities;
-	var data =  this.popChanges();
+	var data = this.popChanges();
 	var entity;
 	if(initUpdate){
 		//preparation for sending entities info on server to client

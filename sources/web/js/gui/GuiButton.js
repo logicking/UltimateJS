@@ -283,6 +283,7 @@ GuiButton.prototype.bind = function(pushFunction) {
 		});
 		this.jObject.bind("mouseleave.guiElementEvents", function(){
 			if(!that.active){
+				that.passiveState();//temporary hack
 				return;
 			}
 			that.normalState();
@@ -413,11 +414,11 @@ GuiButton.prototype.activate = function(isActive) {
 		return;
 	}
 	if (isActive === false) {
-		this.passiveState.call(this);
+		this.passiveState();
 		this.active = false;
 	} else {
 		this.active = true;
-		this.normalState.call(this);
+		this.normalState();
 	}
 };
 

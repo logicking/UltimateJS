@@ -202,7 +202,6 @@ Account.prototype.setEnable = function(isTrue) {
 // screen resize
 Account.prototype.resize = function() {
 	if (this.backgroundState) {
-		console.log("baCKGROUND RESIZE");
 		this.backgroundState.resize();
 	}
 	if (this.children == null)
@@ -212,7 +211,6 @@ Account.prototype.resize = function() {
 			entity.resize();
 		}
 	});
-	// console.log(this);
 };
 
 /*

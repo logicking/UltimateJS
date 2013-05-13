@@ -68,5 +68,4 @@ Scene.prototype.move = function(dx, dy, parallaxDepth) {
 	}
 
 	visual.move(dx, dy);
-	//visual.resize();
 };

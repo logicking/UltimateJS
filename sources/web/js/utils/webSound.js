@@ -2,6 +2,7 @@
 var WebSound = function(context) {
 	this.context = context;
 	this.volume = 1;
+	this.fade = false;
 };
 
 WebSound.prototype.play = function(sndInst, callback) {
@@ -9,10 +10,10 @@ WebSound.prototype.play = function(sndInst, callback) {
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
 	sndInst.source.connect(this.context.destination);
-	console.log("SOUND BUFF", sndInst.buffer);
+//	console.log("SOUND BUFF", sndInst.buffer);
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
-	sndInst.source.gain.value = this.volume;
+	sndInst.source.gain.value = sndInst.volume?sndInst.volume:this.volume;
 	sndInst.source.noteGrainOn(0, sndInst.offset, sndInst.duration);
 	var buf = sndInst.buffer;
 	if (!sndInst.loop) {
@@ -38,6 +39,42 @@ WebSound.prototype.mute = function() {
 
 WebSound.prototype.unmute = function() {
 	this.volume = 1;
+};
+
+WebSound.prototype.fadeOut = function(sndInst) {
+	if(this.fade){
+		return;
+	}
+	this.fade = true;
+	var that = this;
+	if (sndInst) {
+		var int = setInterval(function(){
+			if(sndInst.source.gain.value >= 0.01){
+				sndInst.source.gain.value -= 0.05;
+			}else{
+				that.fade = false;
+				clearInterval(int);
+			}
+		},10);
+	}
+};
+
+WebSound.prototype.fadeIn = function(sndInst) {
+	if(this.fade){
+		return;
+	}
+	this.fade = true;
+	var that = this;
+	if (sndInst) {
+		var int = setInterval(function(){
+			if(sndInst.source.gain.value <= sndInst.volume){
+				sndInst.source.gain.value += 0.05;
+			}else{
+				that.fade = false;
+				clearInterval(int);
+			}
+		},10);
+	}
 };
 
 WebSound.prototype.loadSprite = function(name, callback) {

@@ -6,7 +6,7 @@ var htmlSound = function() {
 	this.soundOffset = 0;
 	this.mp3offset = -0.05;
 	this.audioSpriteInstance = {};
-	
+	this.fade = false;
 
 	this.startTime = 0;
 	this.endTime = 0;
@@ -28,18 +28,6 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	audio.currentTime = that.startTime;
 	console.log("PPPPPPPPLLLLLLLLLAAAAAAAAYYYYYYY!")
 	audio.play();
-
-	
-
-//	this.audioSpriteTimeoutHandler = setTimeout(audioSpriteEndCallback,
-//			sndInst.duration * 1000);
-//
-//	audioSpriteEndCallback = function() {
-//		that.stop();
-//		if (callback) {
-//			callback();
-//		}
-//	};
 
 };
 
@@ -68,6 +56,22 @@ htmlSound.prototype.unmute = function() {
 		return;
 	}
 	this.audioSpriteInstance.muted = false;
+};
+
+htmlSound.prototype.fadeIn = function() {
+	if(this.fade){
+		return;
+	}
+	this.fade = true;
+
+};
+
+htmlSound.prototype.fadeOut = function() {
+	if(this.fade){
+		return;
+	}
+	this.fade = true;
+	
 };
 
 htmlSound.prototype.loadSound = function(audioSpriteName, callback) {

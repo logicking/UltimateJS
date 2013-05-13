@@ -29,9 +29,8 @@ GuiElement.prototype.generate = function(src) {
 GuiElement.prototype.create = function(src) {
 	// initial parent set
 
-	// console.log("Creating item with id %s, src = %s and classname = %s",
-	// this.id, src, this.className);
-
+//	 console.log("Creating item with id %s, src = %s and classname = %s",
+//	 this.id, src, this.className);
 	if (!this.setParent(this.parent)) {
 		// if no parent provided assigning to the body object
 		this.setParent($("body"));
@@ -490,7 +489,9 @@ GuiElement.prototype.remove = function() {
 
 	// console.log("Removing item with id %s, classname = %s", this.id,
 	// this.className);
-
+	if(this.tooltip){
+		this.tooltip.remove();
+	}
 	this.children.remove();
 	this.jObject['remove']();
 };

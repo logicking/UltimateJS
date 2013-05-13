@@ -6,12 +6,15 @@ var Sound = (function() {
 	var snd = {
 		channels : {
 			"default" : {
-				playing : null
+				playing : null,
+				volume : 1
 			},
 			"back" : {
-				playing : null
+				playing : null,
+				volume : 0.3
 			}
 		},
+		channelCount : 2,
 		spriteName : null,
 		sprite : {},
 		sprites : {},
@@ -51,44 +54,68 @@ var Sound = (function() {
 		add : function(id, offset, duration, spriteName, priority) {
 			// if (this.forceSprite) {
 			this.soundBuffers[id] = {
-				priority : (priority ? priority : 0),
+				priority : priority ? priority : 0,
 				offset : offset,
-				spriteName : (spriteName ? spriteName : this.spriteName),
+				spriteName : spriteName ? spriteName : id,
 				duration : duration
 			};
-//			console.log("BUBUBUBDUHFMASDGBFKADBSFKADKJHFGDM"+id, this.soundBuffers[id]);
 			// }
 		},
 		play : function(id, loop, priority, channel) {
-			if (!this.soundBuffers[id])
+			if (!this.soundBuffers[id]){
 				return;
+			}
+			var callback = null;
 
-//			console.log("SPRITES",this.sprites);
 			var ch = this.getChannel(channel);
 			var sound = this.soundBuffers[id];
+			 if (typeof loop === 'function') {
+				 callback = loop;
+				 loop = false;
+			 }
 			var sndInstance = {
 				id : id,
 				priority : priority ? priority : sound.priority,
 				loop : loop ? true : false,
 				offset : sound.offset,
+				volume : ch.volume,
 				duration : sound.duration,
 				spriteName : sound.spriteName,
 				buffer : this.sprites[sound.spriteName] ? this.sprites[sound.spriteName]
 						: this.sprite
 			};
 			if (ch.playing != null) {
-				if (ch.playing.priority > sndInstance.priority) {
-					return;
-				} else {
-					this.instance.stop(ch.playing);
-					ch.playing = sndInstance;
-					this.instance.play(sndInstance, function() {
-						ch.playing = null;
-					});
-				}
+				var num = this.channelCount++;
+				this.channels["channel"+num] = {
+						playing : null,
+						volume : 1
+				};
+				ch.playing = sndInstance;
+				this.instance.play(sndInstance, function() {
+					if(callback){
+						callback();
+					}
+					ch.playing = null;
+				});
+				
+//				if (ch.playing.priority > sndInstance.priority) {
+//					return;
+//				} else {
+//					this.instance.stop(ch.playing);
+//					ch.playing = sndInstance;
+//					this.instance.play(sndInstance, function() {
+//						if(callback){
+//							callback();
+//						}
+//						ch.playing = null;
+//					});
+//				}
 			} else {
 				ch.playing = sndInstance;
 				this.instance.play(sndInstance, function() {
+					if(callback){
+						callback();
+					}
 					ch.playing = null;
 				});
 			}
@@ -96,10 +123,8 @@ var Sound = (function() {
 		init : function(name, forceSprite) {
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
-			if(!this.spriteName){
-				this.spriteName = name;
-			}
 			if (this.forceSprite) {
+
 //				console.log("INIT");
 				this.instance.loadSound(name, function(buf) {
 					that.sprites[name] = buf;
@@ -107,6 +132,24 @@ var Sound = (function() {
 					Sound.turnOn(Sound.isOn());
 				});
 			}
+		},
+		fadeIn : function(channel) {
+//			console.log("SOUND.fadeIn.", channel);
+			var that = this;
+			var playing = this.getChannel(channel).playing;
+			if(!playing){
+				return;
+			}
+			this.instance.fadeIn(playing);
+		},
+		fadeOut : function(channel) {
+//			console.log("SOUND.fadeOut.", channel);
+			var that = this;
+			var playing = this.getChannel(channel).playing;
+			if(!playing){
+				return;
+			}
+			this.instance.fadeOut(playing);
 		},
 		addSprite : function(name) {
 			var that = this;
