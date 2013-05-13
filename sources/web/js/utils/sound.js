@@ -62,7 +62,7 @@ var Sound = (function() {
 			// }
 		},
 		play : function(id, loop, priority, channel) {
-			if (!this.soundBuffers[id]){
+			if (!this.soundBuffers[id] || !this.isOn()){
 				return;
 			}
 			var callback = null;
@@ -120,7 +120,7 @@ var Sound = (function() {
 				});
 			}
 		},
-		init : function(name, forceSprite) {
+		init : function(name, forceSprite, callback) {
 			var that = this;
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
@@ -130,6 +130,9 @@ var Sound = (function() {
 					that.sprites[name] = buf;
 					//set initial mute state
 					Sound.turnOn(Sound.isOn());
+					if(callback){
+						callback();
+					}
 				});
 			}
 		},
