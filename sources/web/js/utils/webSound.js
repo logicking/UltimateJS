@@ -41,39 +41,30 @@ WebSound.prototype.unmute = function() {
 	this.volume = 1;
 };
 
-WebSound.prototype.fadeOut = function(sndInst) {
-	if(this.fade){
-		return;
-	}
-	this.fade = true;
-	var that = this;
-	if (sndInst) {
-		var int = setInterval(function(){
-			if(sndInst.source.gain.value >= 0.01){
-				sndInst.source.gain.value -= 0.05;
-			}else{
-				that.fade = false;
-				clearInterval(int);
-			}
-		},10);
-	}
-};
 
-WebSound.prototype.fadeIn = function(sndInst) {
-	if(this.fade){
+WebSound.prototype.fadeTo = function(sndInst, time, volume) {
+	var fadeStep = 10;
+	if(this.fade == sndInst.id){
 		return;
 	}
-	this.fade = true;
+	this.fade = sndInst.id;
 	var that = this;
+	var dVol = volume - sndInst.source.gain.value;
+	if(dVol == 0){
+		return;
+	}
+	dVol /= time/fadeStep;
 	if (sndInst) {
+		this.fading = true;
 		var int = setInterval(function(){
-			if(sndInst.source.gain.value <= sndInst.volume){
-				sndInst.source.gain.value += 0.05;
+			if(Math.abs(sndInst.source.gain.value - volume) >= Math.abs(dVol)){
+				sndInst.source.gain.value += dVol;
 			}else{
+				sndInst.source.gain.value = volume;
 				that.fade = false;
 				clearInterval(int);
 			}
-		},10);
+		},fadeStep);
 	}
 };
 

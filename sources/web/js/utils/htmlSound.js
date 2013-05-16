@@ -19,60 +19,92 @@ htmlSound.prototype.play = function(sndInst, callback) {
 		return;
 	}
 	
-	this.stopCallback = callback;
-	var audio = this.audioSpriteInstance[sndInst.spriteName]; 
-	audio.pause();
+	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
+	spriteInst.stopCallback = callback;
+	spriteInst.audio.volume = sndInst.volume;
+	spriteInst.audio.pause();
 	
-	that.startTime = sndInst.offset + this.soundOffset;
-	that.endTime = that.startTime + sndInst.duration;
-	audio.currentTime = that.startTime;
-	console.log("PPPPPPPPLLLLLLLLLAAAAAAAAYYYYYYY!")
-	audio.play();
+	spriteInst.startTime = sndInst.offset + this.soundOffset;
+	spriteInst.endTime = spriteInst.startTime + sndInst.duration;
+	spriteInst.audio.currentTime = spriteInst.startTime;
+	spriteInst.audio.play();
 
 };
 
-htmlSound.prototype.stop = function() {
+htmlSound.prototype.stop = function(sndInst) {
 	if (this.audioSpriteInstance == null) {
 		return;
 	}
-	$['each'](this.audioSpriteInstance, function(index, value){
-		if(index == "muted") return;
-		value.pause();
-	});
-
+	if(sndInst){
+		if(!this.audioSpriteInstance[sndInst.spriteName]){
+			return;
+		}
+		this.audioSpriteInstance[sndInst.spriteName].audio.pause();
+	}else{
+		console.log("STOP ALL CHANNELS");
+		$['each'](this.audioSpriteInstance, function(index, value){
+			value.audio.pause();
+		});
+	}
 //	this.audioSpriteInstance.pause();
 };
 
-htmlSound.prototype.mute = function() {
+htmlSound.prototype.mute = function(channel) {
 	if (this.audioSpriteInstance == null) {
 		return;
 	}
-	this.audioSpriteInstance.muted = true;
+	if(channel){
+		this.audioSpriteInstance[channel.playing.spriteName].audio.muted = true;
+	}else{
+		$['each'](this.audioSpriteInstance, function(index, value){
+			value.audio.muted = true;
+		});
+	}
 	this.stop();
 };
 
-htmlSound.prototype.unmute = function() {
+htmlSound.prototype.unmute = function(channel) {
 	if (this.audioSpriteInstance == null) {
 		return;
 	}
-	this.audioSpriteInstance.muted = false;
+	if(channel){
+		this.audioSpriteInstance[channel.playing.spriteName].audio.muted = false;
+	}else{
+		$['each'](this.audioSpriteInstance, function(index, value){
+			value.audio.muted = false;
+		});
+	}
 };
 
-htmlSound.prototype.fadeIn = function() {
-	if(this.fade){
+htmlSound.prototype.fadeTo = function(sndInst, time, volume) {
+	var fadeStep = 10;
+	if(this.fade == sndInst.id){
 		return;
 	}
-	this.fade = true;
-
-};
-
-htmlSound.prototype.fadeOut = function() {
-	if(this.fade){
-		return;
-	}
-	this.fade = true;
 	
+	var audio = this.audioSpriteInstance[sndInst.spriteName].audio; 
+	
+	this.fade = sndInst.id;
+	var that = this;
+	var dVol = volume - audio.volume;
+	if(dVol == 0){
+		return;
+	}
+	dVol /= time/fadeStep;
+	if (sndInst) {
+		this.fading = true;
+		var int = setInterval(function(){
+			if(Math.abs(audio.volume - volume) >= Math.abs(dVol)){
+				audio.volume += dVol;
+			}else{
+				audio.volume = volume;
+				that.fade = false;
+				clearInterval(int);
+			}
+		},fadeStep);
+	}
 };
+
 
 htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	var canPlayMp3, canPlayOgg = null;
@@ -83,6 +115,7 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 		canPlayOgg = !!myAudio.canPlayType
 				&& "" != myAudio.canPlayType('audio/ogg; codecs="vorbis"');
 	}
+	console.log("CAN PLAY", canPlayMp3);
 	var ext;
 	if (canPlayOgg) {
 		ext = ".ogg";
@@ -96,23 +129,32 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	var that = this;
 	if (callback) {
 		audio.addEventListener('canplaythrough', function() {
-			that.audioSpriteInstance[audioSpriteName] = audio;
-			console.log("AUDIO SPRITE INST", that.audioSpriteInstance);
+			console.log("CAN PLAY TROUGH "+audioSpriteName);
+			that.audioSpriteInstance[audioSpriteName] = {
+				audio : audio,
+				startTime : 0,
+				endTime : 0
+			};
+//			console.log("AUDIO SPRITE INST", that.audioSpriteInstance);
 			callback(that.audioSpriteInstance[audioSpriteName]);
 		}, false);
 		audio.addEventListener('timeupdate', function() {
-			console.log(that.audioSpriteInstance[audioSpriteName].currentTime, that.endTime);
-			if(that.audioSpriteInstance[audioSpriteName].currentTime < that.startTime) {
-				that.audioSpriteInstance[audioSpriteName].currentTime = that.startTime;
+			var spriteInst = that.audioSpriteInstance[audioSpriteName];
+//			console.log(spriteInst.audio.currentTime,"  ", spriteInst.endTime, audioSpriteName);
+			if(spriteInst.audio.currentTime < spriteInst.startTime) {
+				spriteInst.audio.currentTime = spriteInst.startTime;
 			}
-			if(that.audioSpriteInstance[audioSpriteName].currentTime >= that.endTime) {
-				that.stop();
-				if (that.stopCallback) {
-					that.stopCallback();
+			if(spriteInst.audio.currentTime >= spriteInst.endTime) {
+				spriteInst.audio.pause();
+				console.log("STOP!>>>>",audioSpriteName);
+				if (spriteInst.stopCallback) {
+					spriteInst.stopCallback();
+					spriteInst.stopCallback = null;
 				}
 			}
 		}, false);
 	} else {
+		console.log("NO CALLBACK ON SOUND INIT");
 		that.audioSpriteInstance[audioSpriteName] = audio;
 	}
 };

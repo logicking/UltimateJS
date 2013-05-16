@@ -9,9 +9,9 @@ var Sound = (function() {
 				playing : null,
 				volume : 1
 			},
-			"back" : {
+			"background" : {
 				playing : null,
-				volume : 0.3
+				volume : 0.2
 			}
 		},
 		channelCount : 2,
@@ -28,12 +28,16 @@ var Sound = (function() {
 			}
 		},
 		stop : function(channel) {
+			console.log("STOP", channel);
 			var that = this;
 			if (channel) {
 				this.instance.stop(this.getChannel(channel)['playing']);
 			} else {
 				$['each'](this.channels, function(index, value) {
-					that.instance.stop(value['playing']);
+					if(index != "background" && value.playing){
+						console.log("STOPPING INDEX", index);
+						that.instance.stop(value['playing']);
+					}
 				});
 			}
 		},
@@ -41,13 +45,59 @@ var Sound = (function() {
 			var on = Device.getStorageItem("soundOn", "true") == "true";
 			return on;
 		},
+		mute : function(channel){
+			var that = this;
+			var ch = this.getChannel(channel);
+			ch.initVol = ch.volume;
+			ch.volume = 0;
+			if (channel) {
+				if(channel.playing){
+					this.instance.mute(ch);
+				}else{
+					channel.volume = 0;
+				}
+			} else {
+				$['each'](this.channels, function(index, value) {
+					if(index != "background"){
+						if(value.playing){
+							that.instance.mute(value);
+						}else{
+							value.volume = 0;
+						}
+					}
+				});
+			}
+		},
+		unmute : function(channel){
+			var that = this;
+			var ch = this.getChannel(channel);
+			ch.initVol = ch.volume;
+			ch.volume = 0;
+			if (channel) {
+				if(channel.playing){
+					this.instance.mute(ch);
+				}else{
+					channel.volume = 1;
+				}
+			} else {
+				$['each'](this.channels, function(index, value) {
+					if(index != "background"){
+						if(value.playing){
+							that.instance.unmute(value);
+						}else{
+							value.volume = 1;
+						}
+					}
+				});
+			}
+		},
 		turnOn : function(isOn) {
 			var soundOn = isOn;
 			Device.setStorageItem("soundOn", soundOn);
 			if (soundOn) {
-				this.instance.unmute();
+				this.unmute();
 			} else {
-				this.instance.mute();
+				this.mute();
 				this.stop();
 			}
 		},
@@ -62,7 +112,8 @@ var Sound = (function() {
 			// }
 		},
 		play : function(id, loop, priority, channel) {
-			if (!this.soundBuffers[id] || !this.isOn()){
+			var that = this;
+			if (!this.soundBuffers[id] || (!this.isOn() && channel != "background")){
 				return;
 			}
 			var callback = null;
@@ -86,16 +137,20 @@ var Sound = (function() {
 			};
 			if (ch.playing != null) {
 				var num = this.channelCount++;
-				this.channels["channel"+num] = {
+				var chName = "channel"+num;
+				this.channels[chName] = {
 						playing : null,
 						volume : 1
 				};
+				ch = this.channels[chName];
 				ch.playing = sndInstance;
 				this.instance.play(sndInstance, function() {
 					if(callback){
 						callback();
 					}
 					ch.playing = null;
+					that.channels[chName] = null;
+					delete that.channels[chName];
 				});
 				
 //				if (ch.playing.priority > sndInstance.priority) {
@@ -125,34 +180,25 @@ var Sound = (function() {
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
 
-//				console.log("INIT");
+				console.log("INIT "+name);
 				this.instance.loadSound(name, function(buf) {
+					console.log("LOAD SOUND CALLBACK");
 					that.sprites[name] = buf;
 					//set initial mute state
-					Sound.turnOn(Sound.isOn());
+//					Sound.turnOn(Sound.isOn());
 					if(callback){
 						callback();
 					}
 				});
 			}
 		},
-		fadeIn : function(channel) {
-//			console.log("SOUND.fadeIn.", channel);
+		fadeTo : function(channel, time, volume) {
 			var that = this;
 			var playing = this.getChannel(channel).playing;
 			if(!playing){
 				return;
 			}
-			this.instance.fadeIn(playing);
-		},
-		fadeOut : function(channel) {
-//			console.log("SOUND.fadeOut.", channel);
-			var that = this;
-			var playing = this.getChannel(channel).playing;
-			if(!playing){
-				return;
-			}
-			this.instance.fadeOut(playing);
+			this.instance.fadeTo(playing, time, volume);
 		},
 		addSprite : function(name) {
 			var that = this;
@@ -168,12 +214,14 @@ var Sound = (function() {
 	
 	try {
 		context = new webkitAudioContext();
-//		context = null;
+		context = null;
 	} catch (e) {
+		context = null;
 		console.log("WEB Audio not supported");
 	}
-	if (context) {
+	if (context !== null) {
 		snd.instance = new WebSound(context);
+		alert("WEB SOUND");
 	} else {
 		//snd.instance = new jSound();
 		snd.instance = new htmlSound();
