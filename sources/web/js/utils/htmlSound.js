@@ -95,7 +95,6 @@ htmlSound.prototype.fadeTo = function(sndInst, time, volume, callback) {
 	}
 	
 	var audio = this.audioSpriteInstance[sndInst.spriteName].audio;
-	alert("FADE"+sndInst.id+" "+this.audioSpriteInstance[sndInst.spriteName].muted);
 	if(this.audioSpriteInstance[sndInst.spriteName].muted){
 		return;
 	}
