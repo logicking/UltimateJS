@@ -23,6 +23,12 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	spriteInst.stopCallback = callback;
 	spriteInst.audio.volume = sndInst.volume;
 	spriteInst.audio.pause();
+	if(sndInst.loop){
+		spriteInst.audio.addEventListener('ended', function() {
+		    this.currentTime = 0;
+		    this.play();
+		}, false);
+	}
 	
 	spriteInst.startTime = sndInst.offset + this.soundOffset;
 	spriteInst.endTime = spriteInst.startTime + sndInst.duration;
@@ -57,9 +63,11 @@ htmlSound.prototype.mute = function(channel) {
 	}
 	if(channel){
 		this.audioSpriteInstance[channel.playing.spriteName].audio.muted = true;
+		this.audioSpriteInstance[channel.playing.spriteName].muted = true;
 	}else{
 		$['each'](this.audioSpriteInstance, function(index, value){
 			value.audio.muted = true;
+			value.muted = true;
 		});
 	}
 //	this.stop();
@@ -71,21 +79,26 @@ htmlSound.prototype.unmute = function(channel) {
 	}
 	if(channel){
 		this.audioSpriteInstance[channel.playing.spriteName].audio.muted = false;
+		this.audioSpriteInstance[channel.playing.spriteName].muted = false;
 	}else{
 		$['each'](this.audioSpriteInstance, function(index, value){
 			value.audio.muted = false;
+			value.muted = false;
 		});
 	}
 };
 
-htmlSound.prototype.fadeTo = function(sndInst, time, volume) {
+htmlSound.prototype.fadeTo = function(sndInst, time, volume, callback) {
 	var fadeStep = 10;
 	if(this.fade == sndInst.id){
 		return;
 	}
 	
-	var audio = this.audioSpriteInstance[sndInst.spriteName].audio; 
-	
+	var audio = this.audioSpriteInstance[sndInst.spriteName].audio;
+	alert("FADE"+sndInst.id+" "+this.audioSpriteInstance[sndInst.spriteName].muted);
+	if(this.audioSpriteInstance[sndInst.spriteName].muted){
+		return;
+	}
 	this.fade = sndInst.id;
 	var that = this;
 	var dVol = volume - audio.volume;
@@ -101,6 +114,9 @@ htmlSound.prototype.fadeTo = function(sndInst, time, volume) {
 			}else{
 				audio.volume = volume;
 				that.fade = false;
+				if(callback){
+					callback();
+				}
 				clearInterval(int);
 			}
 		},fadeStep);
@@ -128,7 +144,6 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 
 	var audio = new Audio(audioSpriteName + ext);
 	audio.preload = "auto";
-	console.log("AUDIO", audio);
 	var that = this;
 	if (callback) {
 		audio.addEventListener('canplaythrough', function() {

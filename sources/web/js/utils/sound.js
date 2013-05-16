@@ -52,16 +52,20 @@ var Sound = (function() {
 			if (channel) {
 				if(channel.playing){
 					this.instance.mute(ch);
+					ch.muted = true;
 				}else{
-					channel.volume = 0;
+					ch.volume = 0;
+					ch.muted = true;
 				}
 			} else {
 				$['each'](this.channels, function(index, value) {
 					if(index != "background"){
 						if(value.playing){
 							that.instance.mute(value);
+							value.muted = true;
 						}else{
 							value.volume = 0;
+							value.muted = true;
 						}
 					}
 				});
@@ -75,16 +79,20 @@ var Sound = (function() {
 			if (channel) {
 				if(channel.playing){
 					this.instance.mute(ch);
+					ch.muted = false;
 				}else{
-					channel.volume = 1;
+					ch.volume = 1;
+					ch.muted = false;
 				}
 			} else {
 				$['each'](this.channels, function(index, value) {
 					if(index != "background"){
 						if(value.playing){
 							that.instance.unmute(value);
+							value.muted = false;
 						}else{
 							value.volume = 1;
+							value.muted = false;
 						}
 					}
 				});
@@ -190,13 +198,14 @@ var Sound = (function() {
 				});
 			}
 		},
-		fadeTo : function(channel, time, volume) {
+		fadeTo : function(channel, time, volume, callback) {
 			var that = this;
-			var playing = this.getChannel(channel).playing;
-			if(!playing){
+			var ch = this.getChannel(channel);
+			var playing = ch.playing;
+			if(!playing || ch.muted){
 				return;
 			}
-			this.instance.fadeTo(playing, time, volume);
+			this.instance.fadeTo(playing, time, volume, callback);
 		},
 		addSprite : function(name) {
 			var that = this;
@@ -212,7 +221,7 @@ var Sound = (function() {
 	
 	try {
 		context = new webkitAudioContext();
-//		context = null;
+		context = null;
 	} catch (e) {
 		context = null;
 		console.log("WEB Audio not supported");

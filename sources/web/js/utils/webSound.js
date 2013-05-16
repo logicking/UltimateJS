@@ -34,6 +34,7 @@ WebSound.prototype.stop = function(sndInst) {
 };
 
 WebSound.prototype.mute = function(channel) {
+	this.muted = true;
 	if(channel){
 		channel.playing.source.gain.value = 0;
 	}else{
@@ -42,6 +43,7 @@ WebSound.prototype.mute = function(channel) {
 };
 
 WebSound.prototype.unmute = function(channel) {
+	this.muted = false;
 	if(channel){
 		channel.playing.source.gain.value = 1;
 	}else{
@@ -50,7 +52,10 @@ WebSound.prototype.unmute = function(channel) {
 };
 
 
-WebSound.prototype.fadeTo = function(sndInst, time, volume) {
+WebSound.prototype.fadeTo = function(sndInst, time, volume, callback) {
+	if(this.muted){
+		return;
+	}
 	var fadeStep = 10;
 	if(this.fade == sndInst.id){
 		return;
@@ -70,6 +75,9 @@ WebSound.prototype.fadeTo = function(sndInst, time, volume) {
 			}else{
 				sndInst.source.gain.value = volume;
 				that.fade = false;
+				if(callback){
+					callback();
+				}
 				clearInterval(int);
 			}
 		},fadeStep);
