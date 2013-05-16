@@ -13,7 +13,7 @@ WebSound.prototype.play = function(sndInst, callback) {
 //	console.log("SOUND BUFF", sndInst.buffer);
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
-	sndInst.source.gain.value = sndInst.volume?sndInst.volume:this.volume;
+	sndInst.source.gain.value = sndInst.volume;
 	sndInst.source.noteGrainOn(0, sndInst.offset, sndInst.duration);
 	var buf = sndInst.buffer;
 	if (!sndInst.loop) {
@@ -33,12 +33,20 @@ WebSound.prototype.stop = function(sndInst) {
 	}
 };
 
-WebSound.prototype.mute = function() {
-	this.volume = 0;
+WebSound.prototype.mute = function(channel) {
+	if(channel){
+		channel.playing.source.gain.value = 0;
+	}else{
+		this.volume = 0;
+	}
 };
 
-WebSound.prototype.unmute = function() {
-	this.volume = 1;
+WebSound.prototype.unmute = function(channel) {
+	if(channel){
+		channel.playing.source.gain.value = 1;
+	}else{
+		this.volume = 1;
+	}
 };
 
 
