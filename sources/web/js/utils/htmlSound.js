@@ -4,7 +4,7 @@
 
 var htmlSound = function() {
 	this.soundOffset = 0;
-	this.mp3offset = -0.05;
+	this.mp3offset = 0//;-0.05;
 	this.audioSpriteInstance = {};
 	this.fade = false;
 
@@ -14,12 +14,12 @@ var htmlSound = function() {
 
 htmlSound.prototype.play = function(sndInst, callback) {
 	var that = this;
-	console.log("SND INST",sndInst, "SPRITE",  this.audioSpriteInstance);
-	if (this.audioSpriteInstance[sndInst.spriteName] == null) {
+	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
+	
+	if (!spriteInst && spriteInst.play) {
 		return;
 	}
 	
-	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 	spriteInst.stopCallback = callback;
 	spriteInst.audio.volume = sndInst.volume;
 	spriteInst.audio.pause();
@@ -27,6 +27,7 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	spriteInst.startTime = sndInst.offset + this.soundOffset;
 	spriteInst.endTime = spriteInst.startTime + sndInst.duration;
 	spriteInst.audio.currentTime = spriteInst.startTime;
+	spriteInst.play = true;
 	spriteInst.audio.play();
 
 };
@@ -40,10 +41,11 @@ htmlSound.prototype.stop = function(sndInst) {
 			return;
 		}
 		this.audioSpriteInstance[sndInst.spriteName].audio.pause();
+		spriteInst.play = false;
 	}else{
-		console.log("STOP ALL CHANNELS");
 		$['each'](this.audioSpriteInstance, function(index, value){
 			value.audio.pause();
+			value.play = false;
 		});
 	}
 //	this.audioSpriteInstance.pause();
@@ -60,7 +62,7 @@ htmlSound.prototype.mute = function(channel) {
 			value.audio.muted = true;
 		});
 	}
-	this.stop();
+//	this.stop();
 };
 
 htmlSound.prototype.unmute = function(channel) {
@@ -109,13 +111,13 @@ htmlSound.prototype.fadeTo = function(sndInst, time, volume) {
 htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	var canPlayMp3, canPlayOgg = null;
 	var myAudio = document.createElement('audio');
+//	myAudio.preload = "auto";
 	if (myAudio.canPlayType) {
 		canPlayMp3 = !!myAudio.canPlayType
 				&& "" != myAudio.canPlayType('audio/mpeg');
 		canPlayOgg = !!myAudio.canPlayType
 				&& "" != myAudio.canPlayType('audio/ogg; codecs="vorbis"');
 	}
-	console.log("CAN PLAY", canPlayMp3);
 	var ext;
 	if (canPlayOgg) {
 		ext = ".ogg";
@@ -125,28 +127,27 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	}
 
 	var audio = new Audio(audioSpriteName + ext);
-
+	audio.preload = "auto";
+	console.log("AUDIO", audio);
 	var that = this;
 	if (callback) {
 		audio.addEventListener('canplaythrough', function() {
-			console.log("CAN PLAY TROUGH "+audioSpriteName);
 			that.audioSpriteInstance[audioSpriteName] = {
 				audio : audio,
 				startTime : 0,
 				endTime : 0
 			};
-//			console.log("AUDIO SPRITE INST", that.audioSpriteInstance);
 			callback(that.audioSpriteInstance[audioSpriteName]);
 		}, false);
+		audio.addEventListener('timeupdate', function() {});
 		audio.addEventListener('timeupdate', function() {
 			var spriteInst = that.audioSpriteInstance[audioSpriteName];
-//			console.log(spriteInst.audio.currentTime,"  ", spriteInst.endTime, audioSpriteName);
 			if(spriteInst.audio.currentTime < spriteInst.startTime) {
 				spriteInst.audio.currentTime = spriteInst.startTime;
 			}
 			if(spriteInst.audio.currentTime >= spriteInst.endTime) {
 				spriteInst.audio.pause();
-				console.log("STOP!>>>>",audioSpriteName);
+				spriteInst.play = false;
 				if (spriteInst.stopCallback) {
 					spriteInst.stopCallback();
 					spriteInst.stopCallback = null;

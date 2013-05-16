@@ -34,8 +34,7 @@ var Sound = (function() {
 				this.instance.stop(this.getChannel(channel)['playing']);
 			} else {
 				$['each'](this.channels, function(index, value) {
-					if(index != "background" && value.playing){
-						console.log("STOPPING INDEX", index);
+					if(index != "background" && value.playing != null){
 						that.instance.stop(value['playing']);
 					}
 				});
@@ -98,7 +97,7 @@ var Sound = (function() {
 				this.unmute();
 			} else {
 				this.mute();
-				this.stop();
+//				this.stop();
 			}
 		},
 		add : function(id, offset, duration, spriteName, priority) {
@@ -182,7 +181,6 @@ var Sound = (function() {
 
 				console.log("INIT "+name);
 				this.instance.loadSound(name, function(buf) {
-					console.log("LOAD SOUND CALLBACK");
 					that.sprites[name] = buf;
 					//set initial mute state
 //					Sound.turnOn(Sound.isOn());
@@ -221,7 +219,6 @@ var Sound = (function() {
 	}
 	if (context !== null) {
 		snd.instance = new WebSound(context);
-		alert("WEB SOUND");
 	} else {
 		//snd.instance = new jSound();
 		snd.instance = new htmlSound();
