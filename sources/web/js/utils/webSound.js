@@ -10,7 +10,7 @@ WebSound.prototype.play = function(sndInst, callback) {
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
 	sndInst.source.connect(this.context.destination);
-//	console.log("SOUND BUFF", sndInst.buffer);
+	console.log("SOUND BUFF", sndInst);
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
 	sndInst.source.gain.value = sndInst.volume;

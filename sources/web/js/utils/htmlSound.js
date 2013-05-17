@@ -16,7 +16,7 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	var that = this;
 	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 	
-	if (!spriteInst && spriteInst.play) {
+	if (!spriteInst || spriteInst.play) {
 		return;
 	}
 	
@@ -151,9 +151,9 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 				startTime : 0,
 				endTime : 0
 			};
+			console.log("GHbdtn!!");
 			callback(that.audioSpriteInstance[audioSpriteName]);
 		}, false);
-		audio.addEventListener('timeupdate', function() {});
 		audio.addEventListener('timeupdate', function() {
 			var spriteInst = that.audioSpriteInstance[audioSpriteName];
 			if(spriteInst.audio.currentTime < spriteInst.startTime) {

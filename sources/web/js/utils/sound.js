@@ -27,6 +27,20 @@ var Sound = (function() {
 				return this.channels[channel];
 			}
 		},
+		addChannel : function(channel, name) {
+			for (var i=0;i<this.channels.length;i++)
+				{
+				if (this.channels[i] == channel)
+					{
+					return;
+					}
+				}
+			if (!channel) {
+				return;
+			}
+			
+			this.channels[name]=channel;
+		},
 		stop : function(channel) {
 			console.log("STOP", channel);
 			var that = this;
@@ -221,12 +235,12 @@ var Sound = (function() {
 	
 	try {
 		context = new webkitAudioContext();
-		context = null;
+//		context = null;
 	} catch (e) {
 		context = null;
 		console.log("WEB Audio not supported");
 	}
-	if (context !== null) {
+	if (context != null) {
 		snd.instance = new WebSound(context);
 	} else {
 		//snd.instance = new jSound();
