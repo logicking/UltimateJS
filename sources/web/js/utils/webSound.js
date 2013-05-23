@@ -10,7 +10,6 @@ WebSound.prototype.play = function(sndInst, callback) {
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
 	sndInst.source.connect(this.context.destination);
-	console.log("SOUND BUFF", sndInst);
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
 	sndInst.source.gain.value = sndInst.volume;
@@ -52,31 +51,32 @@ WebSound.prototype.unmute = function(channel) {
 };
 
 
-WebSound.prototype.fadeTo = function(sndInst, time, volume, callback) {
+WebSound.prototype.fadeTo = function(fadeInst) {
 	if(this.muted){
 		return;
 	}
 	var fadeStep = 10;
-	if(this.fade == sndInst.id){
+	if(this.fade == fadeInst.sndInst.id){
 		return;
 	}
-	this.fade = sndInst.id;
+	this.fade = fadeInst.sndInst.id;
 	var that = this;
-	var dVol = volume - sndInst.source.gain.value;
-	if(dVol == 0){
+	fadeInst.dVol = fadeInst.volume - fadeInst.sndInst.source.gain.value;
+	if(fadeInst.dVol == 0){
 		return;
 	}
-	dVol /= time/fadeStep;
-	if (sndInst) {
+	fadeInst.dVol = Math.round((fadeInst.dVol/(fadeInst.time/fadeStep)) * 10000)/10000;
+	if (fadeInst.sndInst) {
 		this.fading = true;
 		var int = setInterval(function(){
-			if(Math.abs(sndInst.source.gain.value - volume) >= Math.abs(dVol)){
-				sndInst.source.gain.value += dVol;
+			if(Math.abs(fadeInst.sndInst.source.gain.value - fadeInst.volume) >= Math.abs(2 * fadeInst.dVol)){
+				fadeInst.sndInst.source.gain.value += fadeInst.dVol;
 			}else{
-				sndInst.source.gain.value = volume;
+				fadeInst.sndInst.source.gain.value = fadeInst.volume;
+				fadeInst.sndInst.source.gain.value = Math.round(fadeInst.sndInst.source.gain.value * 10000)/10000;
 				that.fade = false;
-				if(callback){
-					callback();
+				if(fadeInst.callback){
+					fadeInst.callback();
 				}
 				clearInterval(int);
 			}

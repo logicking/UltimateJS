@@ -88,33 +88,33 @@ htmlSound.prototype.unmute = function(channel) {
 	}
 };
 
-htmlSound.prototype.fadeTo = function(sndInst, time, volume, callback) {
+htmlSound.prototype.fadeTo = function(fadeInst) {
 	var fadeStep = 10;
-	if(this.fade == sndInst.id){
+	if(this.fade == fadeInst.sndInst.id){
 		return;
 	}
 	
-	var audio = this.audioSpriteInstance[sndInst.spriteName].audio;
-	if(this.audioSpriteInstance[sndInst.spriteName].muted){
+	var audio = this.audioSpriteInstance[fadeInst.sndInst.spriteName].audio;
+	if(this.audioSpriteInstance[fadeInst.sndInst.spriteName].muted){
 		return;
 	}
-	this.fade = sndInst.id;
+	this.fade = fadeInst.sndInst.id;
 	var that = this;
-	var dVol = volume - audio.volume;
-	if(dVol == 0){
+	fadeInst.dVol = fadeInst.volume - audio.volume;
+	if(fadeInst.dVol == 0){
 		return;
 	}
-	dVol /= time/fadeStep;
-	if (sndInst) {
+	fadeInst.dVol /= fadeInst.time/fadeStep;
+	if (fadeInst.sndInst) {
 		this.fading = true;
 		var int = setInterval(function(){
-			if(Math.abs(audio.volume - volume) >= Math.abs(dVol)){
-				audio.volume += dVol;
+			if(Math.abs(audio.volume - fadeInst.volume) >= Math.abs(fadeInst.dVol)){
+				audio.volume += fadeInst.dVol;
 			}else{
-				audio.volume = volume;
+				audio.volume = fadeInst.volume;
 				that.fade = false;
-				if(callback){
-					callback();
+				if(fadeInst.callback){
+					fadeInst.callback();
 				}
 				clearInterval(int);
 			}

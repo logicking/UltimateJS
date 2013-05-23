@@ -42,7 +42,6 @@ var Sound = (function() {
 			this.channels[name]=channel;
 		},
 		stop : function(channel) {
-			console.log("STOP", channel);
 			var that = this;
 			if (channel) {
 				this.instance.stop(this.getChannel(channel)['playing']);
@@ -219,7 +218,14 @@ var Sound = (function() {
 			if(!playing || ch.muted){
 				return;
 			}
-			this.instance.fadeTo(playing, time, volume, callback);
+			var fadeInst = {
+					channel : channel,
+					time : time,
+					sndInst : playing,
+					volume : volume, 
+					callback : callback
+			};
+			this.instance.fadeTo(fadeInst);
 		},
 		addSprite : function(name) {
 			var that = this;
