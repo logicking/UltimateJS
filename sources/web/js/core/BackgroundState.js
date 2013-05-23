@@ -81,7 +81,7 @@ BackgroundState.prototype.init = function(params) {
 	this.addGui(this.mask);
 	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
-	this.mask.setZ(10000);
+	this.mask.setZ(99999999);
 	this.mask.hide();
 };
 
