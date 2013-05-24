@@ -167,7 +167,7 @@ Server.prototype.executeCommand = function(name, args, session, callback) {
 		try {
 			command(args, session, callback);
 		} catch (err) {
-			console.log("Error on command execution:");
+			console.log("Error on command execution: ", name);
 			console.log("Error: ", err, "\n");
 			console.log(err.stack);
 			callback({
@@ -686,14 +686,14 @@ Server.prototype.onAuth = function(req, res) {
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if (req.user && req.user.provider) {
-			if (req.user.provider == "facebook") {
-				userId = req.user.id;
-			}
-			if (req.user.provider == "vkontakte") {
-				userId = req.user.uid;
-			}
-		}
+//		if (req.user && req.user.provider) {
+//			if (req.user.provider == "facebook") {
+//				userId = req.user.id;
+//			}
+//			if (req.user.provider == "vkontakte") {
+//				userId = req.user.uid;
+//			}
+//		}
 	}
 	
 	function runAuthCallbacks(session, cb){
@@ -763,7 +763,7 @@ Server.prototype.onCommunicate = function(req, res, next) {
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if(req.provider){
+		if(req.user){
 			if (req.user.provider == "facebook") {
 				userId = req.user.id;
 			}
@@ -813,12 +813,22 @@ Server.prototype.onCommand = function(req, res, next) {
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if (req.user.provider == "facebook") {
-			userId = req.user.id;
+		if(req.user){
+			if (req.user.provider == "facebook") {
+				userId = req.user.id;
+			}
+			if (req.user.provider == "vkontakte") {
+				userId = req.user.uid;
+			}
+		}else{
+			res.json({
+				error : {
+					description : "Wrong cookie",
+					code : 1
+				}
+			});
 		}
-		if (req.user.provider == "vkontakte") {
-			userId = req.user.uid;
-		}
+		
 	}
 
 	var session = Server.instance.getSession(userId);

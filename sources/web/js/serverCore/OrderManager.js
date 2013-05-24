@@ -20,6 +20,8 @@ OrderManager.prototype.getApiCallback = function(){
 	return function(req, res){
 		console.log("vk_api callback");
 		var json = req.body;
+//		console.log("req: ", req);
+		console.log("body: ", req.body);
 		if(!that.isValid(json)){
 			if(that.notValid){
 				that.notValid(json, res);	
