@@ -42,9 +42,11 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 			}
 		}
 	}	
+	
 //	console.log("Created Entities record with unique IDs: ", object);
 	//account.readGlobalUpdate(obj);
 	//console.log("Account After Reading default global update: ", account);
+	
 	return object;
 };
 

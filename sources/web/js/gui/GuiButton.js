@@ -304,14 +304,14 @@ GuiButton.prototype.bind = function(pushFunction) {
 				if (that.pushFunction) {
 					var name = event.currentTarget.getAttribute("name");
 					if (name) {
-						if (name == "screen") {
-							Recorder.recordAction("clickedAt", name, {
-								x : event.offsetX,
-								y : event.offsetY
-							});
-						} else {
-							Recorder.recordAction("click", name);
-						}
+//						if (name == "screen") {
+//							Recorder.recordAction("clickedAt", name, {
+//								x : event.offsetX,
+//								y : event.offsetY
+//							});
+//						} else {
+//							Recorder.recordAction("click", name);
+//						}
 					}
 					that.pushFunction(event);
 				}

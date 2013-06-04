@@ -3,10 +3,11 @@ var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
-var ENABLE_REMOTE_CONSOLE = true;
+var ENABLE_REMOTE_CONSOLE = false;
+var ONLY_ERRORS = false;
 var DISABLE_CONSOLE = false;
 //reseting log on logserverr
-	var consoleUrl = "http://127.0.0.1:8765/";
+	var consoleUrl = "http://ec2-23-20-152-59.compute-1.amazonaws.com:8765/";
 	console.log("Connecting to console server");
 	if(ENABLE_REMOTE_CONSOLE){
 		request.post(consoleUrl + "resetLog", {
@@ -31,7 +32,7 @@ var DISABLE_CONSOLE = false;
 			var fn = console.log;
 			var index = 0;
 			console.log = function() {
-				if(!DISABLE_CONSOLE){
+				if(!DISABLE_CONSOLE ){
 					var that = this;
 					index = index + 1;
 					time = Date.now();
@@ -42,6 +43,7 @@ var DISABLE_CONSOLE = false;
 		}
 	})();
 
+var error_flag = false;
 	var onConsoleMessage = function(args, time, index) {
 		var msg = util.format.apply(util, args);
 		var json = {
@@ -52,9 +54,19 @@ var DISABLE_CONSOLE = false;
 		};
 		try{
 			if(ENABLE_REMOTE_CONSOLE){
-				request.post(consoleUrl + "logmsg", {
-					form : json
-				});
+				if(ONLY_ERRORS){
+					if(error_flag){
+						request.post(consoleUrl + "logmsg", {
+							form : json
+						});
+					}
+					
+				}else{
+					request.post(consoleUrl + "logmsg", {
+						form : json
+					});
+				}
+				
 
 			}
 		}catch(err){
@@ -63,11 +75,12 @@ var DISABLE_CONSOLE = false;
 
 	};
 
-
 //exception handling
 process.on('uncaughtException', function (err) {
+	  error_flag = true;
 	  console.log('Caught uncaught exception: ' ,  err);
 	  console.log( err.stack );
+	  error_flag = false;
 });
 
 // Inheritance pattern

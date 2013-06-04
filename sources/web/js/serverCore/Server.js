@@ -12,7 +12,7 @@ function Server() {
 	var commands = null;
 };
 
-Server.prototype.init = function(sconf, callback) {
+Server.prototype.init = function(sconf, callback, droptable) {
 	var that = this;
 	this.config = sconf;
 	this.authCallbacks = [];
@@ -65,15 +65,28 @@ Server.prototype.init = function(sconf, callback) {
 		// console.log("notice: %j", msg);
 		// console.log("-----------------");
 		// });
-		var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table);
-		entity_table_delquery.on("end", function() {
-			var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
-			users_accounts_delquery.on("end", function() {
-				if (callback) {
-					callback();
-				}
+		if(droptable){
+			console.log("Deleting data from DB... ");
+			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table);
+			entity_table_delquery.on("end", function() {
+				var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
+				users_accounts_delquery.on("end", function() {
+					var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
+					scores_delquery.on("end", function(){
+						if (callback) {
+							callback();
+						}
+					});
+					
+				});
 			});
-		});
+		}else{
+			if (callback) {
+				callback();
+			}
+		}
+		
+		
 
 		// client.query( 'DROP TABLE IF EXISTS account_data');
 		// authClient.query( 'DROP TABLE IF EXISTS users_accounts');
@@ -167,9 +180,11 @@ Server.prototype.executeCommand = function(name, args, session, callback) {
 		try {
 			command(args, session, callback);
 		} catch (err) {
+			error_flag = !error_flag;
 			console.log("Error on command execution: ", name);
 			console.log("Error: ", err, "\n");
 			console.log(err.stack);
+			error_flag = !error_flag;
 			callback({
 				error : err,
 				stack : err.stack
@@ -190,7 +205,9 @@ Server.prototype.getAccountByUserId = function(session, userId, callback) {
 	var rows = [];
 	var query = that.client.query("SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ]);
 	query.on("error", function(error) {
+		error_flag = true;
 		console.log("Get Account By User Id error\n", error);
+		error_flag = false;
 	});
 
 	query.on('row', function(row) {
@@ -771,7 +788,10 @@ Server.prototype.onCommunicate = function(req, res, next) {
 				userId = req.user.uid;
 			}
 		}else{
+			error_flag = !error_flag;
+
 			console.log("WRONG req.session: ", req.session);
+			error_flag = !error_flag;
 			res.json({
 				error : {
 					description : "Wrong cookie",
