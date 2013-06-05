@@ -44,7 +44,10 @@ var Sound = (function() {
 		stop : function(channel) {
 			var that = this;
 			if (channel) {
-				this.instance.stop(this.getChannel(channel)['playing']);
+				var ch = this.getChannel(channel);
+				if(ch){
+					this.instance.stop(ch['playing']);
+				}
 			} else {
 				$['each'](this.channels, function(index, value) {
 					if(index != "background" && value.playing != null){
@@ -200,7 +203,7 @@ var Sound = (function() {
 			this.forceSprite = forceSprite ? true : false;
 			if (this.forceSprite) {
 
-				console.log("INIT "+name);
+//				console.log("INIT "+name);
 				this.instance.loadSound(name, function(buf) {
 					that.sprites[name] = buf;
 					//set initial mute state
