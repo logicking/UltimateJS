@@ -144,17 +144,14 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	if (callback) {
 
 		audio.addEventListener('abort', function() {
-			console.log("AAAABBBBOOOORRRRTTT", audioSpriteName);
 			alert(audioSpriteName + " aborted");
 		}, true);
 
 		audio.addEventListener('error', function() {
-			console.log("EEEERRRRROOOOOORRRRRRRRRR", audioSpriteName);
 			alert(audioSpriteName + " error");
 		}, true);
 
 		audio.addEventListener('suspend', function() {
-			console.log("SSSSSSSUUUUUUUUUUUUUUUSSSSSS", audioSpriteName);
 			alert(audioSpriteName + " suspend");
 		}, true);
 
@@ -164,7 +161,6 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 				startTime : 0,
 				endTime : 0
 			};
-			console.log("GHbdtn!!");
 			callback(that.audioSpriteInstance[audioSpriteName]);
 			audio.removeEventListener("canplaythrough", canplay, false);
 		};
