@@ -4,7 +4,7 @@
 
 var htmlSound = function() {
 	this.soundOffset = 0;
-	this.mp3offset = 0//;-0.05;
+	this.mp3offset = 0.001;//;-0.05;
 	this.audioSpriteInstance = {};
 	this.fade = false;
 
@@ -47,7 +47,7 @@ htmlSound.prototype.stop = function(sndInst) {
 			return;
 		}
 		this.audioSpriteInstance[sndInst.spriteName].audio.pause();
-		spriteInst.play = false;
+		this.audioSpriteInstance[sndInst.spriteName].play = false;
 	}else{
 		$['each'](this.audioSpriteInstance, function(index, value){
 			value.audio.pause();
@@ -145,15 +145,17 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	audio.preload = "auto";
 	var that = this;
 	if (callback) {
-		audio.addEventListener('canplaythrough', function() {
+		var canplay = function() {
 			that.audioSpriteInstance[audioSpriteName] = {
-				audio : audio,
-				startTime : 0,
-				endTime : 0
+					audio : audio,
+					startTime : 0,
+					endTime : 0
+				};
+				console.log("GHbdtn!!");
+				callback(that.audioSpriteInstance[audioSpriteName]);
+				audio.removeEventListener("canplaythrough", canplay, false);
 			};
-			console.log("GHbdtn!!");
-			callback(that.audioSpriteInstance[audioSpriteName]);
-		}, false);
+		audio.addEventListener('canplaythrough',canplay , false);
 		audio.addEventListener('timeupdate', function() {
 			var spriteInst = that.audioSpriteInstance[audioSpriteName];
 			if(spriteInst.audio.currentTime < spriteInst.startTime) {
