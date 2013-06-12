@@ -315,9 +315,13 @@ var Screen = (function() {
 			return viewporter.isLandscape();
 		},
 		widthRatio : function() {
+			if (this.fixedSize == true)
+				return 1;
 			return widthRatio;
 		},
 		heightRatio : function() {
+			if (this.fixedSize == true)
+				return 1;
 			return heightRatio;
 		},
 		// Size of the working screen field

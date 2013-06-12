@@ -81,12 +81,13 @@ BackgroundState.prototype.init = function(params) {
 	this.addGui(this.mask);
 	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
-	this.mask.setZ(99999999);
+	this.mask.setZ(999999999);
 	this.mask.hide();
 };
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	var that = this;
+	console.log("BackgroundState.prototype.fadeIn");
 	if (this.loader != null) {
 		this.loader.show();
 		this.loader.$()['css']("opacity", 0);
@@ -109,6 +110,7 @@ BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 
 BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
+	console.log("BackgroundState.prototype.fadeOut");
 	if (this.loader != null) {
 		this.loader.$()['stop']();
 		this.loader.hide();
