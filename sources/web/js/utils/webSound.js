@@ -44,7 +44,7 @@ WebSound.prototype.mute = function(channel) {
 WebSound.prototype.unmute = function(channel) {
 	this.muted = false;
 	if(channel){
-		channel.playing.source.gain.value = 1;
+		channel.playing.source.gain.value = channel.volume;
 	}else{
 		this.volume = 1;
 	}

@@ -29,6 +29,10 @@ GuiLabel.prototype.initialize = function(params) {
 
 	this.fontSize = params['fontSize'] ? params['fontSize'] : 20;
 	this.change(params['text']);
+	if(params['cursor']){
+		this.jObject['css']("cursor", params['cursor']);
+		this.cursor = params['cursor'];
+	}
 	if (params['align']) {
 		this.align(params['align'], params['verticalAlign']);
 	}
@@ -41,7 +45,7 @@ GuiLabel.prototype.generate = function(src) {
 	var id = this.id;
 	this.rowId = this.id + "_row";
 	this.cellId = this.id + "_cell";
-	return "<div id='" + this.id + "' class='" + this.style + " unselectable'>"
+	return "<div id='" + this.id + "' class='" + this.style + " unselectable' style='cursor: default'>"
 	+ "<div id='" + this.rowId + "' style='display:table-row; '>"
 	+ "<div id='" + this.cellId +"'"+((this.divname)?(" name='"+ this.divname +"'"):(""))+ " style='display:table-cell;'>"
 	+ src + "</div></div></div>";
