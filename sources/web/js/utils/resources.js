@@ -78,10 +78,13 @@ var Resources = (function() {
 			}
 		},
 		// returnes string
-		getString : function(stringId) {
+		getString : function(stringId, rand) {
 			if (strings[stringId]) {
 			var str = strings[stringId];
 				if(strings[stringId] instanceof Array){
+					if (rand == false) {
+						return strings[stringId];
+					}
 					var lbl = str[Math.floor(Math.random() * strings[stringId].length)];
 					return lbl; 
 				}
