@@ -3,8 +3,8 @@ var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
 var logger = sconf.username;
-var ENABLE_REMOTE_CONSOLE = false;
-var ONLY_ERRORS = false;
+var ENABLE_REMOTE_CONSOLE = true;
+var ONLY_ERRORS = true;
 var DISABLE_CONSOLE = false;
 //reseting log on logserverr
 	var consoleUrl = "http://ec2-23-20-152-59.compute-1.amazonaws.com:8765/";

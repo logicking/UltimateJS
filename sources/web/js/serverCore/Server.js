@@ -2,7 +2,7 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 15 * 60 * 1000;
+var CACHE_LIFETIME = 30 * 60 * 1000;
  
 function Server() {
 	var fileServer = null;
@@ -480,6 +480,7 @@ Server.prototype.removeEntity = function(id, removeChildren) {
 	// true when server.removeEntity called from previous Entity.destroy() call
 
 	entity.notifyListeners("destroy", true);
+	entity.notifyListeners("class", entity.constructor.name);
 	if ((entity instanceof Account) && (entity.userId)) {
 		delete entity.userId;
 	}
@@ -712,13 +713,16 @@ Server.prototype.onAuth = function(req, res) {
 //			}
 //		}
 	}
-	
+	var authError = false;
 	function runAuthCallbacks(session, cb){
 		var walker = function(index){
 			return function(){
 				process.nextTick(function(){
-					if(index < that.authCallbacks.length){
-						that.authCallbacks[index](session, walker(index+1));
+					if(index < that.authCallbacks.length && !authError){
+						that.authCallbacks[index](session, walker(index+1), function(){
+							console.log("setting error = true");
+							authError = true;
+						});
 					}else{
 						if(cb){
 							cb();
@@ -738,13 +742,21 @@ Server.prototype.onAuth = function(req, res) {
 	if (session) {
 		// console.log("Found previous session with userId: ", userId);
 		runAuthCallbacks(session, function() {
-			var obj = {
+			if (authError) {
+				console.log("Error on auth!!!!");
+				var obj = {
+					error : "Auth error occured."
+				};
+			} else {
+				var obj = {
 					accountId : session.accountId,
 					userId : userId,
 					initUpdate : session.sendData(true)
 				};
-				res.end(JSON.stringify(obj));
-			});
+			}
+
+			res.end(JSON.stringify(obj));
+		});
 
 		return;
 	}
@@ -760,11 +772,18 @@ Server.prototype.onAuth = function(req, res) {
 		// "initData": req.session.initData,
 		"callback" : (function() {
 			runAuthCallbacks(session, function() {
-				var obj = {
+				if (authError) {
+					console.log("Error on auth!!!!");
+					var obj = {
+						error : "Auth error occured."
+					};
+				} else {
+					var obj = {
 						accountId : session.accountId,
 						userId : userId,
 						initUpdate : session.sendData(true)
 					};
+				}
 					res.end(JSON.stringify(obj));
 				});
 
