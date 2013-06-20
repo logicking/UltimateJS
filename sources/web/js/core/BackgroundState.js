@@ -54,26 +54,25 @@ BackgroundState.prototype.init = function(params) {
 
 	if (params["loader"]) {
 		this.loader = guiFactory.createObject("GuiDiv", {
-			parent : "body",
+			parent : this.mask,
 			image : params['loader'],
 			background : {
 				image : params['loader']
 			},
 			style : "spite",
-			width : 35,
-			height : 35,
+			width : 274,
+			height : 66,
 			x : "50%",
 			y : "50%",
-			offsetX : -17,
-			offsetY : -17
-
+			offsetX : -137,
+			offsetY : -33
 		});
 		this.loader.setClickTransparent(true);
 		this.addGui(this.loader);
 		this.loader.$()['css']("opacity", 0);
-		this.loader.$()['css']("position", "fixed");
-		this.loader.$()['css']("top", "50%");
-		this.loader.$()['css']("left", "50%");
+		this.loader.$()['css']("position", "absolute");
+//		this.loader.$()['css']("top", "50%");
+//		this.loader.$()['css']("left", "50%");
 		this.loader.setZ(11001);
 		this.loader.hide();
 		// this.mask.children.addGui(loader,"loader");
@@ -129,9 +128,9 @@ BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
 	if (this.loader != null) {
 		this.loader.resize();
-		this.loader.$()['css']("position", "fixed");
-		this.loader.$()['css']("top", "50%");
-		this.loader.$()['css']("left", "50%");
+		this.loader.$()['css']("position", "absolute");
+//		this.loader.$()['css']("top", "50%");
+//		this.loader.$()['css']("left", "50%");
 	}
 	$['each'](this.dialogs, function(index, value) {
 		value.resize();
