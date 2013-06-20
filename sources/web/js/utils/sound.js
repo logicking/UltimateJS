@@ -168,7 +168,6 @@ var Sound = (function() {
 					if (callback) {
 						callback();
 					}
-					console.log("CALLBACK");
 					ch.playing = null;
 					that.channels[chName] = null;
 					delete that.channels[chName];
@@ -218,7 +217,7 @@ var Sound = (function() {
 			var ch = this.getChannel(channel);
 			var playing = ch.playing;
 			if (!playing || ch.muted) {
-				console.log(playing, ch);
+//				console.log(playing, ch);
 				return;
 			}
 			var fadeInst = {

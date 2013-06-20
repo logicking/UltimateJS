@@ -38,7 +38,7 @@ jSound.prototype.play = function(sndInst, callback) {
 
 jSound.prototype.fadeTo = function(fadeInst) {
 	var fadeStep = 10;
-	if (this.fade == fadeInst.sndInst.id) {
+	if (this.fade == fadeInst.sndInst.spriteName) {
 		return;
 	}
 
@@ -46,7 +46,7 @@ jSound.prototype.fadeTo = function(fadeInst) {
 	if (spriteInst.muted) {
 		return;
 	}
-	this.fade = fadeInst.sndInst.id;
+	this.fade = fadeInst.sndInst.spriteName;
 	var that = this;
 	fadeInst.dVol = fadeInst.volume - spriteInst.volume;
 	if (fadeInst.dVol == 0) {
@@ -55,7 +55,7 @@ jSound.prototype.fadeTo = function(fadeInst) {
 	fadeInst.dVol /= fadeInst.time / fadeStep;
 	if (fadeInst.sndInst) {
 		this.fading = true;
-		var int = setInterval(function() {
+		spriteInst.int = setInterval(function() {
 			if (Math.abs(spriteInst.volume - fadeInst.volume) >= Math.abs(fadeInst.dVol)) {
 				spriteInst.volume += fadeInst.dVol;
 				spriteInst.setVolume(fadeInst.sndInst.id, spriteInst.volume);
@@ -66,7 +66,7 @@ jSound.prototype.fadeTo = function(fadeInst) {
 				if (fadeInst.callback) {
 					fadeInst.callback();
 				}
-				clearInterval(int);
+				clearInterval(spriteInst.int);
 			}
 		}, fadeStep);
 	}
@@ -81,9 +81,15 @@ jSound.prototype.stop = function(sndInst) {
 			return;
 		}
 		this.sprites[sndInst.spriteName].stop();
+		if(this.sprites[sndInst.spriteName].int){
+			clearInterval(this.sprites[sndInst.spriteName].int);				
+		}
 	} else {
 		$['each'](this.sprites, function(index, value) {
 			value.audio.stop();
+			if(value.int){
+				clearInterval(value.int);				
+			}
 		});
 	}
 };
@@ -213,6 +219,7 @@ jSound.prototype.generateJplayer = function(id, audioSpriteName) {
 		},
 		supplied : "oga, mp3, m4a",
 		solution : "html, flash",
+		preload : "auto", 
 		// solution : "html",//, flash",
 		swfPath : PATH_TO_JPLAYER_SWF,
 
@@ -296,7 +303,7 @@ jSound.prototype.generateSpriteChannels = function(jArr) {
 		},
 		setVolume : function(id, vol) {
 			$['each'](this.channels, function(index, value) {
-				if (value.playing.id == id) {
+				if (value.playing && value.playing.id == id) {
 					value.audio['jPlayer']("volume", vol);
 				}
 			});
