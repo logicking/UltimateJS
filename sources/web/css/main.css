@@ -17,6 +17,7 @@ div {
     -moz-user-select: -moz-none;
     -khtml-user-select: none;
     -webkit-user-select: none;
+    -ms-user-select: none;
     /*3D transform */
     -o-user-select: none;
     user-select: none;
@@ -25,6 +26,7 @@ div {
 .unselectable {
 	-webkit-user-select: none;
 	-khtml-user-select: none;
+	-ms-user-select: none;
 	-moz-user-select: none;
 	-o-user-select: none;
 	user-select: none;
