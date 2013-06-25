@@ -252,7 +252,11 @@ jSound.prototype.generateSpriteChannels = function(jArr) {
 		play : function(sndInst, callback) {
 			var ch = this.getFree();
 			if (ch) {
-				ch.audio['jPlayer']("volume", this.volume);
+				if(this.muted){
+					ch.audio['jPlayer']("volume", 0);	
+				}else{
+					ch.audio['jPlayer']("volume", this.volume);
+				}
 				ch.audio['jPlayer']("play", sndInst.offset);
 				ch.playing = sndInst;
 				audioSpriteEndCallback = function() {
@@ -275,6 +279,7 @@ jSound.prototype.generateSpriteChannels = function(jArr) {
 				if (value.playing) {
 					 value.audio['jPlayer']("pause");
 					 value.playing = null;
+					 clearTimeout(value.audioSpriteTimeoutHandler);
 				}
 			});
 		},
