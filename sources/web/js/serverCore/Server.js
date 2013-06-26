@@ -67,7 +67,7 @@ Server.prototype.init = function(sconf, callback, droptable) {
 		// });
 		if(droptable){
 			console.log("Deleting data from DB... ");
-			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table);
+			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
 			entity_table_delquery.on("end", function() {
 				var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
 				users_accounts_delquery.on("end", function() {
@@ -273,7 +273,7 @@ Server.prototype.killCached = function(id) {
 Server.prototype.addToCache = function(entity) {
 	var cache = Server.instance.cache, id = entity.id;
 	 entity.log(" adding to cache.");
-	// entity.logChildren("on addToCache");
+	// entity.logChildren("on addToCache");1
 	// case of overwriting(there is an old instance of entity in cache)
 	if (cache[id])
 		if (cache[id] != entity) {// case when we update existing cache(in
@@ -690,6 +690,27 @@ Server.prototype.setTransactionHandler = function(func) {
 
 Server.prototype.getTransactionHandler = function() {
 	return this.trunsactionHandler;
+};
+
+
+Server.prototype.killSession = function(userId){
+	var that = this;
+	var session = Server.instance.getSession[userId];
+	if(session){
+		var accId = session.accountId;
+		global.clearTimeout(session.timeoutId);
+		session.destroy();
+		that.killCached(accId);
+	}
+};
+
+
+Server.prototype.killAllSessions = function(){
+	
+	
+	for(var userId in Sessions){
+		this.killSession(userId);
+	}
 };
 
 Server.prototype.onAuth = function(req, res) {

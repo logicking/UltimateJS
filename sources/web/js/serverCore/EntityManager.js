@@ -15,39 +15,72 @@ EntityManager.prototype.init = function(params){
 	commands = new Object();
 };
 
-EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNames){
+EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNames, callback){
+	var that = this;
 //	console.log("template", template);
 	var template = JSON.parse(JSON.stringify(serverSnapshot));
 	var object = {};
 	var names = {};
 	var id;
+	
+	var entityNum = 0;
+	var cbCount = 0, lpCount = 0;
+	
+	var queue = [];
 	for(var name in template){
 //		if(global[template[name]["class"]] instanceof Account){
 //			console.log("We found account")
 //		}
-		if(template[name]["root"] == true) id = accountID; 
-		else id = uniqueId().toString();
-		names[name] = id;
-		object[id] = template[name];
+		if(template[name]["root"] == true){
+			id = accountID;
+			names[name] = id; 
+			object[id] = template[name];
+		}else{
+			lpCount++;
+//			console.log("loopcount: ", lpCount);
+			queue.push(name);
+//			that.getUniqueId(createCallback(name));
+		} 
 	}
+	
+	var walker = function(){
+
+		var name = queue.splice(0, 1);
+		that.getUniqueId(function(id){
+			names[name] = id;
+			object[id] = template[name];
+
+			if(queue.length <= 0){
+				for(var id in object){
+					var curJSON = object[id];
+//					console.log("Current JSON:", curJSON);
+					for(var propName in curJSON){
+						var rememberedName;
+						if(rememberedName = names[curJSON[propName]]){
+							curJSON[propName] = rememberedName;
+						}
+					}
+					entityNum++;
+				}	
+
+				if(callback){
+//					console.log("object:",object);
+					callback({update:object, count:entityNum});
+				}
+				return;
+			}
+			walker();
+		});
+	};
+	walker();
 //	console.log("names: ",names);
 //	console.log("obj: ", object);
-	for(var id in object){
-		var curJSON = object[id];
-//		console.log("Current JSON:", curJSON);
-		for(var propName in curJSON){
-			var rememberedName;
-			if(rememberedName = names[curJSON[propName]]){
-				curJSON[propName] = rememberedName;
-			}
-		}
-	}	
+	
 	
 //	console.log("Created Entities record with unique IDs: ", object);
 	//account.readGlobalUpdate(obj);
 	//console.log("Account After Reading default global update: ", account);
 	
-	return object;
 };
 
 //
@@ -88,10 +121,24 @@ EntityManager.prototype.getAccountEntities = function(accountID, callback){
 EntityManager.prototype.backupEntity = function(entity, callback){
 	var that = this;
 	var data = {};
+	var entityData = null;
 	var id = entity.id;
-//	console.log("Entity passed to backup\n", entity, "\n");
-	entity.writeUpdate(data, new Object());
-	var entityData = data[id];
+	if(entity instanceof Entity){
+		entity.writeUpdate(data, new Object());	
+		entityData = data[id];
+	}else{
+		entityData = entity;
+	}
+	
+//	console.log("Entity passed to backup\n", entity, "\n");\
+	if(!entityData){
+		error_flag = true;
+		console.log("Smth wrong with entityData backuping entity to DB!!!");
+		error_flag = false;
+		callback({error:"entityData undefined on backupEntity at EntityManager"});
+		return;
+	}
+	
 //	console.log("EntityData on backup: ", entityData);
 	var query = this.eClient.query( "SELECT * FROM " + sconf.entity_table + " WHERE id = $1" , [id] );
 	query.on("end", function(result){
@@ -365,3 +412,25 @@ function extend(data, addData){
 		}
 	}
 }
+
+EntityManager.prototype.getUniqueId = function(callback){
+	var that = this;
+	var id = "-1";
+	var unique = null;
+	var query = this.eClient.query( "SELECT * FROM " + sconf.entity_table + " WHERE id = $1" , [id] );
+	query.on("row", function(row){
+		unique = row.data;
+	});
+	query.on("end", function(result){
+		var innerQuery = that.eClient.query("UPDATE " + sconf.entity_table + " SET data = $2, parentid = $3  WHERE id = $1",
+					[ id, (Number(unique)+1), ""]);
+			
+			innerQuery.on("end", function(){
+				if(callback){
+					callback(unique);
+				}
+			});
+		
+	});
+
+};
