@@ -96,11 +96,15 @@ var Resources = (function() {
 
 		},
 		// loads json with set language
-		setLanguage : function(language) {
-			var fileName = "resources/localization/" + language + ".json";
-			$['getJSON'](fileName, function(data) {
-				strings = data;
-			});
+		setLanguage : function(language, array) {
+			if ((array == true) && (typeof language == "object")) {
+				strings = language;
+			} else {
+				var fileName = "resources/localization/" + language + ".json";
+				$['getJSON'](fileName, function(data) {
+					strings = data;
+				});
+			}
 		},
 		// returns filename of an image for current resolution
 		getImage : function(name, preload, preloadCallback) {

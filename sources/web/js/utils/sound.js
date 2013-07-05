@@ -253,8 +253,8 @@ var Sound = (function() {
 		snd.instance = new WebSound(context);
 	} else {
 		snd.type = "jSound";
-		snd.instance = new jSound();
-		// snd.instance = new htmlSound();
+//		snd.instance = new jSound();
+		snd.instance = new htmlSound();
 	}
 
 	return snd;
