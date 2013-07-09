@@ -17,7 +17,11 @@ Entity.prototype.init = function(params) {
 	this.listeners = selectValue(params["listeners"], []);
 //	console.log("Listeners: ",this.listeners);
 	if(params["accountId"]){
-		this.account = Server.instance.getEntity(null, params["accountId"], null);
+		this.account = Server.instance.getEntity(null, params["accountId"], null, true);
+		if(!this.account){
+			console.err_log("[CRITICAL ERROR]: No Account found for accountId=%s", params["accountId"]);
+		}
+		
 	}else{
 		if(this instanceof Account){
 			this.account = this;
@@ -305,3 +309,13 @@ Entity.prototype.setParent = function(parent){
 	}
 };
 
+
+
+Entity.prototype.reportState = function(collector){
+	if(collector instanceof Array){
+		var info = JSON.stringify(this);
+		collector.push(info + "\n");
+	}else{
+		console.log("Wrong collector on entity(id=%s) report state.", this.id);
+	}
+};

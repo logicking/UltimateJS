@@ -7,13 +7,35 @@ var serverSnapshot = require(path.join(__dirname, "../resources/gameServerSnapsh
 
 function EntityManager(){
 	EntityManager.instance = this;
-	var commands = null;
 };
 
 EntityManager.prototype.init = function(params){
-	this.eClient = params["entityClient"];
-	commands = new Object();
+	var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
+
+	if (!this.eClient) {
+		this.eClient = new pg.Client(conString);
+		this.eClient.connect();
+	}else{
+		this.eClient.end();
+		this.eClient = new pg.Client(conString);
+		this.eClient.connect();
+	}
 };
+
+
+EntityManager.prototype.resetClient = function(){
+	var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
+
+	if (!this.eClient) {
+		this.eClient = new pg.Client(conString);
+		this.eClient.connect();
+	}else{
+		this.eClient.end();
+		this.eClient = new pg.Client(conString);
+		this.eClient.connect();
+	}
+};
+
 
 EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNames, callback){
 	var that = this;
@@ -84,13 +106,6 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 };
 
 //
-//EntityManager.prototype.backupSession = function(session){
-//	assert(session || session instanceof Session, "Bad session arg on backup");
-//	this.eClient.query("UPDATE account_data SET data = $1 WHERE account = $2",
-//	[ JSON.stringify(session.sendData()), session.accountID ]).on("error", function(error){
-//		console.log(error);
-//	});
-//};
 
 EntityManager.prototype.getAccountEntities = function(accountID, callback){
 	assert(Server.instance.entities[accountID], "No such Account in Entities with accID ", accountID);
@@ -105,17 +120,6 @@ EntityManager.prototype.getAccountEntities = function(accountID, callback){
 	});
 };
 //
-//EntityManager.prototype.createSessionRecord = function(session){
-//	assert(session || session instanceof Session, "Bad session arg on createRecord");
-//	console.log("Creating Record");
-//	var query = this.eClient.query("INSERT INTO " + s + "(account, data) VALUES  ($1, $2)", [  session.accountID, JSON.stringify( session.sendData() ) ]);
-//	query.on("error", function(error){
-//		console.log(error);
-//	});
-//	query.on("end", function(){
-//		console.log("Created Record for userID: %s with accID: %s", session.userId, session.accountID );
-//	});
-//};
 
 
 EntityManager.prototype.backupEntity = function(entity, callback){
@@ -239,27 +243,6 @@ EntityManager.prototype.collectByParent = function(parentID, callback){
 		recurciveCollect(finaldata, data, callback);
 	});
 //	
-//	EntityManager.instance.getEntityByParent(parentID, function(fdata){
-//		utils.extend(true, data, fdata);
-//		for(var id in fdata){
-//			loopCounter = loopCounter + 1;
-////			console.log("loopCounter: ", loopCounter);
-//			EntityManager.instance.getEntityByParent(id, function(ndata){
-//				callbackCounter = callbackCounter + 1;
-////				console.log("callbackCounter: ", callbackCounter);
-//				utils.extend(true, data, ndata);
-//				callbacked = true;
-//				if(callback && (callbackCounter == loopCounter) ){
-//					console.log("Collected by parent: ", data);
-//					callback(data);
-//				}
-//			});	
-//		}
-//		if(!callbacked && callback){
-//			console.log("Collected by parent: ", data);
-//			callback(data);
-//		}
-//	});
 };
 
 EntityManager.prototype.getEntityByParent = function(parentID, callback){
@@ -417,20 +400,67 @@ EntityManager.prototype.getUniqueId = function(callback){
 	var that = this;
 	var id = "-1";
 	var unique = null;
-	var query = this.eClient.query( "SELECT * FROM " + sconf.entity_table + " WHERE id = $1" , [id] );
+	var query = this.eClient.query( "SELECT data FROM " + sconf.entity_table + " WHERE id='-1'; UPDATE " 
+				+ sconf.entity_table + " SET data = (CAST(nullif(data, '') AS integer)+1) WHERE id ='-1'"  );
 	query.on("row", function(row){
 		unique = row.data;
 	});
 	query.on("end", function(result){
-		var innerQuery = that.eClient.query("UPDATE " + sconf.entity_table + " SET data = $2, parentid = $3  WHERE id = $1",
-					[ id, (Number(unique)+1), ""]);
-			
-			innerQuery.on("end", function(){
-				if(callback){
-					callback(unique);
-				}
-			});
-		
+		if(callback){
+			callback(unique);
+		}
+//		var innerQuery = that.eClient.query("UPDATE " + sconf.entity_table + " SET data = $2, parentid = $3  WHERE id = $1",
+//					[ id, (Number(unique)+1), ""]);
+//			
+//			innerQuery.on("end", function(){
+//				
+//			});
+//		
 	});
 
 };
+
+
+
+EntityManager.prototype.getAccountIdByUserId = function(userId, callback){
+	var that = this;
+	console.log("getAccountIdByUserId call.");
+	var query = that.eClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
+	var rows = [];
+	query.on( "error", function(error){
+		console.err_log("Session INIT Error on Request to DB\n", error);
+	});
+	
+	query.on('row', function(row){
+		rows.push(row);
+	});
+	
+	query.on("end", function(result){
+		console.log("getAccountIdByUserId end of query handler.");
+		if((result.rowCount>=1) && (rows.length>=1)){
+			var dropWrong = function(list){
+				if(list.length<=1){
+					console.log("getAccountIdByUserId callback(%s) call. Found user accId.", (!callback)?"undefined":"defined");
+					if(callback){
+						callback(list.pop().account);
+					}
+					return;
+				}
+				var accId = list.pop();
+				var query = that.eCLient.query("DELETE FROM " + sconf.user_accounts_table + " WHERE account = $1", [accId]);
+				query.on("end", function(){
+					dropWrong(list);
+				});
+			};
+			dropWrong(rows);
+		}else{
+			console.log("getAccountIdByUserId callback(%s) call. Not found user accId", (!callback)?"undefined":"defined");
+			if(callback){
+				callback(null);
+			}
+			
+		}
+		
+	});
+};
+

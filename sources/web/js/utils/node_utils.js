@@ -2,14 +2,20 @@ var request = require("request");
 var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
-var logger = sconf.username;
+var logger = sconf.username + sconf.deploy?"_deploy":"";
 var ENABLE_REMOTE_CONSOLE = true;
 var ONLY_ERRORS = true;
 var DISABLE_CONSOLE = false;
-//reseting log on logserverr
-	var consoleUrl = "http://ec2-23-20-152-59.compute-1.amazonaws.com:8765/";
-	console.log("Connecting to console server");
-	if(ENABLE_REMOTE_CONSOLE){
+//reseting log on logserver
+var consoleUrl = "http://ec2-23-20-152-59.compute-1.amazonaws.com:8765/";
+console.log("Connecting to console server");
+	
+
+(function(){
+	var error_flag = false;
+	
+	
+	if(ENABLE_REMOTE_CONSOLE && !sconf.deploy){
 		request.post(consoleUrl + "resetLog", {
 			form : {
 				name : logger,
@@ -27,23 +33,9 @@ var DISABLE_CONSOLE = false;
 	}
 	
 
-	(function() {
-		if(ENABLE_REMOTE_CONSOLE|| DISABLE_CONSOLE){
-			var fn = console.log;
-			var index = 0;
-			console.log = function() {
-				if(!DISABLE_CONSOLE ){
-					var that = this;
-					index = index + 1;
-					time = Date.now();
-					onConsoleMessage(arguments, time, index);
-					return fn.apply(this, arguments);
-				}
-			};
-		}
-	})();
-
-var error_flag = false;
+	
+	
+	
 	var onConsoleMessage = function(args, time, index) {
 		var msg = util.format.apply(util, args);
 		var json = {
@@ -74,14 +66,46 @@ var error_flag = false;
 		}
 
 	};
+	
+	
+	(function() {
+		if(ENABLE_REMOTE_CONSOLE|| DISABLE_CONSOLE){
+			var fn = console.log;
+			var index = 0;
+			console.log = function() {
+				if(!DISABLE_CONSOLE){
+					var that = this;
+					index = index + 1;
+					time = Date.now();
+					onConsoleMessage(arguments, time, index);
+					return fn.apply(this, arguments);
+				}
+			};
+		}
+	})();
+	
+	console.err_log = function(){
+		error_flag = true;
+		console.log.apply(console.log, arguments);
+		error_flag = false;
+	};
+	
+	console.err_trace = function(){
+		var args = arguments;
+		try{
+			throw new Error();
+		}catch(err){
+			error_flag = true;
+			console.log.apply(console.log, args);
+			console.log("With trace: ", err.stack);
+			error_flag = false;
+		}
+		
+	};
+	
+	
+})();
 
-//exception handling
-process.on('uncaughtException', function (err) {
-	  error_flag = true;
-	  console.log('Caught uncaught exception: ' ,  err);
-	  console.log( err.stack );
-	  error_flag = false;
-});
 
 // Inheritance pattern
 Function.prototype.inheritsFrom = function(parentClassOrObject) {
@@ -210,14 +234,11 @@ var uniqueId = (function() {
 
 //Generate unique ID number for messages
 var mUId = (function() {
-	var id = 0; // This is the private persistent value
-	// The outer function returns a nested function that has access
-	// to the persistent value. It is this nested function we're storing
-	// in the variable uniqueID above.
+	var id = 0; 
 	return function() {
 		return id++;
-	}; // Return and increment
-})(); // Invoke the outer function after defining it.
+	}; 
+})();
 
 // Console hack for IE
 //if(typeof console == "undefined") {

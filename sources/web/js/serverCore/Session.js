@@ -2,7 +2,7 @@
 /* 
  * Session - authorization, account manager 
  */
-var SESSION_LIFETIME = 30 * 60 * 1000;
+var SESSION_LIFETIME = 15 * 60 * 1000;
 
 function Session(){
 	var propertyQueue = null;
@@ -10,46 +10,28 @@ function Session(){
 
 Session.prototype.init = function(params){
 	var that = this;
+	this.vkApp = vkApi(sconf.vkontakte_app_id, sconf.vkontakte_app_secret);
 	this.userId = params["userId"];
 	this.accountId = "default";
 	var callback = params["callback"];
 	var that = this;
 	var rows = [];
 	propertyQueue = [];
+	
 	that.authClient = params["authClient"];
-//	console.log("that.authClient is defined on session init: ", !(!that.authClient));
 	error_flag = true;
-	console.log("Session init on userId: ", this.userId);
-	error_flag = false;
-	var et = Date.now(); 
-	var query = that.authClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ that.userId ] );
-	query.on( "error", function(error){
-		error_flag = true;
-		console.log("Session INIT Error on Request to DB\n", error);
-		error_flag = false;
-	});
+//	console.err_log("Session init call with userId=%s.", this.userId);
 	
-	query.on('row', function(row){
-		rows.push(row);
-	});
-	
-	query.on("end", function(result){
-		error_flag = true;
-		console.log("end of query on session init.");
-		error_flag = false;
-//		console.log("Auth account request time: ", Date.now() - et);
-		if((result.rowCount == 0)&&(rows.length == 0)){
-			error_flag = true;
-			console.log("rowCount == 0 (New user).");
-			error_flag = false;
+	EntityManager.instance.getAccountIdByUserId(that.userId, function(accId){
+		console.log("got Account ID", accId);
+		if(!accId){
+//			console.err_log("No AccId found. New User!");
 			EntityManager.instance.getUniqueId(function(unique){
 				that.accountId = unique;
 				that.authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
 //				et = Date.now();
 				EntityManager.instance.getAccountDefaultUpdate(that.accountId, null, function(defaultUpdate){4
-					error_flag = true;
-					console.log("Got default update.");
-					error_flag = false;
+//					console.err_log("Got default update.");
 					var num = defaultUpdate.count;
 					defaultUpdate = defaultUpdate.update;
 					var counter = 0;
@@ -73,6 +55,7 @@ Session.prototype.init = function(params){
 								Server.instance.restoreFromCache(account.id, that);
 //								console.log("Restore from cache time: ", Date.now() - et);
 								that.reportActivity();
+//								console.err_trace("End of new User's session init trace.");
 								if(callback){
 									callback();
 								}
@@ -93,49 +76,28 @@ Session.prototype.init = function(params){
 				}); 
 
 			});
-			error_flag = false;
 //			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
 
 //			});
 			return;
 		}
-
-		that.accountId = rows[0].account;
-		error_flag = true;
-		console.log("Found previous record.");
-		error_flag = false;
-////		that.account = new BasicAccount();
-		et = Date.now();
+		
+		that.accountId = accId;
+//		console.err_log("Found previous record with accId=%s.", accId);
+		
 		Server.instance.getEntity(that, that.accountId, function(account){
-//			console.log("get Account entity time: ", Date.now() - et);
-//			if(!account){
-//			Server.instance.extendEntities(EntityManager.instance.getAccountDefaultUpdate(that.accountId), that );
-//			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
-//			Server.instance.getEntity(that, that.accountId, function(account){
-//			Server.instance.addSession(that);
-//			account.userId = that.userId;
-//			console.log("Set userId to account on session init");
-//			Server.instance.restoreFromCache(account.id, that);
-//			that.reportActivity();
-//			if(callback){
-//			callback();
-//			}
-//			}, false, true);
-//			});
 
 //			}
 			if(!account){
-				error_flag = true;
-				console.log("Record found but Account not FOUND!");
-				error_flag = false;
+				console.err_log("Record found but Account not FOUND!");
+				
 				var query = that.authClient.query( "DELETE FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ that.userId ] );
 				query.on( "error", function(error){
-					error_flag = true;
-					console.log("Session INIT Error on Request to DB\n", error);
-					error_flag = false;
+					console.err_log("Session INIT Error on Request to DB\n", error);
 				});
 
 				query.on("end", function(){
+					console.err_log("Deleted Wrong record. Initing again.");
 					that.init(params);
 				});
 
@@ -144,17 +106,15 @@ Session.prototype.init = function(params){
 			Server.instance.addSession(that);
 			account.userId = that.userId;
 			account.userLogin = true;
-			et = Date.now();
 			Server.instance.restoreFromCache(account.id, that);
 			that.reportActivity();
-			error_flag = true;
-			console.log("Restored from cache.");
-			error_flag = false;
+//			console.err_log("Restored from cache.");
 			if(callback){
 				callback();
 			}
 		}, false, true);
 	});
+	
 };
 
 Session.prototype.setInitData = function(initData){
@@ -266,4 +226,13 @@ Session.prototype.destroy = function(){
 //	Server.instance.logEntities("After session destroy");
 //	Server.instance.logCache("After session destroy");
 	//session.suicide();
+};
+
+Session.prototype.reportState = function(collector){
+	if(collector instanceof Array){
+		var info = JSON.stringify(this);
+		collector.push(info + "\n");
+	}else{
+		console.log("Wrong collector.");
+	}
 };

@@ -2,7 +2,7 @@
  * Defines main class: owner of Sessions, Accounts, allEntities, scheduler
  */
 
-var CACHE_LIFETIME = 30 * 60 * 1000;
+var CACHE_LIFETIME = 15 * 60 * 1000;
  
 function Server() {
 	var fileServer = null;
@@ -10,6 +10,9 @@ function Server() {
 	var Accounts = null;
 	var Sessions = null;
 	var commands = null;
+//	this.getSessions = function(){
+//		return Sessions;
+//	};
 };
 
 Server.prototype.init = function(sconf, callback, droptable) {
@@ -41,7 +44,6 @@ Server.prototype.init = function(sconf, callback, droptable) {
 		var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
 
 		if (!that.client) {
-//			console.log("INITING CLIENT FOR THE FIRST TIME\n------\n------\n------\n------\n------\n------\n------\n------\n------\n------");
 			that.client = new pg.Client(conString);
 			that.client.connect();
 		}
@@ -56,16 +58,7 @@ Server.prototype.init = function(sconf, callback, droptable) {
 		commands = {};
 		Server.instance = this;
 
-		// that.client.on('error', function(error){
-		// console.log(error);
-		// });
-		//
-		// that.client.on('notice', function(msg) {
-		// console.log("-----------------");
-		// console.log("notice: %j", msg);
-		// console.log("-----------------");
-		// });
-		if(droptable){
+		if((!sconf.deploy) && droptable){
 			console.log("Deleting data from DB... ");
 			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
 			entity_table_delquery.on("end", function() {
@@ -85,20 +78,14 @@ Server.prototype.init = function(sconf, callback, droptable) {
 				callback();
 			}
 		}
+		this.disableAuth = false;
+
 		
 		
 
-		// client.query( 'DROP TABLE IF EXISTS account_data');
-		// authClient.query( 'DROP TABLE IF EXISTS users_accounts');
-		// client.query( 'CREATE TABLE account_data(account varchar(30), data
-		// text )' );
-		// client.query( 'CREATE TABLE entity_data(id varchar(30), data text,
-		// parentid varchar(30) )' );
-		// authClient.query( 'CREATE TABLE users_accounts(userid varchar(30),
-		// account varchar(30) )' );
-
-		// console.log('(Re)Created Tables entity_data and users_accounts');
-
+	
+		
+		
 		this.addCommand("switchState", function(args, session, callback) {
 //			var et = Date.now();
 			
@@ -167,14 +154,35 @@ Server.prototype.init = function(sconf, callback, droptable) {
 	}
 };
 
+Server.prototype.initPgClient = function(){
+	var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
+
+	if (!this.client) {
+		this.client = new pg.Client(conString);
+		this.client.connect();
+	}else{
+		this.client.end();
+		this.client = new pg.Client(conString);
+		this.client.connect();
+	}
+	return this.client;
+};
+
+
 // passed func should take 3 args - args array, session, callback(see below)
 Server.prototype.addCommand = function(name, func) {
 	commands[name] = func;
 };
 
+Server.prototype.getSessions = function(){
+	return Sessions;
+};
+
 // callback receives only 1 arg - result of command execution
 // and is defined in onCommand() function
 Server.prototype.executeCommand = function(name, args, session, callback) {
+	
+	
 	var command = commands[name];
 	if (command) {
 		try {
@@ -254,6 +262,7 @@ Server.prototype.createEntity = function(id, session, callback) {
 };
 
 Server.prototype.killCached = function(id) {
+	console.log("Killing entity(id=%s)", id);
 	var entity;
 	if (!(entity = Server.instance.cache[id])) {
 		return;
@@ -319,7 +328,7 @@ Server.prototype.resetCacheTimeout = function(entity) {
 		}
 //		 console.log("Resetting timeout for entity with id=%s", entity.id);
 		entity.timeoutId = global.setTimeout(function() {
-			console.log("Killing entity(id=%s)", entity.id);
+			
 			Server.instance.killCached(entity.id);
 		}, CACHE_LIFETIME);
 	};
@@ -498,10 +507,58 @@ Server.prototype.removeEntity = function(id, removeChildren) {
 	}
 };
 
+Server.prototype.collectUserData = function(userId, callback){
+	var session = this.getSession(userId);
+	var info = {
+			data: []
+	};
+	
+	if(session){
+		session.reportState(data);
+		info.sessionAlive = true;
+	}else{
+		info.sessionAlive = false;
+	}
+	
+	//just for BubbleMeadow!!!
+	EntityManager.instance.getAccountIdByUserId(userId, function(accountId){
+		Server.instance.getEntity(null, accountId, function(account){
+			account.reportState(info.data);
+			for(var id in account.allEntities){
+				var entity = account.allEntities[id];
+				entity.reportState(info.data);
+				if(entity instanceof MapState){
+					for(var i=0;i<entity.children.length;i++){
+						entity.children[i].reportState(info.data);
+					}
+					Server.instance.getEntity(null, entity.gamestate, function(gameState){
+						gameState.reportState(info.data);
+						if(callback){
+							callback(info);
+						}
+					});
+				}
+				if(entity instanceof BallsGameState){
+					Server.instance.getEntity(null, entity.mapState, function(mapState){
+						gameState.reportState(info.data);
+						if(callback){
+							callback(info);
+						}
+					}, false, true);
+				}
+			}
+		}, false, true);
+	});
+	
+};
+
+
 Server.prototype.getEntity = function(session, id, callback, existingOnly, createChildren) {
 	/*
-	 * tries 3 times: 1) from working entities 2) from cache (tries to add to
-	 * working ) 3) from DB
+	 * tries 3 times:
+	 * 1) from working entities 
+	 * 2) from cache (tries to add to working ) 
+	 * 3) from DB
 	 */
 	var et = Date.now();
 	var addedIdList = [];
@@ -524,9 +581,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 				if (callback) {
 					// console.log("Get entity(%s) time: ", entity.id,
 					// Date.now() - et);
-					process.nextTick(function() {
-						callback(entity);
-					});
+					callback(entity);
 
 				}
 
@@ -559,9 +614,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 				if (callback) {
 					// console.log("Get entity(%s) time: ", entity.id,
 					// Date.now() - et);
-					process.nextTick(function() {
-						callback(entity);
-					});
+					callback(entity);
 				}
 
 			});
@@ -569,9 +622,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 		}
 		if (callback) {
 			// console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
-			process.nextTick(function() {
-				callback(entity);
-			});
+			callback(entity);
 		}
 		return entity;
 	}
@@ -585,9 +636,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 		if ((!entity) || (entity == null)) {
 			console.log("Entity id \"%s\" does not exist.", id);
 			// console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
-			process.nextTick(function() {
-				callback(null);
-			});
+			callback(null);
 			return;
 		}
 		// console.log("Entity with id=%s on EnityManager.getEntity",
@@ -598,9 +647,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 
 		if (!createChildren) {
 			// console.log("Get entity(%s) time: ", entity.id, Date.now() - et);
-			process.nextTick(function() {
-				callback(entity);
-			});
+			callback(entity);
 			return;
 		}
 		EntityManager.instance.collectByParent(id, function(data) {
@@ -617,9 +664,7 @@ Server.prototype.getEntity = function(session, id, callback, existingOnly, creat
 			if (callback) {
 				// console.log("Get entity(%s) time: ", entity.id, Date.now() -
 				// et);
-				process.nextTick(function() {
-					callback(entity);
-				});
+				callback(entity);
 			}
 
 		});
@@ -693,35 +738,54 @@ Server.prototype.getTransactionHandler = function() {
 };
 
 
-Server.prototype.killSession = function(userId){
-	var that = this;
-	var session = Server.instance.getSession[userId];
+Server.prototype.killSession = function(session){
 	if(session){
+		console.log("killing session: ", session.userId);
 		var accId = session.accountId;
 		global.clearTimeout(session.timeoutId);
 		session.destroy();
-		that.killCached(accId);
+		this.killCached(accId);
 	}
 };
 
 
 Server.prototype.killAllSessions = function(){
-	
-	
-	for(var userId in Sessions){
-		this.killSession(userId);
+	Server.instance.disableAuth = true;
+	var sessions = this.getSessions();
+//	console.log("got sessions: ", sessions);
+	for(var userId in sessions){
+		this.killSession(sessions[userId]);
 	}
 };
 
+Server.prototype.getOnlineNum = function(){
+	var sessions = this.getSessions();
+	var counter = 0;
+	for(var userId in sessions){
+		counter++; 
+	}
+	return counter;
+};
+
+
 Server.prototype.onAuth = function(req, res) {
+	console.log();
 	var entryTime = Date.now();
 	// session.userId = req.body.userId;
 	// if(!req.isAuthenticated()){
 	// Server.instance.onIFrameAuth(req.data.);
 	// }
+	console.log("server.onAuth()");
+	if(Server.instance.disableAuth){
+		var obj = {
+				error : "Auth disabled.",
+				error_code : 2
+			};
+		res.end(JSON.stringify(obj));
+		return;
+	}
 	var that = Server.instance;
 	var userId;
-	var et = Date.now();
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
@@ -734,18 +798,22 @@ Server.prototype.onAuth = function(req, res) {
 //			}
 //		}
 	}
+	console.log("AuthCallbacks length = ", that.authCallbacks.length);
 	var authError = false;
 	function runAuthCallbacks(session, cb){
 		var walker = function(index){
 			return function(){
 				process.nextTick(function(){
+					
 					if(index < that.authCallbacks.length && !authError){
+						console.log("Walker %s call.", index);
 						that.authCallbacks[index](session, walker(index+1), function(){
 							console.log("setting error = true");
 							authError = true;
 						});
 					}else{
 						if(cb){
+							console.log("Callback on walker.");
 							cb();
 						}
 					}
@@ -760,8 +828,9 @@ Server.prototype.onAuth = function(req, res) {
 	// console.log("\nAuth request from user : ", userId);
 	var session = Server.instance.getSession(userId);
 //	console.log("22222222222222222: ", Date.now() - et);
+	
 	if (session) {
-		// console.log("Found previous session with userId: ", userId);
+		 console.log("Found session for userId: ", userId);
 		runAuthCallbacks(session, function() {
 			if (authError) {
 				console.log("Error on auth!!!!");
@@ -775,18 +844,16 @@ Server.prototype.onAuth = function(req, res) {
 					initUpdate : session.sendData(true)
 				};
 			}
-
+			console.log("callback on authCallbacks.");
 			res.end(JSON.stringify(obj));
 		});
 
 		return;
 	}
-	et = Date.now();
 	var session = new Session();
-//	console.log("33333333333333333333: ", Date.now() - et);
 
-	et = Date.now();
-//	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
+	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
+	console.log("New session init.");
 	session.init({
 		"userId" : userId,
 		"authClient" : Server.instance.client,
@@ -796,17 +863,18 @@ Server.prototype.onAuth = function(req, res) {
 				if (authError) {
 					console.log("Error on auth!!!!");
 					var obj = {
-						error : "Auth error occured."
+							error : "Auth error occured."
 					};
 				} else {
 					var obj = {
-						accountId : session.accountId,
-						userId : userId,
-						initUpdate : session.sendData(true)
+							accountId : session.accountId,
+							userId : userId,
+							initUpdate : session.sendData(true)
 					};
 				}
-					res.end(JSON.stringify(obj));
-				});
+				console.log("Auth Callback.");
+				res.end(JSON.stringify(obj));
+			});
 
 		})
 	});
@@ -870,6 +938,7 @@ Server.prototype.onCommunicate = function(req, res, next) {
 Server.prototype.onCommand = function(req, res, next) {
 	var entryTime = Date.now();
 	var userId;
+	
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
@@ -892,6 +961,7 @@ Server.prototype.onCommand = function(req, res, next) {
 	}
 
 	var session = Server.instance.getSession(userId);
+	
 	if (!session) {
 		res.json({
 			error : {
@@ -901,10 +971,30 @@ Server.prototype.onCommand = function(req, res, next) {
 		});
 		return;
 	}
+	if(!userId){
+		res.json({
+			error : {
+				description : "Wrong userId!!!",
+				code : 4
+			}
+		});
+		return;
+	}
 
 	var json = req.body;
-	var command = json['command'], args = json['args'];
 	
+	var command = json['command'], args = json['args'];
+	if((session.panelValuesTime && (Date.now() - session.panelValuesTime < 2000 )) && (command == "getPanelValues")){
+//		res.json({
+//			error : "Too many requests.",
+//			error_code : 5
+//		});
+		return;
+	}else{
+		if(command == "getPanelValues"){
+			session.panelValuesTime = Date.now();
+		}
+	}
 	Server.instance.executeCommand(command, args, session, function(result) {
 		// EntityManager.instance.backupAllEntities(Server.instance.entities,
 		// function(){
