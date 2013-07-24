@@ -24,7 +24,7 @@ Scene.prototype.init = function(params) {
 	Scene.parent.init.call(this, params);
 };
 
-Scene.prototype.createVisual = function() {
+Scene.prototype.createVisual = function(noChildAttach) {
 	var params = this.params;
 	var visual = guiFactory.createObject("GuiScene", {
 		parent : this.guiParent,
@@ -42,9 +42,11 @@ Scene.prototype.createVisual = function() {
 
 	var that = this;
 	this.children = this.children ? this.children : new Array();
-	$['each'](this.children, function(id, val) {
-		that.attachChildVisual(val);
-	});
+	if(!noChildAttach){
+		$['each'](this.children, function(id, val) {
+			that.attachChildVisual(val);
+		});
+	}
 };
 
 Scene.prototype.attachChildVisual = function(child) {
