@@ -13,6 +13,15 @@ var Resources = (function() {
 
 	// enum of strings of current language
 	var strings = new Object();
+	
+//	var cache = document.createElement("div");
+//	cache.style.width = "100px";
+//	cache.style.height = "100px";
+//	cache.style.background = "red";
+//	cache.style.left = "12790px";
+//	cache.style.top = "0px";
+
+//	document.body.appendChild(cache);
 
 	var currentResolution = null;
 	var defaultResolution = null;
@@ -49,7 +58,7 @@ var Resources = (function() {
 				}
 			}
 			if (loadTimer > 10000) {
-				log("Loading too long" + assetsArray.length);
+//				log("Loading too long" + assetsArray.length);
 				for ( var i = 0; i < assetsArray.length; i++) {
 					var obj = assetsArray[i];
 					if (obj.type == "image" && !obj.loaded) {
@@ -232,7 +241,7 @@ var Resources = (function() {
 				var thisLength = 5*(counter+1);
 				if (thisLength>l) {
 					if (thisLength - l > 5) {
-						log(thisLength + " clear");
+//						log(thisLength + " clear");
 						clearInterval(mediaInterval);
 						return;
 					} else {
@@ -241,11 +250,11 @@ var Resources = (function() {
 				} 
 				
 				for (; i < thisLength; ++i) {
-					if (i > 42)
-						log(i + " = i; thisLength = " + thisLength + " total = " + total);
+//					if (i > 42)
+//						log(i + " = i; thisLength = " + thisLength + " total = " + total);
 					current = data[i];
 
-					log2(i + "/" + l + " 0");
+//					log2(i + "/" + l + " 0");
 					ext = current.substr(current.lastIndexOf('.') + 1)
 							.toLowerCase();
 
@@ -262,13 +271,13 @@ var Resources = (function() {
 						obj.type = "image";
 						obj.fileName = Resources.getImage(current);
 						obj.src = obj.fileName;
-						var image = document.createElement('img');
-						image.src = obj.fileName;
-						image.style.position = "fixed";
-						image.style.top = '0px';
-						image.style.left = '1000px';
-						image.style.zIndex = 100000;
-						document.getElementById("cacher").appendChild(image);
+//						var image = document.createElement('img');
+//						image.src = obj.fileName;
+//						image.style.position = "fixed";
+//						image.style.top = '0px';
+//						image.style.left = '1000px';
+//						image.style.zIndex = 100000;
+//						cache.appendChild(image);
 						// log3(obj.fileName + "is requested, ");
 					} else {
 						total--;
@@ -278,7 +287,7 @@ var Resources = (function() {
 					// add to global asset collection
 					assets[current] = obj;
 					assetsArray.push(obj);
-					log3(assetsArray.length + "; ");
+//					log3(assetsArray.length + "; ");
 
 					obj.onload = function() {
 						if (this.loaded)
@@ -296,7 +305,7 @@ var Resources = (function() {
 						}
 						if (j === total) {
 							// log3(this.fileName + "is ready, ");
-							log("oncomplete");
+//							log("oncomplete");
 							if (oncomplete)
 								oncomplete();
 						}
@@ -313,7 +322,7 @@ var Resources = (function() {
 							});
 						} else {
 							j++;
-							log("onerror oncomplete");
+//							log("onerror oncomplete");
 							if (j === total) {
 								if (oncomplete)
 									oncomplete();
