@@ -17,6 +17,7 @@ function Account(parent) {
 Account.inheritsFrom(BaseState);
 
 Account.prototype.init = function(params) {
+	this.enabled = true;
 	params = params ? params : {};
 	Account.parent.init.call(this, params);
 	// associative array of all active entities
@@ -171,6 +172,7 @@ Account.prototype.render = function() {
 
 // Regular scheduled update for registered enities
 Account.prototype.update = function(dt) {
+	if (this.enabled == false) return;
 	var that = this;
 	var date = Date.now();
 	if(date - this.prevUpdateTime >= this.globalUpdateInterval){
@@ -195,7 +197,7 @@ Account.prototype.update = function(dt) {
 	});
 };
 Account.prototype.setEnable = function(isTrue) {
-
+	this.enabled = isTrue;
 };
 
 // called from outside, to notify entities about

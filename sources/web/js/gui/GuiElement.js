@@ -110,10 +110,10 @@ GuiElement.prototype.initialize = function(params) {
 	// generate ID
 	this.id = this.generateId();
 	// Check whether element with such id is already in scene
-	if ($("#" + this.id).length > 0) {
-		console.error(" GuiElement with  id = '" + this.id
-				+ "' is already exists.");
-	}
+//	if ($("#" + this.id).length > 0) {
+//		console.error(" GuiElement with  id = '" + this.id
+//				+ "' is already exists.");
+//	}
 
 	this.style = params['style'];
 	this.width = params['width'];
@@ -122,6 +122,7 @@ GuiElement.prototype.initialize = function(params) {
 	this.enable = true;
 	this.children = new GuiContainer();
 	this.children.init();
+	this.positioned = false;
 
 	this.src = params['html'] ? params['html'] : this.src;
 	if (params['jObject']) {
@@ -152,9 +153,13 @@ GuiElement.prototype.initialize = function(params) {
 		});
 	}
 
-	this.setOffset(Screen.macro(params['offsetX']), Screen
-			.macro(params['offsetY']));
-	this.setPosition(Screen.macro(params['x']), Screen.macro(params['y']));
+//	this.setOffset(Screen.macro(params['offsetX']), Screen
+//			.macro(params['offsetY']));
+//	this.setPosition(Screen.macro(params['x']), Screen.macro(params['y']));
+	this.x = Screen.macro(params['x']);
+	this.y = Screen.macro(params['y']);
+	this.offsetX = Screen.macro(params['offsetX']);
+	this.offsetY = Screen.macro(params['offsetY']);
 	this.setSize(Screen.macro(params['width']), Screen.macro(params['height']));
 	if (typeof params['z'] == "number") {
 		this.setZ(params['z']);
@@ -163,6 +168,8 @@ GuiElement.prototype.initialize = function(params) {
 	if (params['hide']) {
 		this.hide();
 	} else {
+//		this.toBeVisible = true;
+//		this.visible = false;
 		this.show();
 	}
 
@@ -170,7 +177,7 @@ GuiElement.prototype.initialize = function(params) {
 		this.setOpacity(params['opacity']);
 	}
 
-	this.resize();
+//	this.resize();
 };
 
 GuiElement.prototype.setOffset = function(offsetX, offsetY) {
@@ -239,18 +246,50 @@ GuiElement.prototype.getPosition = function() {
 
 GuiElement.prototype.setZ = function(z) {
 	this.jObject['css']("z-index", z);
-	this.jObject['css']("-webkit-transform", "translateZ(0)");
+//	this.jObject['css']("-webkit-transform", "translateZ(0)");
 	this.z = z;
 };
 
-GuiElement.prototype.show = function() {
+GuiElement.prototype.show = function(noPosition) {
+//	if (this.positioned && this.positioned != true)
+//	if (!noPosition)
+//		this.positioning();
+	
+	
+//	if (this.children) {
+//		$["each"](this.children.guiEntities, function(index, value) {
+//			value.show();
+//		});
+//	}
+
 	this.jObject['show']();
 	this.visible = true;
+};
+
+GuiElement.prototype.positioning = function() {
+//	if (this.visible == false && this.toBeVisible == true) {
+//		this.show(true);
+//		return;
+//	}
+	this.setOffset(this.offsetX, this.offsetY);
+	this.setPosition(this.x, this.y);
+//	this.setSize(Screen.macro(this.params['width']), Screen.macro(this.params['height']));
+
+
+//	
+	if (this.children) {
+		$["each"](this.children.guiEntities, function(index, value) {
+			value.positioning();
+		});
+	}
+	
+	this.positioned = true;
 };
 
 GuiElement.prototype.hide = function() {
 	this.jObject['hide']();
 	this.visible = false;
+	this.toBeVisible = false;
 };
 
 GuiElement.prototype.setOpacity = function(opacity) {
@@ -392,7 +431,7 @@ GuiElement.prototype.resize = function() {
 	this.setRealSize(w, h);
 	this.setPosition(this.x, this.y);
 
-	this.children.resize();
+//	this.children.resize();
 };
 
 // prevents resizing of element

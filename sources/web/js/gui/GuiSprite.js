@@ -220,7 +220,7 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 };
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
-		independentUpdate) {
+		independentUpdate, callback) {
 
 	var animation = this.animations[animationName];
 	assert(animation, "No such animation: " + animationName);
@@ -250,6 +250,10 @@ GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		this.updateAnimationCallback = setInterval(function() {
 			that.updateAnimation();
 		}, this.currentFrameLength);
+	}
+	
+	if (callback) {
+		this.animationEndCallback = callback;
 	}
 	this.updateAnimation();
 };
@@ -350,20 +354,24 @@ GuiSprite.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
-	if (this.viewport) {
-		this.clampByViewport();
-	} else {
+//	if (this.viewport) {
+//		this.clampByViewport();
+//	} else {
 		this.setRealPosition(x, y);
-	}
+//	}
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
-	this.transform({
-		translate : {
-			x : Math.round(x * Screen.widthRatio()),
-			y : Math.round(y * Screen.heightRatio())
-		}
-	});
+
+	var pos = Screen.calcRealSize(x, y);
+	this.jObject['css']("left", pos.x);
+	this.jObject['css']("top", pos.y);
+//	this.transform({
+//		translate : {
+//			x : x,//Math.round(x * Screen.widthRatio()),
+//			y : y//Math.round(y * Screen.heightRatio())
+//		}
+//	});
 };
 
 GuiSprite.prototype.setTransform = function(matrix, angle) {

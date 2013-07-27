@@ -87,41 +87,65 @@ BackgroundState.prototype.init = function(params) {
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	var that = this;
 	console.log("BackgroundState.prototype.fadeIn");
+
 	if (this.loader != null) {
 		this.loader.show();
-		this.loader.$()['css']("opacity", 0);
-		this.loader.$()['stop']();
-		this.loader.$()['delay'](0.5 * fadeTime);
-		this.loader.fadeTo(1, 0.5 * fadeTime, function() {
-		});
-	}
-	this.mask.show();
-	this.mask.$()['stop']();
-	this.mask.$()['css']("opacity", 0);
-	this.mask.$()['css']("background-color", color);
-	this.mask.fadeTo(1, fadeTime, function(){
+		this.loader.$()['css']("opacity", 1);
+	}	
+	setTimeout(function() {
 		that.faded = true;
-//		that.mask.show();
 		if (callback)
 			callback();
-	});
+	},fadeTime);
+	that.mask.show();
+	
+//	if (this.loader != null) {
+//		this.loader.show();
+//		this.loader.$()['css']("opacity", 0);
+//		this.loader.$()['stop']();
+//		this.loader.$()['delay'](0.5 * fadeTime);
+//		this.loader.fadeTo(1, 0.5 * fadeTime, function() {
+//		});
+//	}
+//	this.mask.show();
+//	this.mask.$()['stop']();
+//	this.mask.$()['css']("opacity", 0);
+//	this.mask.$()['css']("background-color", color);
+//	this.mask.fadeTo(1, fadeTime, function(){
+//		that.faded = true;
+////		that.mask.show();
+//		if (callback)
+//			callback();
+//	});
 };
 
 BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 	var that = this;
 	console.log("BackgroundState.prototype.fadeOut");
 	if (this.loader != null) {
-		this.loader.$()['stop']();
 		this.loader.hide();
-//		this.loader.fadeTo(0, 0.3 * fadeTime);
 	}
-	this.mask.fadeTo(0, fadeTime, function() {
+	that.mask.hide();
+	setTimeout(function() {
 		that.faded = false;
-		that.mask.hide();
 		if (callback)
 			callback();
-	});
-	this.faded = false;
+	},fadeTime);
+
+	
+//	that.mask.hide();
+//	if (this.loader != null) {
+//		this.loader.$()['stop']();
+//		this.loader.hide();
+////		this.loader.fadeTo(0, 0.3 * fadeTime);
+//	}
+//	this.mask.fadeTo(0, fadeTime, function() {
+//		that.faded = false;
+//		that.mask.hide();
+//		if (callback)
+//			callback();
+//	});
+//	this.faded = false;
 };
 
 BackgroundState.prototype.resize = function() {

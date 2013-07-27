@@ -42,7 +42,7 @@ Entity.prototype.assert = function(cond, msg) {
 };
 
 Entity.prototype.log = function(msg) {
-	console.log("Entity id='" + this.id + "', " + msg);
+//	console.log("Entity id='" + this.id + "', " + msg);
 };
 
 Entity.prototype.destroy = function() {

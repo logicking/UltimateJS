@@ -10,11 +10,11 @@ GuiContainer.prototype.init = function() {
 	this.guiEntitiesMap = new Object();
 };
 GuiContainer.prototype.resize = function() {
-	for ( var i = 0; i < this.guiEntities.length; i++) {
-		if (this.guiEntities[i].resize) {
-			this.guiEntities[i].resize();
-		}
-	}
+//	for ( var i = 0; i < this.guiEntities.length; i++) {
+//		if (this.guiEntities[i].resize) {
+//			this.guiEntities[i].resize();
+//		}
+//	}
 };
 
 GuiContainer.prototype.update = function(time) {

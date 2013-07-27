@@ -6,6 +6,7 @@
 var Resources = (function() {
 	// private interface
 	var assets = new Array();
+	var assetsArray = new Array();
 
 	var images = new Array();
 	var resolutions = new Object();
@@ -15,6 +16,7 @@ var Resources = (function() {
 
 	var currentResolution = null;
 	var defaultResolution = null;
+	var loadTimer = 0;
 
 	var loadImage = function(src, callback) {
 		var image = new Image();
@@ -26,6 +28,35 @@ var Resources = (function() {
 	return { // public interface
 
 		init : function() {
+		},
+
+		isNotLoaded : function(time) {
+
+			loadTimer += time;
+
+//			log3("IsNotLoaded: " + assetsArray.length);
+
+			for ( var i = 0; i < assetsArray.length; i++) {
+				var obj = assetsArray[i];
+				// log3("constructor : " + (obj.constructor == Image) + "loaded
+				// : " + obj.loaded);
+				if (obj.type == "image" && !obj.loaded) {
+//					log3(obj.height + " = obj.height; " + obj.fileName + "; ");
+				}
+				if (obj.type == "image" && !obj.loaded
+						&& obj.naturalWidth !== 0 && obj.naturalHeight !== 0) {
+					obj.onload();
+				}
+			}
+			if (loadTimer > 10000) {
+				log("Loading too long" + assetsArray.length);
+				for ( var i = 0; i < assetsArray.length; i++) {
+					var obj = assetsArray[i];
+					if (obj.type == "image" && !obj.loaded) {
+						obj.onload();
+					}
+				}
+			}
 		},
 
 		setResolution : function(resolutionName) {
@@ -80,13 +111,14 @@ var Resources = (function() {
 		// returnes string
 		getString : function(stringId, rand) {
 			if (strings[stringId]) {
-			var str = strings[stringId];
-				if(strings[stringId] instanceof Array){
+				var str = strings[stringId];
+				if (strings[stringId] instanceof Array) {
 					if (rand == false) {
 						return strings[stringId];
 					}
-					var lbl = str[Math.floor(Math.random() * strings[stringId].length)];
-					return lbl; 
+					var lbl = str[Math.floor(Math.random()
+							* strings[stringId].length)];
+					return lbl;
 				}
 				return strings[stringId];
 			} else {
@@ -136,9 +168,12 @@ var Resources = (function() {
 				// name
 				// supposing that we have all images for this resolution
 				// available
-				if (!imageFilename) {
+				if (!imageFilename && typeof name != "undefined" && name) {
 					imageFilename = resolutions[currentResolution].folder
 							+ name;
+				} else {
+					// HACK! 26.07.2013
+					imageFilename = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 				}
 
 				if (preload) {
@@ -149,9 +184,9 @@ var Resources = (function() {
 			if (preloadCallback && image && image.complete) {
 				preloadCallback();
 			}
-			
-			if(assets[name]){
-//				console.log("IN ASS", assets[name].complete);
+
+			if (assets[name]) {
+				// console.log("IN ASS", assets[name].complete);
 			}
 			return imageFilename;
 		},
@@ -189,64 +224,105 @@ var Resources = (function() {
 		// TODO rewrite
 		loadMedia : function(data, oncomplete, onprogress, onerror) {
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
-			for (; i < l; ++i) {
-				current = data[i];
-				ext = current.substr(current.lastIndexOf('.') + 1)
-						.toLowerCase();
-
-				if ((ext === "mp3" || ext === "wav" || ext === "ogg" || ext === "mp4")) {
-					obj = new Audio(current);
-					// Chrome doesn't trigger onload on audio, see
-					// http://code.google.com/p/chromium/issues/detail?id=77794
-					if (navigator.userAgent.indexOf('Chrome') != -1)
-						j++;
-				} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
-						|| ext === "png") {
-					obj = new Image();
-					obj.src = Resources.getImage(current);
-				} else {
-					total--;
-					continue; // skip if not applicable
-				}
-
-				// add to global asset collection
-				assets[current] = obj;
-
-				obj.onload = function() {
-					++j;
-					// if progress callback, give information of assets loaded,
-					// total and percent
-					if (onprogress) {
-						onprogress.call(this, {
-							loaded : j,
-							total : total,
-							percent : (j / total * 100)
-						});
-					}
-					if (j === total) {
-						if (oncomplete)
-							oncomplete();
-					}
-				};
-
-				// if there is an error, pass it in the callback (this will be
-				// the object that didn't load)
-				obj.onerror = function() {
-					if (onerror) {
-						onerror.call(this, {
-							loaded : j,
-							total : total,
-							percent : (j / total * 100)
-						});
+			var counter = -1;
+			var times = Math.floor(l/5);
+			var mediaInterval = setInterval(function() {
+				counter++;
+				i = 5*counter;
+				var thisLength = 5*(counter+1);
+				if (thisLength>l) {
+					if (thisLength - l > 5) {
+						log(thisLength + " clear");
+						clearInterval(mediaInterval);
+						return;
 					} else {
-						j++;
+						thisLength = l;
+					}
+				} 
+				
+				for (; i < thisLength; ++i) {
+					if (i > 42)
+						log(i + " = i; thisLength = " + thisLength + " total = " + total);
+					current = data[i];
+
+					log2(i + "/" + l + " 0");
+					ext = current.substr(current.lastIndexOf('.') + 1)
+							.toLowerCase();
+
+					if ((ext === "mp3" || ext === "wav" || ext === "ogg" || ext === "mp4")) {
+						obj = new Audio(current);
+						// Chrome doesn't trigger onload on audio, see
+						// http://code.google.com/p/chromium/issues/detail?id=77794
+						if (navigator.userAgent.indexOf('Chrome') != -1)
+							j++;
+					} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
+							|| ext === "png") {
+						obj = new Image();
+						obj.loaded = false;
+						obj.type = "image";
+						obj.fileName = Resources.getImage(current);
+						obj.src = obj.fileName;
+						var image = document.createElement('img');
+						image.src = obj.fileName;
+						image.style.position = "fixed";
+						image.style.top = '0px';
+						image.style.left = '1000px';
+						image.style.zIndex = 100000;
+						document.getElementById("cacher").appendChild(image);
+						// log3(obj.fileName + "is requested, ");
+					} else {
+						total--;
+						continue; // skip if not applicable
+					}
+
+					// add to global asset collection
+					assets[current] = obj;
+					assetsArray.push(obj);
+					log3(assetsArray.length + "; ");
+
+					obj.onload = function() {
+						if (this.loaded)
+							return;
+						++j;
+						// if progress callback, give information of assets loaded,
+						// total and percent
+						this.loaded = true;
+						if (onprogress) {
+							onprogress.call(this, {
+								loaded : j,
+								total : total,
+								percent : (j / total * 100)
+							});
+						}
 						if (j === total) {
+							// log3(this.fileName + "is ready, ");
+							log("oncomplete");
 							if (oncomplete)
 								oncomplete();
 						}
-					}
-				};
-			}
+					};
+
+					// if there is an error, pass it in the callback (this will be
+					// the object that didn't load)
+					obj.onerror = function() {
+						if (onerror) {
+							onerror.call(this, {
+								loaded : j,
+								total : total,
+								percent : (j / total * 100)
+							});
+						} else {
+							j++;
+							log("onerror oncomplete");
+							if (j === total) {
+								if (oncomplete)
+									oncomplete();
+							}
+						}
+					};
+				}
+			} ,500);
+
 		}
 	};
 })();

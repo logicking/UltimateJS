@@ -60,6 +60,7 @@ GuiLabel.prototype.create = function(src) {
 };
 
 GuiLabel.prototype.change = function(src, fontSize) {
+	this.text = src;
 	src = Resources.getString(src);
 	$("#" + this.cellId).text(src);
 	if (fontSize)
