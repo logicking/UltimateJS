@@ -20,6 +20,7 @@ Account.prototype.init = function(params) {
 	this.enabled = true;
 	params = params ? params : {};
 	Account.parent.init.call(this, params);
+	this.updateIsOn = false;
 	// associative array of all active entities
 	this.allEntities = new Object();
 	// entities that should be update on timely basis
@@ -92,15 +93,15 @@ Account.prototype.addScheduledEntity = function(newEntity) {
 	var that = this;
 	var dt = this.globalUpdateInterval;
 	// if adding first object to scheduling queue start update interval
-	if (!this.globalUpdateIntervalHandle) {
+	if (!this.updateIsOn) {
 		that.prevUpdateTime = Date.now();
-//		this.globalUpdateIntervalHandle = this.setInterval(function() {
-//			that.update(dt);
-//		}, dt);
-		this.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
+		this.globalUpdateIntervalHandle = this.setInterval(function() {
 			that.update(dt);
-		});
-
+		}, GLOBAL_UPDATE_INTERVAL);
+//		this.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
+//			that.update(dt);
+//		});
+		this.updateIsOn = true;
 	}
 	this.scheduledEntities[newEntity.id] = newEntity;
 };
@@ -113,6 +114,7 @@ Account.prototype.removeScheduledEntity = function(entity) {
 			&& $['isEmptyObject'](this.scheduledEntities)) {
 		this.clearInterval(this.globalUpdateIntervalHandle);
 		this.globalUpdateIntervalHandle = null;
+		this.updateIsOn = false;
 	}
 };
 /*
@@ -120,25 +122,28 @@ Account.prototype.removeScheduledEntity = function(entity) {
  */
 var oldWindowRequestAnimationFrame = window.requestAnimationFrame;
 window.requestAnimationFrame = (function() {
-	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
-			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
-			|| window.msRequestAnimationFrame
-			|| function( /* function */callback, /* DOMElement */element) {
-				window.setTimeout(callback, 1000 / 50);
-			};
+//	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
+//			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
+//			|| window.msRequestAnimationFrame
+//			|| function( /* function */callback, /* DOMElement */element) {
+//				window.setTimeout(callback, 1000 / 50);
+//			};
+	return function( /* function */callback, /* DOMElement */element) {
+		window.setTimeout(callback, GLOBAL_UPDATE_INTERVAL);
+		};
 })();
 
 Account.prototype.addRenderEntity = function(newEntity) {
-	assert(typeof (newEntity.id) == "string", "Entity ID must be string");
-	var that = this;
-	// if adding first object to rendering queue start update interval
-	if (!this.globalRenderFrameHandle) {
-		this.lastRenderTime = Date.now();
-		this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
-			that.render();
-		});
-	}
-	this.renderEntities[newEntity.id] = newEntity;
+//	assert(typeof (newEntity.id) == "string", "Entity ID must be string");
+//	var that = this;
+//	// if adding first object to rendering queue start update interval
+//	if (!this.globalRenderFrameHandle) {
+//		this.lastRenderTime = Date.now();
+//		this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+//			that.render();
+//		});
+//	}
+//	this.renderEntities[newEntity.id] = newEntity;
 };
 
 Account.prototype.removeRenderEntity = function(entity) {
@@ -192,9 +197,9 @@ Account.prototype.update = function(dt) {
 	}else{
 		dt += date - this.prevUpdateTime;
 	}
-	window.requestAnimationFrame(function() {
-		that.update(dt);
-	});
+//	window.requestAnimationFrame(function() {
+//		that.update(dt);
+//	});
 };
 Account.prototype.setEnable = function(isTrue) {
 	this.enabled = isTrue;
