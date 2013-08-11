@@ -113,7 +113,6 @@ GuiSprite.prototype.update = function(dt) {
 	if (this.currentAnimation == null && this.spatialAnimation == null) {
 		return;
 	}
-
 	var curTime = (new Date()).getTime();
 	if (!dt) {
 		dt = curTime - this.lastUpdateTime;
@@ -125,6 +124,7 @@ GuiSprite.prototype.update = function(dt) {
 		this.updateSpatialAnimation(dt);
 	}
 	while (this.currentFrameTime >= this.currentFrameLength) {
+
 		var stopped = this.updateAnimation();
 		if (stopped == true) {
 			return;
@@ -157,6 +157,9 @@ GuiSprite.prototype.updateSpatialAnimation = function(dt) {
 };
 
 GuiSprite.prototype.updateAnimation = function() {
+	if (Account.instance.idleStop == true)
+		return;
+	
 	if (this.currentAnimation == null)
 		return;
 	if (this.currentFrame >= this.animations[this.currentAnimation].frames.length) {
