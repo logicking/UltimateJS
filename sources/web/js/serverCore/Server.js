@@ -3,16 +3,16 @@
  */
 
 var CACHE_LIFETIME = 15 * 60 * 1000;
- 
+
 function Server() {
 	var fileServer = null;
 	this.client = null;
 	var Accounts = null;
 	var Sessions = null;
 	var commands = null;
-//	this.getSessions = function(){
-//		return Sessions;
-//	};
+	// this.getSessions = function(){
+	// return Sessions;
+	// };
 };
 
 Server.prototype.init = function(sconf, callback, droptable) {
@@ -58,40 +58,35 @@ Server.prototype.init = function(sconf, callback, droptable) {
 		commands = {};
 		Server.instance = this;
 
-		if((!sconf.deploy) && droptable){
+		if ((!sconf.deploy) && droptable) {
 			console.log("Deleting data from DB... ");
 			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
 			entity_table_delquery.on("end", function() {
 				var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
 				users_accounts_delquery.on("end", function() {
 					var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
-					scores_delquery.on("end", function(){
+					scores_delquery.on("end", function() {
 						if (callback) {
 							callback();
 						}
 					});
-					
+
 				});
 			});
-		}else{
+		} else {
 			if (callback) {
 				callback();
 			}
 		}
 		this.disableAuth = false;
 
-		
-		
-
-	
-		
-		
 		this.addCommand("switchState", function(args, session, callback) {
-//			var et = Date.now();
-			
-			//args[0] - id of current state, args[1] - new state's id
+			// var et = Date.now();
+
+			// args[0] - id of current state, args[1] - new state's id
 			var curState = Server.instance.getEntity(session, args[0], null, true);
-//			console.log("Get CUrrent state time: ____________", Date.now() - et);
+			// console.log("Get CUrrent state time: ____________", Date.now() -
+			// et);
 			// parentId;
 			if (!session) {
 				callback({
@@ -114,24 +109,25 @@ Server.prototype.init = function(sconf, callback, droptable) {
 				});
 				return;
 			}
-//			et = Date.now();
+			// et = Date.now();
 
-
-			Server.instance.getEntity(null, session.accountId, function(account){
-				if(args[0] == account.initialState){
+			Server.instance.getEntity(null, session.accountId, function(account) {
+				if (args[0] == account.initialState) {
 					account.recActivity("LE");
 				}
-				
+
 			});
 			curState.setParent(null);
-//			console.log("Current state setPArent(null) time: ____________", Date.now() - et);
+			// console.log("Current state setPArent(null) time: ____________",
+			// Date.now() - et);
 			// console.log("CurrentState(id=%s) has parent with id=%s",
 			// curState.id, parentId);
 			// curState.setParent(null);
 			// Server.instance.removeEntity(curState.id, true);
 			et = Date.now();
 			Server.instance.getEntity(session, args[1], function(entity) {
-//				console.log("Get new State Time: _____________", Date.now() - et);
+				// console.log("Get new State Time: _____________", Date.now() -
+				// et);
 				entity.setParent(parentId);
 				// console.log("NewState's parent: ", getParentId(entity));
 				// console.log("OldState's parent: ", getParentId(curState));
@@ -142,7 +138,8 @@ Server.prototype.init = function(sconf, callback, droptable) {
 				// function(){4
 				et = Date.now();
 				var changes = session.popChanges();
-//				console.log("Pop changes time: _____________", Date.now() - et);
+				// console.log("Pop changes time: _____________", Date.now() -
+				// et);
 				// Server.instance.logEntities("after switchState");
 				// Server.instance.logCache("after switchState");
 				callback(changes);
@@ -154,13 +151,13 @@ Server.prototype.init = function(sconf, callback, droptable) {
 	}
 };
 
-Server.prototype.initPgClient = function(){
+Server.prototype.initPgClient = function() {
 	var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
 
 	if (!this.client) {
 		this.client = new pg.Client(conString);
 		this.client.connect();
-	}else{
+	} else {
 		this.client.end();
 		this.client = new pg.Client(conString);
 		this.client.connect();
@@ -168,39 +165,57 @@ Server.prototype.initPgClient = function(){
 	return this.client;
 };
 
-
 // passed func should take 3 args - args array, session, callback(see below)
 Server.prototype.addCommand = function(name, func) {
 	commands[name] = func;
 };
 
-Server.prototype.getSessions = function(){
+Server.prototype.getSessions = function() {
 	return Sessions;
 };
 
 // callback receives only 1 arg - result of command execution
 // and is defined in onCommand() function
 Server.prototype.executeCommand = function(name, args, session, callback) {
-	
-	
+
 	var command = commands[name];
 	if (command) {
-		try {
-			command(args, session, callback);
-		} catch (err) {
-			error_flag = !error_flag;
-			console.log("Error on command execution: ", name);
-			console.log("Error: ", err, "\n");
-			console.log(err.stack);
-			error_flag = !error_flag;
-			callback({
-				error : err,
-				stack : err.stack
-			});
-		}
-		return;
+
+		// commented due to domain introduction.
+		// try{
+		command(args, session, callback);
+		// } catch (err) {
+		// var userId = null;
+		// if(session){
+		// if(session.userId){
+		// userId = session.userId;
+		// // Server.instance.collectUserData(session.userId, function(info){
+		// console.err_log("Error on command execution: ", name);
+		// console.err_log("Error: ", err, "\n");
+		// console.err_log(err.stack);
+		// // console.err_log("Collected User(%s) Data on error:\n",
+		// session.userId, info);
+		// callback({
+		// error : err,
+		// stack : err.stack
+		// });
+		// // });
+		// }
+		// return;
+		// }else{
+		// console.err_log("No session passed as argument to command handler.");
+		// }
+		// console.err_log("Error on command execution: ", name);
+		// console.err_log("Error: ", err, "\n");
+		// console.err_log(err.stack);
+		// callback({
+		// error : err,
+		// stack : err.stack
+		// });
+		// }
+		// return;
 	} else {
-		console.log("Unknow command: ", name);
+		console.err_log("Unknow command: ", name);
 	}
 };
 
@@ -223,7 +238,7 @@ Server.prototype.getAccountByUserId = function(session, userId, callback) {
 	});
 
 	query.on("end", function(result) {
-		if (result.rowCount == 0) {
+		if ((result.rowCount == 0) || (rows.length == 0)) {
 			callback(null);
 		}
 		Server.instance.getEntity(session, rows[0].account, function(account) {
@@ -261,32 +276,62 @@ Server.prototype.createEntity = function(id, session, callback) {
 	});
 };
 
-Server.prototype.killCached = function(id) {
-	console.log("Killing entity(id=%s)", id);
+Server.prototype.killCached = function(id, callback) {
+	console.log("Starting to kill entity(id=%s)", id);
 	var entity;
 	if (!(entity = Server.instance.cache[id])) {
 		return;
 	}
 	EntityManager.instance.backupEntity(entity, function() {
 		if (entity.children) {
-			for ( var i = 0; i < entity.children.length; i++) {
-				Server.instance.killCached(entity.children[i].id);
+			var walker = function(list, index, callback) {
+				console.log("Walker called with index: %s, list.length=%s", index, list.length);
+				if (list.length <= index) {
+					console.log("Walker finished. Calling callback.");
+					if(callback){
+						callback();
+					}
+					return;
+				}
+//				console.log("Killing cached with id: ", list[index].id);
+				Server.instance.killCached(list[index].id, function(){
+//					console.log("Killed cached: ", list[index].id);
+					walker(list, index+1, callback);
+				});
+			};
+			walker(entity.children, 0, function(){
+				console.log("Called main callback. Exiting killCached.");
+				delete Server.instance.cache[id];
+				entity.destroy(false);
+				if(callback){
+					callback();
+				}
+			});
+//			for ( var i = 0; i < entity.children.length; i++) {
+//				Server.instance.killCached(entity.children[i].id);
+//			}
+		}else{
+			console.log("Called main callback. Exiting killCached.");
+			delete Server.instance.cache[id];
+			entity.destroy(false);
+			if(callback){
+				callback();
 			}
+			
 		}
-		delete Server.instance.cache[id];
-		entity.destroy(false);
+		
 	});
 };
 
 // adds single entity(without children)
 Server.prototype.addToCache = function(entity) {
 	var cache = Server.instance.cache, id = entity.id;
-	 entity.log(" adding to cache.");
+	entity.log(" adding to cache.");
 	// entity.logChildren("on addToCache");1
 	// case of overwriting(there is an old instance of entity in cache)
 	if (cache[id])
 		if (cache[id] != entity) {// case when we update existing cache(in
-									// ideal world this never happens)
+			// ideal world this never happens)
 			console.log("Entity has equal ids on addToCache");
 			if (cache[id].timeoutId) {
 				global.clearTimeout(cache[id].timeoutId);
@@ -298,7 +343,7 @@ Server.prototype.addToCache = function(entity) {
 		}
 	cache[id] = entity;
 	entity.listeners = []; // adding to cache means "destroy" to client so
-							// there is nothing to notify
+	// there is nothing to notify
 	var parentId = getParentId(entity);
 
 	// resets timeout to the top of the tree if entity was added to cache
@@ -307,6 +352,10 @@ Server.prototype.addToCache = function(entity) {
 
 	if (parentId && this.isInEntities(parentId)) {
 		this.entities[parentId].removeChild(entity);
+	}
+	if(!parentId || !this.isInCache(parentId)){
+//		console.log("PrimeCache========================: ", id);
+		entity.primeCache = true;
 	}
 	if (this.entities[id] == entity) {
 		delete this.entities[id];
@@ -326,9 +375,9 @@ Server.prototype.resetCacheTimeout = function(entity) {
 		if (entity.timeoutId) {
 			global.clearTimeout(entity.timeoutId);
 		}
-//		 console.log("Resetting timeout for entity with id=%s", entity.id);
+		// console.log("Resetting timeout for entity with id=%s", entity.id);
 		entity.timeoutId = global.setTimeout(function() {
-			
+
 			Server.instance.killCached(entity.id);
 		}, CACHE_LIFETIME);
 	};
@@ -381,7 +430,8 @@ Server.prototype.getCache = function(id, listener) {
 	var parentId = getParentId(entity);
 	if (parentId && this.isInEntities(parentId)) {
 		var parent = this.entities[parentId];
-		// console.log("Adding child to entity on getCache to parent(id=%s)", parentId);
+		// console.log("Adding child to entity on getCache to parent(id=%s)",
+		// parentId);
 		parent.addChild(entity);
 	}
 
@@ -393,7 +443,7 @@ Server.prototype.getCache = function(id, listener) {
 		}
 		addedList.push(parent);
 		Server.instance.addEntityInstance(parent, listener);
-		 parent.log(" setting as active");
+		parent.log(" setting as active");
 		// parent.logChildren("on getCache byParent");
 		delete cache[parent.id];
 		if (parent.children) {
@@ -434,22 +484,50 @@ Server.prototype.restoreFromCache = function(id, listener) {
 	return entity;
 };
 
-Server.prototype.clearCache = function() {
+Server.prototype.clearCache = function(callback) {
 	/*
 	 * TODO: calls destroy of all entities
 	 * 
 	 */
-
+	var firstId = null;
+	for(var id in Server.instance.cache){
+		firstId = id;
+		break;
+	}
+	if(firstId){
+		Server.instance.killCached(firstId, function(){
+			Server.instance.clearCache(callback);
+		});
+		
+	}else{
+		if(callback){
+			callback();
+		}
+	}
+//	console.log("primeCache list: ", cacheList);
+//	var walker = function(list, index, callback){
+//		if(index >= list.length){
+//			if(callback){
+//				callback();
+//			}
+//			return;
+//		}
+//		console.log("Calling clearCache walker index=%s", index);
+//		
+//	};
+//	
+//	walker(cacheList, 0, callback);
+	
 };
 
 Server.prototype.addEntityInstance = function(entity, listeners) {
 	// console.log("Entity to add: ", entity);
 	assert(entity instanceof Entity, "'entity' in not Entity instance.");
 	if (!((entity instanceof Account) && (entity.userId != null)) && // entity
-																		// is
-																		// loaded
-																		// from
-																		// session.init();
+	// is
+	// loaded
+	// from
+	// session.init();
 	((entity.parent == null) || (typeof entity.parent == String) || Server.instance.isInCache(getParentId(entity)))) {
 		// entity.log("is invalid. Cant be pushed to working.");
 		Server.instance.addToCache(entity);
@@ -507,41 +585,41 @@ Server.prototype.removeEntity = function(id, removeChildren) {
 	}
 };
 
-Server.prototype.collectUserData = function(userId, callback){
+Server.prototype.collectUserData = function(userId, callback) {
 	var session = this.getSession(userId);
 	var info = {
-			data: []
+		data : []
 	};
-	
-	if(session){
-		session.reportState(data);
+
+	if (session) {
+		session.reportState(info.data);
 		info.sessionAlive = true;
-	}else{
+	} else {
 		info.sessionAlive = false;
 	}
-	
-	//just for BubbleMeadow!!!
-	EntityManager.instance.getAccountIdByUserId(userId, function(accountId){
-		Server.instance.getEntity(null, accountId, function(account){
+
+	// just for BubbleMeadow!!!
+	EntityManager.instance.getAccountIdByUserId(userId, function(accountId) {
+		Server.instance.getEntity(null, accountId, function(account) {
 			account.reportState(info.data);
-			for(var id in account.allEntities){
+			for ( var id in account.allEntities) {
 				var entity = account.allEntities[id];
 				entity.reportState(info.data);
-				if(entity instanceof MapState){
-					for(var i=0;i<entity.children.length;i++){
+				if (entity instanceof MapState) {
+					for ( var i = 0; i < entity.children.length; i++) {
 						entity.children[i].reportState(info.data);
 					}
-					Server.instance.getEntity(null, entity.gamestate, function(gameState){
+					Server.instance.getEntity(null, entity.gamestate, function(gameState) {
 						gameState.reportState(info.data);
-						if(callback){
+						if (callback) {
 							callback(info);
 						}
 					});
 				}
-				if(entity instanceof BallsGameState){
-					Server.instance.getEntity(null, entity.mapState, function(mapState){
+				if (entity instanceof BallsGameState) {
+					Server.instance.getEntity(null, entity.mapState, function(mapState) {
 						gameState.reportState(info.data);
-						if(callback){
+						if (callback) {
 							callback(info);
 						}
 					}, false, true);
@@ -549,16 +627,13 @@ Server.prototype.collectUserData = function(userId, callback){
 			}
 		}, false, true);
 	});
-	
-};
 
+};
 
 Server.prototype.getEntity = function(session, id, callback, existingOnly, createChildren) {
 	/*
-	 * tries 3 times:
-	 * 1) from working entities 
-	 * 2) from cache (tries to add to working ) 
-	 * 3) from DB
+	 * tries 3 times: 1) from working entities 2) from cache (tries to add to
+	 * working ) 3) from DB
 	 */
 	var et = Date.now();
 	var addedIdList = [];
@@ -725,7 +800,7 @@ Server.prototype.setAuthCallback = function(callback) {
 	this.authCallbacks.push(callback);
 };
 
-Server.prototype.addAuthCallback = function(callback){
+Server.prototype.addAuthCallback = function(callback) {
 	this.authCallbacks.push(callback);
 };
 
@@ -737,100 +812,153 @@ Server.prototype.getTransactionHandler = function() {
 	return this.trunsactionHandler;
 };
 
-
-Server.prototype.killSession = function(session){
-	if(session){
+Server.prototype.killSession = function(session, callback) {
+	var that = this;
+	if (session) {
 		console.log("killing session: ", session.userId);
 		var accId = session.accountId;
 		global.clearTimeout(session.timeoutId);
-		session.destroy();
-		this.killCached(accId);
+		session.destroy(function(){
+			that.killCached(accId, function() {
+				if (callback) {
+					callback();
+				}
+			});
+		});
+		
+	} else {
+		if (callback) {
+			callback();
+		}
 	}
+
 };
 
-
-Server.prototype.killAllSessions = function(){
+Server.prototype.killAllSessions = function(callback) {
+	var that = this;
 	Server.instance.disableAuth = true;
 	var sessions = this.getSessions();
-//	console.log("got sessions: ", sessions);
-	for(var userId in sessions){
-		this.killSession(sessions[userId]);
+	// console.log("got sessions: ", sessions);
+	var list = [];
+	for ( var userId in sessions) {
+		list.push(sessions[userId]);
+		// this.killSession(sessions[userId]);
 	}
+
+	var walker = function(index) {
+		if (index >= list.length) {
+			for(var id in that.entities){
+				console.log("Alive:", id);
+			}
+			for(var id in that.cache){
+				console.log("Cache:", id);
+			}
+			for(var id in Sessions){
+				console.log("Session:", id);
+			}
+			Server.instance.clearCache(function(){
+				console.log("After clearing cache");
+				for(var id in that.entities){
+					console.log("Alive:", id);
+				}
+				for(var id in that.cache){
+					console.log("Cache:", id);
+				}
+				for(var id in Sessions){
+					console.log("Session:", id);
+				}
+				if(callback){
+					callback();
+				}
+			});
+			
+			return;
+		}
+		that.killSession(list[index], function() {
+			walker(index + 1);
+		});
+	}
+	walker(0);
 };
 
-Server.prototype.getOnlineNum = function(){
+Server.prototype.getOnlineNum = function() {
 	var sessions = this.getSessions();
 	var counter = 0;
-	for(var userId in sessions){
-		counter++; 
+	for ( var userId in sessions) {
+		counter++;
 	}
 	return counter;
 };
 
-
 Server.prototype.onAuth = function(req, res) {
-	console.log();
 	var entryTime = Date.now();
 	// session.userId = req.body.userId;
 	// if(!req.isAuthenticated()){
 	// Server.instance.onIFrameAuth(req.data.);
 	// }
-	console.log("server.onAuth()");
-	if(Server.instance.disableAuth){
+	// console.log("server.onAuth()");
+	if (Server.instance.disableAuth) {
 		var obj = {
-				error : "Auth disabled.",
-				error_code : 2
-			};
+			error : "Auth disabled.",
+			error_code : 2
+		};
 		res.end(JSON.stringify(obj));
 		return;
 	}
 	var that = Server.instance;
-	var userId;
+	var userId = null;
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-//		if (req.user && req.user.provider) {
-//			if (req.user.provider == "facebook") {
-//				userId = req.user.id;
-//			}
-//			if (req.user.provider == "vkontakte") {
-//				userId = req.user.uid;
-//			}
-//		}
+		// if (req.user && req.user.provider) {
+		// if (req.user.provider == "facebook") {
+		// userId = req.user.id;
+		// }
+		// if (req.user.provider == "vkontakte") {
+		// userId = req.user.uid;
+		// }
+		// }
 	}
-	console.log("AuthCallbacks length = ", that.authCallbacks.length);
-	var authError = false;
-	function runAuthCallbacks(session, cb){
-		var walker = function(index){
-			return function(){
-				process.nextTick(function(){
-					
-					if(index < that.authCallbacks.length && !authError){
-						console.log("Walker %s call.", index);
-						that.authCallbacks[index](session, walker(index+1), function(){
+
+//	console.log("AuthCallbacks length = ", that.authCallbacks.length);
+	var authError = !userId;
+	if (authError) {
+		console.log("Undefined userId (wrong cookie).");
+		res.end(JSON.stringify(obj));
+		return;
+	}
+	function runAuthCallbacks(session, cb) {
+		var walker = function(index) {
+			return function() {
+				process.nextTick(function() {
+
+					if (index < that.authCallbacks.length && !authError) {
+						// console.log("Walker %s call.", index);
+						that.authCallbacks[index](session, walker(index + 1), function() {
 							console.log("setting error = true");
 							authError = true;
 						});
-					}else{
-						if(cb){
-							console.log("Callback on walker.");
+					} else {
+						if (cb) {
+							// console.log("Callback on walker.");
 							cb();
 						}
 					}
 				});
 			};
-			
+
 		};
 		walker(0)();
 	}
-	
-//	console.log("111111111111111: ", Date.now() - et);
+
+	// console.log("111111111111111: ", Date.now() - et);
 	// console.log("\nAuth request from user : ", userId);
 	var session = Server.instance.getSession(userId);
-//	console.log("22222222222222222: ", Date.now() - et);
-	
+	// console.log("22222222222222222: ", Date.now() - et);
+
 	if (session) {
-		 console.log("Found session for userId: ", userId);
+		
+		// console.log("Found session for userId: ", userId);
 		runAuthCallbacks(session, function() {
 			if (authError) {
 				console.log("Error on auth!!!!");
@@ -844,7 +972,7 @@ Server.prototype.onAuth = function(req, res) {
 					initUpdate : session.sendData(true)
 				};
 			}
-			console.log("callback on authCallbacks.");
+			// console.log("callback on authCallbacks.");
 			res.end(JSON.stringify(obj));
 		});
 
@@ -852,8 +980,9 @@ Server.prototype.onAuth = function(req, res) {
 	}
 	var session = new Session();
 
-	console.log("that.client is defined onAuth: ", !(!Server.instance.client));
-	console.log("New session init.");
+	// console.log("that.client is defined onAuth: ",
+	// !(!Server.instance.client));
+	// console.log("New session init.");
 	session.init({
 		"userId" : userId,
 		"authClient" : Server.instance.client,
@@ -863,16 +992,16 @@ Server.prototype.onAuth = function(req, res) {
 				if (authError) {
 					console.log("Error on auth!!!!");
 					var obj = {
-							error : "Auth error occured."
+						error : "Auth error occured."
 					};
 				} else {
 					var obj = {
-							accountId : session.accountId,
-							userId : userId,
-							initUpdate : session.sendData(true)
+						accountId : session.accountId,
+						userId : userId,
+						initUpdate : session.sendData(true)
 					};
 				}
-				console.log("Auth Callback.");
+				// console.log("Auth Callback.");
 				res.end(JSON.stringify(obj));
 			});
 
@@ -888,14 +1017,14 @@ Server.prototype.onCommunicate = function(req, res, next) {
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if(req.user){
+		if (req.user) {
 			if (req.user.provider == "facebook") {
 				userId = req.user.id;
 			}
 			if (req.user.provider == "vkontakte") {
 				userId = req.user.uid;
 			}
-		}else{
+		} else {
 			error_flag = !error_flag;
 
 			console.log("WRONG req.session: ", req.session);
@@ -922,7 +1051,7 @@ Server.prototype.onCommunicate = function(req, res, next) {
 	var data = req.body;
 	// console.log("Request to change smth from user : ", userId);
 	// console.log("Change data: ", data);
-//	Server.instance.receiveData(data, session);
+	// Server.instance.receiveData(data, session);
 	// EntityManager.instance.backupSession(session);
 	// console.log("session.entities right before response.end: ",
 	// session.entities);
@@ -938,18 +1067,18 @@ Server.prototype.onCommunicate = function(req, res, next) {
 Server.prototype.onCommand = function(req, res, next) {
 	var entryTime = Date.now();
 	var userId;
-	
+
 	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
 	} else {
-		if(req.user){
+		if (req.user) {
 			if (req.user.provider == "facebook") {
 				userId = req.user.id;
 			}
 			if (req.user.provider == "vkontakte") {
 				userId = req.user.uid;
 			}
-		}else{
+		} else {
 			res.json({
 				error : {
 					description : "Wrong cookie",
@@ -957,11 +1086,11 @@ Server.prototype.onCommand = function(req, res, next) {
 				}
 			});
 		}
-		
+
 	}
 
 	var session = Server.instance.getSession(userId);
-	
+
 	if (!session) {
 		res.json({
 			error : {
@@ -971,7 +1100,7 @@ Server.prototype.onCommand = function(req, res, next) {
 		});
 		return;
 	}
-	if(!userId){
+	if (!userId) {
 		res.json({
 			error : {
 				description : "Wrong userId!!!",
@@ -982,17 +1111,26 @@ Server.prototype.onCommand = function(req, res, next) {
 	}
 
 	var json = req.body;
-	
+
 	var command = json['command'], args = json['args'];
-	if((session.panelValuesTime && (Date.now() - session.panelValuesTime < 2000 )) && (command == "getPanelValues")){
-//		res.json({
-//			error : "Too many requests.",
-//			error_code : 5
-//		});
+	if (!session.panelValueCount) {
+		session.panelValueCount = 0;
+	}
+	if ((command == "getPanelValues") && (((session.panelValuesTime && (Date.now() - session.panelValuesTime < 1000))) && (session.panelValuesCount > 10))) {
+		console.err_log("Detected lot of getPanelValues calls. User: ", session.userId);
+		res.json({
+			error : "Too many requests.",
+			error_code : 5
+		});
 		return;
-	}else{
-		if(command == "getPanelValues"){
-			session.panelValuesTime = Date.now();
+	} else {
+		if (command == "getPanelValues") {
+			if ((Date.now() - session.panelValuesTime) < 1000) {
+				session.panelValuesCount++;
+			} else {
+				session.panelValuesTime = Date.now();
+				session.panelValuesCount = 1;
+			}
 		}
 	}
 	Server.instance.executeCommand(command, args, session, function(result) {
@@ -1000,7 +1138,7 @@ Server.prototype.onCommand = function(req, res, next) {
 		// function(){
 		//
 		// });
-		console.log("Command: %s; from user: %s; execution time=%s", command, userId, Date.now() - entryTime+ "");
+		console.log("Command executed=%s; user=%s; time=%s", command, userId, Date.now() - entryTime + "");
 		res.json(result);
 	});
 };
@@ -1021,6 +1159,33 @@ Server.prototype.logCache = function(msg) {
 
 Server.prototype.cleanUp = function() {
 
+};
+
+Server.prototype.runTimeouts = function(callback) {
+	var that = this;
+	var query = that.client.query("SELECT data FROM " + sconf.entity_table + " WHERE parentid = 'timeout'");
+	var rows = [];
+	query.on("row", function(row) {
+		rows.push(row);
+	});
+
+	query.on("end", function() {
+		var walker = function(index) {
+			if (rows.length <= index) {
+				if (callback) {
+					callback();
+				}
+				return;
+			}
+			var data = JSON.parse(rows[index].data);
+			Server.instance.getEntity(null, data.id, function(account) {
+				account.reRunLifesRefill(data.refPoint, function() {
+					walker(index + 1);
+				});
+			}, false);
+		};
+		walker(0);
+	});
 };
 
 Server.prototype.start = function(app, callback) {

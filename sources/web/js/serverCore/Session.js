@@ -10,7 +10,6 @@ function Session(){
 
 Session.prototype.init = function(params){
 	var that = this;
-	this.vkApp = vkApi(sconf.vkontakte_app_id, sconf.vkontakte_app_secret);
 	this.userId = params["userId"];
 	this.accountId = "default";
 	var callback = params["callback"];
@@ -21,17 +20,17 @@ Session.prototype.init = function(params){
 	that.authClient = params["authClient"];
 	error_flag = true;
 //	console.err_log("Session init call with userId=%s.", this.userId);
-	
 	EntityManager.instance.getAccountIdByUserId(that.userId, function(accId){
-		console.log("got Account ID", accId);
+//		console.log("got Account ID", accId);
 		if(!accId){
 //			console.err_log("No AccId found. New User!");
+			
 			EntityManager.instance.getUniqueId(function(unique){
 				that.accountId = unique;
 				that.authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
 //				et = Date.now();
-				EntityManager.instance.getAccountDefaultUpdate(that.accountId, null, function(defaultUpdate){4
-//					console.err_log("Got default update.");
+				EntityManager.instance.getAccountDefaultUpdate(that.accountId, null, function(defaultUpdate){
+//					console.err_log("Got default update.", defaultUpdate);
 					var num = defaultUpdate.count;
 					defaultUpdate = defaultUpdate.update;
 					var counter = 0;
@@ -44,7 +43,8 @@ Session.prototype.init = function(params){
 //							console.log("Extention time: ", Date.now() - et);
 //							et = Date.now();
 							Server.instance.getEntity(that, that.accountId, function(account){
-
+								account.setAlive(true);
+								account.recActivity("login_time=" + Date.now());
 //								console.log("get Account entity time: ", Date.now() - et);
 								Server.instance.addSession(that);
 								account.userId = that.userId;
@@ -81,13 +81,10 @@ Session.prototype.init = function(params){
 //			});
 			return;
 		}
-		
 		that.accountId = accId;
 //		console.err_log("Found previous record with accId=%s.", accId);
-		
 		Server.instance.getEntity(that, that.accountId, function(account){
-
-//			}
+			account.setAlive(true);
 			if(!account){
 				console.err_log("Record found but Account not FOUND!");
 				
@@ -106,9 +103,9 @@ Session.prototype.init = function(params){
 			Server.instance.addSession(that);
 			account.userId = that.userId;
 			account.userLogin = true;
+			account.recActivity("login_time=" + Date.now());
 			Server.instance.restoreFromCache(account.id, that);
 			that.reportActivity();
-//			console.err_log("Restored from cache.");
 			if(callback){
 				callback();
 			}
@@ -160,7 +157,7 @@ Session.prototype.sendData = function(initUpdate){
 				delete entity["destroy"];
 			}
 		}
-//		console.log("Data on init: ", data);
+		//console.log("Data on init: ", data);
 		//this.updateAccount(data);
 	}else{
 		data = this.popChanges();
@@ -214,14 +211,27 @@ Session.prototype.reportActivity = function(){
 	}, SESSION_LIFETIME);
 };
 
-Session.prototype.destroy = function(){
+Session.prototype.destroy = function(callback){
 	var session = this;
 	Server.instance.removeSession(session.userId);
 //	console.log("Killing session (", session.userId, ")");
 	Server.instance.getEntity(null, session.accountId, function(account){
-		account.recActivity("SD");// for stat
+		account.setAlive(false);
+		if (account.userLogin) {
+			account.recActivity("logout_time="+Date.now());
+			
+			delete account.userLogin;
+		}
+		StatCollector.instance.addRecord(account, function(){
+			console.log("killed account. Added record to stat table");
+			Server.instance.removeEntity(session.accountId, true);
+			if(callback){
+				callback();
+			}
+		});
+		
 	});
-	Server.instance.removeEntity(session.accountId, true);
+
 	
 //	Server.instance.logEntities("After session destroy");
 //	Server.instance.logCache("After session destroy");
@@ -229,8 +239,16 @@ Session.prototype.destroy = function(){
 };
 
 Session.prototype.reportState = function(collector){
+	
 	if(collector instanceof Array){
-		var info = JSON.stringify(this);
+		var info = JSON.stringify(this, function(key, value){
+			console.err_log("key == ", key );
+			if((key == "timeoutId" )||(key == "authClient") ){
+				return "";  
+			}else{
+				return value;
+			}
+		});
 		collector.push(info + "\n");
 	}else{
 		console.log("Wrong collector.");

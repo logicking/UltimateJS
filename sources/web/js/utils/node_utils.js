@@ -2,13 +2,21 @@ var request = require("request");
 var util = require('util');
 var path = require('path');
 var sconf = require(path.join(__dirname, "../resources/server_config.json"));
-var logger = sconf.username + sconf.deploy?"_deploy":"";
-var ENABLE_REMOTE_CONSOLE = true;
-var ONLY_ERRORS = true;
-var DISABLE_CONSOLE = false;
+var logger = sconf.username + (sconf.deploy?"_deploy":"");
+if(sconf.deploy){
+	var ENABLE_REMOTE_CONSOLE = false;
+	var ONLY_ERRORS = true;
+	var DISABLE_CONSOLE = true;
+}else{
+	var ENABLE_REMOTE_CONSOLE = false;
+	var ONLY_ERRORS = true;
+	var DISABLE_CONSOLE = false;
+}
+
 //reseting log on logserver
-var consoleUrl = "http://ec2-23-20-152-59.compute-1.amazonaws.com:8765/";
-console.log("Connecting to console server");
+var consoleUrl = "http://ec2-54-226-180-234.compute-1.amazonaws.com:8765/";
+
+console.log("Script entry point.");
 	
 
 (function(){
@@ -69,8 +77,8 @@ console.log("Connecting to console server");
 	
 	
 	(function() {
-		if(ENABLE_REMOTE_CONSOLE|| DISABLE_CONSOLE){
-			var fn = console.log;
+		var fn = console.log;
+		if(ENABLE_REMOTE_CONSOLE || DISABLE_CONSOLE){
 			var index = 0;
 			console.log = function() {
 				if(!DISABLE_CONSOLE){
@@ -81,27 +89,29 @@ console.log("Connecting to console server");
 					return fn.apply(this, arguments);
 				}
 			};
+			
 		}
+		console.err_log = function(){
+			error_flag = true;
+			var result = fn.apply(fn, arguments);
+			error_flag = false;
+			return result;
+		};
 	})();
 	
-	console.err_log = function(){
-		error_flag = true;
-		console.log.apply(console.log, arguments);
-		error_flag = false;
-	};
 	
-	console.err_trace = function(){
-		var args = arguments;
-		try{
-			throw new Error();
-		}catch(err){
-			error_flag = true;
-			console.log.apply(console.log, args);
-			console.log("With trace: ", err.stack);
-			error_flag = false;
-		}
-		
-	};
+//	console.err_trace = function(){
+//		var args = arguments;
+//		try{
+//			throw new Error();
+//		}catch(err){
+//			error_flag = true;
+//			console.log.apply(console.log, args);
+//			console.log("With trace: ", err.stack);
+//			error_flag = false;
+//		}
+//		
+//	};
 	
 	
 })();

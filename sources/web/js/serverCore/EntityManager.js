@@ -154,7 +154,7 @@ EntityManager.prototype.backupEntity = function(entity, callback){
 
 		}else{
 //			console.log("Inserting entityData: ", entityData );
-			innerQuery = that.eClient.query("INSERT INTO " + sconf.entity_table + "(id, data, parentid) VALUES  ($1, $2, $3) ",	
+			innerQuery = that.eClient.query("INSERT INTO " + sconf.entity_table + "(id, data, parentid) VALUES ($1, $2, $3) ",	
 					[ id, JSON.stringify( entityData ), (getParentId(entity)?getParentId(entity):"")]);
 
 		}
@@ -446,11 +446,11 @@ EntityManager.prototype.getAccountIdByUserId = function(userId, callback){
 					}
 					return;
 				}
-				var accId = list.pop();
-				var query = that.eCLient.query("DELETE FROM " + sconf.user_accounts_table + " WHERE account = $1", [accId]);
-				query.on("end", function(){
-					dropWrong(list);
-				});
+//				var accId = list.pop();
+//				var query = that.eCLient.query("DELETE FROM " + sconf.user_accounts_table + " WHERE account = $1", [accId]);
+//				query.on("end", function(){
+//					dropWrong(list);
+//				});
 			};
 			dropWrong(rows);
 		}else{
