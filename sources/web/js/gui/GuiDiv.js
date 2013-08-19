@@ -47,8 +47,8 @@ GuiDiv.prototype.initialize = function(params) {
 				: ENHANCED_BASE_WIDTH;
 		params['height'] = params['height'] ? params['height']
 				: ENHANCED_BASE_HEIGHT;
-		params['x'] = (params['x'] || params['x'] == 0) ? params['x'] : -ENHANCED_BASE_MARGIN_WIDTH;
-		params['y'] = (params['y'] || params['x'] == 0) ? params['y'] : -ENHANCED_BASE_MARGIN_HEIGHT;
+		params['x'] = 1;//(params['x'] || params['x'] == 0) ? params['x'] : -ENHANCED_BASE_MARGIN_WIDTH;
+		params['y'] = 0;//(params['y'] || params['x'] == 0) ? params['y'] : -ENHANCED_BASE_MARGIN_HEIGHT;
 		this.enhancedScene = true;
 		// enhancedScene is clamped by the maximum allowed screen size
 		this.setViewport(Screen.fullRect());
@@ -94,8 +94,15 @@ GuiDiv.prototype.applyBackground = function(params) {
 			this.setBackgroundFromParams(params[i], j--);
 		}
 	} else if (params) {
+		var tempName = params['image'];
 		params['image'] = this.remote ? params['image'] : Resources.getImage(params['image']);
 		this.setBackgroundFromParams(params, null);
+		if (tempName == "background_dialog_profiles_large.png" ||
+				tempName == "background_dialog_common.png" || 
+				tempName == "background_dialog_profiles_small.png" ||
+				tempName == "background_dialog_profiles_initial.png") {
+			this.resize();
+		}
 	}
 };
 
