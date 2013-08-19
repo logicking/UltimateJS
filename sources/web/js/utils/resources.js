@@ -14,14 +14,33 @@ var Resources = (function() {
 	// enum of strings of current language
 	var strings = new Object();
 	
-//	var cache = document.createElement("div");
-//	cache.style.width = "100px";
-//	cache.style.height = "100px";
-//	cache.style.background = "red";
-//	cache.style.left = "12790px";
-//	cache.style.top = "0px";
-
-//	document.body.appendChild(cache);
+	var cache = document.createElement("div");
+	cache.style.width = "1px";
+	cache.style.height = "720px";
+	cache.style.left = "0px";
+	cache.style.top = "0px";
+	cache.style.position = "fixed";
+	document.body.appendChild(cache);
+	
+//	var cacheMaskR = document.createElement("div");
+//	cacheMaskR.style.width = "1280px";
+//	cacheMaskR.style.height = "720px";
+//	cacheMaskR.style.background = "#000000";
+//	cacheMaskR.style.left = "1279px";
+//	cacheMaskR.style.top = "0px";
+//	cacheMaskR.style.zIndex = 9999999;
+//	cacheMaskR.style.position = "fixed";
+//	cache.appendChild(cacheMaskR);
+//	
+//	var cacheMaskD = document.createElement("div");
+//	cacheMaskD.style.width = "2560px";
+//	cacheMaskD.style.height = "720px";
+//	cacheMaskD.style.background = "#000000";
+//	cacheMaskD.style.left = "0px";
+//	cacheMaskD.style.top = "720px";
+//	cacheMaskD.style.zIndex = 9999999;
+//	cacheMaskD.style.position = "fixed";
+//	cache.appendChild(cacheMaskD);
 
 	var currentResolution = null;
 	var defaultResolution = null;
@@ -68,6 +87,17 @@ var Resources = (function() {
 			}
 		},
 
+//		hideCache : function() {
+//			var cacheMask = document.createElement("div");
+//			cacheMask.style.width = "10px";
+//			cacheMask.style.height = "720px";
+//			cacheMask.style.background = "black";
+//			cacheMask.style.left = "1279px";
+//			cacheMask.style.top = "0px";
+//			cacheMask.style.zIndex = 100000;
+//			cache.appendChild(cacheMask);
+//		},
+		
 		setResolution : function(resolutionName) {
 			assert(resolutions[resolutionName], "Resolution " + resolutionName
 					+ " not exists!");
@@ -151,6 +181,12 @@ var Resources = (function() {
 		getImage : function(name, preload, preloadCallback) {
 			var imageFilename = null;
 			var image = null;
+			
+			if (name == "background_dialog_common.png" || 
+					name == "background_dialog_profiles_small.png" ||
+						name == "background_dialog_profiles_initial.png") {
+				name = "background_dialog_profiles_large.png";
+			}
 
 			// we are not using resolutions
 			if (!currentResolution) {
@@ -271,13 +307,18 @@ var Resources = (function() {
 						obj.type = "image";
 						obj.fileName = Resources.getImage(current);
 						obj.src = obj.fileName;
-//						var image = document.createElement('img');
+						var image = document.createElement('div');
+						var style = "position: fixed; top: 0; left: 0px; width: 1px; height: 1px;";
+						style += "background-image: url('" + obj.fileName + "'); background-repeat: no-repeat;";
+						style += "-webkit-background-size: 1px 1px;";
+						style += "-o-background-size: 1px 1px;";
+						style += "-moz-background-size: 1px 1px;";
+						style += "-khtml-background-size: 1px 1px;";
+						style += "-ms-background-size: 1px 1px;";
+						style += "background-size: 1px 1px;";
 //						image.src = obj.fileName;
-//						image.style.position = "fixed";
-//						image.style.top = '0px';
-//						image.style.left = '1000px';
-//						image.style.zIndex = 100000;
-//						cache.appendChild(image);
+						image.setAttribute('style', style);
+						cache.appendChild(image);
 						// log3(obj.fileName + "is requested, ");
 					} else {
 						total--;
