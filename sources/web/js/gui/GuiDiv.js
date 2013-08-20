@@ -47,7 +47,7 @@ GuiDiv.prototype.initialize = function(params) {
 				: ENHANCED_BASE_WIDTH;
 		params['height'] = params['height'] ? params['height']
 				: ENHANCED_BASE_HEIGHT;
-		params['x'] = 1;//(params['x'] || params['x'] == 0) ? params['x'] : -ENHANCED_BASE_MARGIN_WIDTH;
+		params['x'] = 0;//(params['x'] || params['x'] == 0) ? params['x'] : -ENHANCED_BASE_MARGIN_WIDTH;
 		params['y'] = 0;//(params['y'] || params['x'] == 0) ? params['y'] : -ENHANCED_BASE_MARGIN_HEIGHT;
 		this.enhancedScene = true;
 		// enhancedScene is clamped by the maximum allowed screen size

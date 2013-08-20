@@ -49,7 +49,7 @@ GuiDialog.prototype.initialize = function(params) {
 		"style" : "mask",
 		"width" : "FULL_WIDTH",
 		"height" : "FULL_HEIGHT",
-		"x" : 0,
+		"x" : 1,
 		"y" : 0
 	});
 	this.maskDiv.setPosition(this.parent.width/2 - this.maskDiv.width, this.parent.height/2 - this.maskDiv.height);
