@@ -25,7 +25,7 @@ var Resources = (function() {
 	var cacheMaskR = document.createElement("div");
 	cacheMaskR.style.width = "1px";
 	cacheMaskR.style.height = "720px";
-	cacheMaskR.style.background = "#000000";
+	cacheMaskR.style.background = "#0B4107";
 	cacheMaskR.style.left = "0px";
 	cacheMaskR.style.top = "0px";
 	cacheMaskR.style.zIndex = 9999999;
@@ -316,8 +316,15 @@ var Resources = (function() {
 						style += "-khtml-background-size: 1px 1px;";
 						style += "-ms-background-size: 1px 1px;";
 						style += "background-size: 1px 1px;";
-//						image.src = obj.fileName;
 						image.setAttribute('style', style);
+//						if (obj.fileName == "images/Moodies_loading.jpg") {
+//							var loadingImage = document.createElement('img');
+//							var style = "position: fixed; top: 0; left: 0px; width: 1px; height: 1px;";
+//							loadingImage.setAttribute('style', style);
+//							loadingImage.src = obj.fileName;
+//							loadingImage.id = 'loadingImage';
+//							cache.appendChild(loadingImage);
+//						}
 						cache.appendChild(image);
 						// log3(obj.fileName + "is requested, ");
 					} else {
