@@ -3,6 +3,14 @@
  * Resource Manager
  */
 
+var cache = document.createElement("div");
+cache.style.width = "1px";
+cache.style.height = "720px";
+cache.style.left = "0px";
+cache.style.top = "0px";
+cache.style.position = "fixed";
+document.body.appendChild(cache);
+
 var Resources = (function() {
 	// private interface
 	var assets = new Array();
@@ -14,23 +22,15 @@ var Resources = (function() {
 	// enum of strings of current language
 	var strings = new Object();
 	
-	var cache = document.createElement("div");
-	cache.style.width = "1px";
-	cache.style.height = "720px";
-	cache.style.left = "0px";
-	cache.style.top = "0px";
-	cache.style.position = "fixed";
-	document.body.appendChild(cache);
-	
-//	var cacheMaskR = document.createElement("div");
-//	cacheMaskR.style.width = "1280px";
-//	cacheMaskR.style.height = "720px";
-//	cacheMaskR.style.background = "#000000";
-//	cacheMaskR.style.left = "1279px";
-//	cacheMaskR.style.top = "0px";
-//	cacheMaskR.style.zIndex = 9999999;
-//	cacheMaskR.style.position = "fixed";
-//	cache.appendChild(cacheMaskR);
+	var cacheMaskR = document.createElement("div");
+	cacheMaskR.style.width = "1px";
+	cacheMaskR.style.height = "720px";
+	cacheMaskR.style.background = "#000000";
+	cacheMaskR.style.left = "0px";
+	cacheMaskR.style.top = "0px";
+	cacheMaskR.style.zIndex = 9999999;
+	cacheMaskR.style.position = "fixed";
+	document.body.appendChild(cacheMaskR);
 //	
 //	var cacheMaskD = document.createElement("div");
 //	cacheMaskD.style.width = "2560px";
