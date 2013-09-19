@@ -363,6 +363,21 @@ GuiButton.prototype.changeButtonBackgrounds = function(params, idx) {
 	}
 };
 
+GuiButton.prototype.setButtonBackgrounds = function(img) {
+	if (this.imageNormal) {
+		this.imageNormal.setBackground(img);
+	}
+	if (this.imageHover) {
+		this.imageHover.setBackground(img);
+	}
+	if (this.imageActive) {
+		this.imageActive.setBackground(img);
+	}
+	if (this.imagePassive) {
+		this.imagePassive.setBackground(img);
+	}
+};
+
 // show or hides background
 // changes background for highlighted
 GuiButton.prototype.highlight = function(isOn) {
