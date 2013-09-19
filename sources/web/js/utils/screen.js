@@ -101,8 +101,8 @@ var Screen = (function() {
 			return false;
 		}
 
-		offsetX = Math.round((windowInnerWidth - fieldWidth) / 2);
-		offsetY = Math.round((windowInnerHeight - fieldHeight) / 2);
+		offsetX = 0; //Math.round((windowInnerWidth - fieldWidth) / 2);
+		offsetY = 0; //Math.round((windowInnerHeight - fieldHeight) / 2);
 
 		currentFullWidth = fullWidth;
 		currentFullHeight = fullHeight;

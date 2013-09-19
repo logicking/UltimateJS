@@ -72,6 +72,19 @@ GuiLabel.prototype.change = function(src, fontSize) {
 	this.resize();
 };
 
+GuiLabel.prototype.htmlChange = function(src, fontSize) {
+	this.text = src;
+	src = Resources.getString(src);
+	$("#" + this.cellId).html(src);
+	if (fontSize)
+		this.fontSize = fontSize;
+//	console.error(this.id,this.cellId, $("#" + this.cellId).text());
+	$("#" + this.cellId)['css']("font-size", Math.floor(this.fontSize
+			* Math.min(Screen.widthRatio(), Screen.heightRatio()))
+			+ "px");
+	this.resize();
+};
+
 GuiLabel.prototype.append = function(src) {
 	$("#" + this.cellId).append(src);
 	this.resize();
