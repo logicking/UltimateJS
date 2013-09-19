@@ -157,8 +157,8 @@ GuiSprite.prototype.updateSpatialAnimation = function(dt) {
 };
 
 GuiSprite.prototype.updateAnimation = function() {
-	if (Account.instance.idleStop == true)
-		return;
+//	if (Account.instance.idleStop == true)
+//		return;
 	
 	if (this.currentAnimation == null)
 		return;
