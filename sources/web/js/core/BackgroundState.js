@@ -53,19 +53,20 @@ BackgroundState.prototype.init = function(params) {
 	});
 
 	if (params["loader"]) {
+		console.log("LOADER EXISTS");
 		this.loader = guiFactory.createObject("GuiDiv", {
 			parent : this.mask,
-			image : params['loader'],
+			image : params['loader'].image,
 			background : {
-				image : params['loader']
+				image : params['loader'].image
 			},
 			style : "spite",
-			width : 274,
-			height : 66,
+			width : params['loader'].width?params['loader'].width:274,
+			height : params['loader'].height?params['loader'].height:66,
 			x : "50%",
-			y : "50%",
-			offsetX : -137,
-			offsetY : -33
+			y : "65%",
+			offsetX : params['loader'].width?(-params['loader'].width/2):-137,
+			offsetY : params['loader'].height?(-params['loader'].height/2):-33
 		});
 		this.loader.setClickTransparent(true);
 		this.addGui(this.loader);

@@ -310,7 +310,7 @@ GuiButton.prototype.bind = function(pushFunction) {
 			this.jObject.bind("mouseup", callbackCaller);
 		} else {
 			this.jObject.bind("touchstart", function() {
-				if (!this.active)
+				if (!that.active)
 					return;
 				that.activeState.call(that);
 				that.clickAllowed = true;
