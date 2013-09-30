@@ -122,7 +122,7 @@ SimpleCountdown.prototype.updateLabel = function(){
 };
 
 SimpleCountdown.prototype.update = function(updateTime) {
-	if (!this.paused) {
+	if (!this.paused && this.count) {
 //		this.count -= updateTime;
 		this.count -= Date.now() - this.time;
 		this.time = Date.now();
