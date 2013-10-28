@@ -108,6 +108,9 @@ Countdown.prototype.createVisual = function() {
 	}
 
 	var that = this;
+	
+	var end = false;
+	
 	var animationEnd = function() {
 		if (!that.paused) {
 			if (that.count > 1) {
@@ -129,14 +132,16 @@ Countdown.prototype.createVisual = function() {
 				if (that.EndCallback) {
 					that.EndCallback();
 				}
-				return;
+				end = true;
 			}
 		}
 	};
 	// Sound.play("beepShort");
-	if (this.sprite) {
-		this.sprite.playAnimation("countdown", 1000, false);
-		this.sprite.setAnimationEndCallback(animationEnd);
+	if (!end) {
+		if (this.sprite) {
+			this.sprite.playAnimation("countdown", 1000, false);
+			this.sprite.setAnimationEndCallback(animationEnd);
+		}
 	}
 };
 
