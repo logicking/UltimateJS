@@ -287,7 +287,8 @@ GuiElement.prototype.positioning = function() {
 };
 
 GuiElement.prototype.hide = function() {
-	this.jObject['hide']();
+//	this.jObject['hide']();
+	this.jObject['css']("display", "none");
 	this.visible = false;
 	this.toBeVisible = false;
 };
@@ -513,7 +514,7 @@ GuiElement.prototype.setParent = function(newParent, saveGlobalPosition) {
 			this.move(left, top);
 		}
 
-		if (this.jObject) {
+		if (this.jObject && oldParent != this.parent) {
 			this.jObject['appendTo'](parent.jObject);
 		}
 		return true;
