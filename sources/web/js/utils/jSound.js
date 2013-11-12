@@ -213,7 +213,7 @@ jSound.prototype.generateJplayer = function(id, audioSpriteName) {
 		ready : function() {
 			$(this)['jPlayer']("setMedia", {
 				oga : audioSpriteName + ".ogg",
-				// m4a : audioSpriteName + ".mp4",
+				m4a : audioSpriteName + ".mp4",
 				mp3 : audioSpriteName + ".mp3"
 			});
 		},
@@ -222,6 +222,8 @@ jSound.prototype.generateJplayer = function(id, audioSpriteName) {
 		preload : "auto", 
 		// solution : "html",//, flash",
 		swfPath : PATH_TO_JPLAYER_SWF,
+
+        oggSupport: true,
 
 		ended : function() { // The
 			// $.jPlayer.event.ended

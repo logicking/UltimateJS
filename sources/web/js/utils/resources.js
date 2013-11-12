@@ -267,7 +267,7 @@ var Resources = (function() {
 
 		// temporary borrowed from CraftyJS game engine
 		// TODO rewrite
-		loadMedia : function(data, oncomplete, onprogress, onerror) {
+		loadMedia : function(data, oncomplete, onprogress, onerror, someFunc) {
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
 			var counter = -1;
 			var times = Math.floor(l/5);
@@ -283,7 +283,9 @@ var Resources = (function() {
 					} else {
 						thisLength = l;
 					}
-				} 
+				} else {
+					Loader['updateLoadingState'](Loader['currentLoadingState']()+ Math.round(40/times));	
+				}
 				
 				for (; i < thisLength; ++i) {
 //					if (i > 42)
@@ -378,7 +380,9 @@ var Resources = (function() {
 						}
 					};
 				}
-			} ,500);
+				if (someFunc)
+					someFunc();
+			} ,300);
 
 		}
 	};
