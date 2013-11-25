@@ -25,6 +25,7 @@ guiFactory.addClass(GuiDiv);
 GuiDiv.prototype.initialize = function(params) {
 	this.divname = params['divname'];
 	this.backgrounds = new Array();
+	this.disableViewport();
 	// short alias for background
 	if (params['image']) {
 		params['background'] = {
@@ -330,6 +331,7 @@ GuiDiv.prototype.setViewport = function(rect, isParent) {
 
 GuiDiv.prototype.disableViewport = function(){
 	this.viewportDisable = true;
+	this.viewport = null;
 };
 
 GuiDiv.prototype.globalOffset = function() {
