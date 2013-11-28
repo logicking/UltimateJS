@@ -214,6 +214,14 @@ var Device = (function() {
 					y : e['originalEvent']['touches'][0].pageY
 				};
 			}
+			if (e['originalEvent'] && !e['originalEvent'].touches) {
+				if (e['originalEvent'].pageX) {
+					return {
+						x : e['originalEvent'].pageX,
+						y : e['originalEvent'].pageY
+					};
+				}
+			}
 			if (e['touches']) {
 				return {
 					x : e['touches'][0].pageX,

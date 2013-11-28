@@ -16,12 +16,16 @@ var viewporter;
 
 		// options
 		forceDetection: false,
-		
-		// set to true to prevent page scroll.
-		preventPageScroll: false,
+
+		disableLegacyAndroid: true,
 
 		// constants
 		ACTIVE: (function() {
+
+			// it's best not do to anything to very weak devices running Android 2.x
+			if(viewporter.disableLegacyAndroid && (/android 2/i).test(navigator.userAgent)) {
+				return false;
+			}
 
 			// iPad's don't allow you to scroll away the UI of the browser
 			if((/ipad/i).test(navigator.userAgent)) {
@@ -32,11 +36,6 @@ var viewporter;
 			if((/webos/i).test(navigator.userAgent)) {
 				return true;
 			}
-			
-			//if firefox phone
-			if(window.navigator.mozApps && window.navigator.mozApps.install){
-				return false;
-			}
 
 			// touch enabled devices
 			if('ontouchstart' in window) {
@@ -45,7 +44,7 @@ var viewporter;
 
 			return false;
 
-		})(),
+		}),
 
 		READY: false,
 
@@ -63,11 +62,30 @@ var viewporter;
 		},
 
 		refresh: function(){
-			if (_viewporter){
+			if (_viewporter) {
 				_viewporter.prepareVisualViewport();
 			}
+		},
+
+		preventPageScroll: function() {
+
+			// prevent page scroll if `preventPageScroll` option was set to `true`
+			document.body.addEventListener('touchmove', function(event) {
+				event.preventDefault();
+			}, false);
+
+			// reset page scroll if `preventPageScroll` option was set to `true`
+			// this is used after showing the address bar on iOS
+			document.body.addEventListener("touchstart", function() {
+				_viewporter.prepareVisualViewport();
+			}, false);
+
 		}
+
 	};
+
+	// execute the ACTIVE flag
+	viewporter.ACTIVE = viewporter.ACTIVE();
 
 	// if we are on Desktop, no need to go further
 	if (!viewporter.ACTIVE) {
@@ -92,36 +110,7 @@ var viewporter;
 			window.addEventListener('orientationchange', function() {
 				if(window.orientation !== cachedOrientation) {
 					that.prepareVisualViewport();
-					setTimeout( function(){
-						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
-						$(window)['trigger']("resize");
-					}, 200);
-					setTimeout( function(){
-						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
-						$(window)['trigger']("resize");
-					}, 300);
-					setTimeout( function(){
-//						that.prepareVisualViewport();
-						window.scrollTo(0, that.IS_ANDROID ? 1 : 0);
-						$(window)['trigger']("resize");
-					}, 400);
 					cachedOrientation = window.orientation;
-				}
-			}, false);
-
-			
-			// prevent page scroll if `preventPageScroll` option was set to `true`
-			document.body.addEventListener('touchmove', function(event) {
-				if (viewporter.preventPageScroll){
-					event.preventDefault();
-				}
-			}, false);
-			
-			// reset page scroll if `preventPageScroll` option was set to `true`
-			// this is used after showing the address bar on iOS
-			document.body.addEventListener("touchstart", function() {
-				if (viewporter.preventPageScroll) {
-					that.prepareVisualViewport();
 				}
 			}, false);
 			
@@ -176,22 +165,15 @@ var viewporter;
 				return this.postProcess();
 			}
 
-			//preventing 1pixel stripe at the bottom of the screen
-			if(that.IS_ANDROID)
-				document.getElementById('root').style.top = 1 + "px";
-			
-			
-			var oldHeight = document.documentElement.style.minHeight.substring(0, document.documentElement.style.minHeight.indexOf("px"));
 			// maximize the document element's height to be able to scroll away the url bar
-//			alert(window.innerHeight);
-			document.documentElement.style.minHeight = (window.innerHeight + 200)+ "px";
+			document.documentElement.style.minHeight = '5000px';
 
 			var startHeight = window.innerHeight;
 			var deviceProfile = this.getProfile();
 			var orientation = viewporter.isLandscape() ? 'landscape' : 'portrait';
 
 			// try scrolling immediately
-			window.scrollTo(0, that.IS_ANDROID ? 100 : 0); // Android needs to scroll by at least 1px
+			window.scrollTo(0, that.IS_ANDROID ? 1 : 0); // Android needs to scroll by at least 1px
 
 			// start the checker loop
 			var iterations = 40;
@@ -199,7 +181,7 @@ var viewporter;
 
 				// retry scrolling
 				window.scrollTo(0, that.IS_ANDROID ? 1 : 0); // Android needs to scroll by at least 1px
-				
+
 				function androidProfileCheck() {
 					return deviceProfile ? window.innerHeight === deviceProfile[orientation] : false;
 				}
@@ -209,19 +191,16 @@ var viewporter;
 
 				iterations--;
 
-				//preventing 1pixel stripe at the bottom of the screen
-				if(that.IS_ANDROID)
-					document.getElementById('root').style.top = 1 + "px";
-				
 				// check iterations first to make sure we never get stuck
-				if (  iterations <= 0||(that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) ) {
-					
+				if ( (that.IS_ANDROID ? androidProfileCheck() : iosInnerHeightCheck()) || iterations < 0) {
+
 					// set minimum height of content to new window height
 					document.documentElement.style.minHeight = window.innerHeight + 'px';
-//					// set the right height for the body wrapper to allow bottom positioned elements
-//					document.getElementById('viewporter').style.position = 'relative';
-//					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
-					
+
+					// set the right height for the body wrapper to allow bottom positioned elements
+					document.getElementById('viewporter').style.position = 'relative';
+					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
+
 					clearInterval(check);
 
 					// fire events, get ready
@@ -229,7 +208,7 @@ var viewporter;
 
 				}
 
-			}, 5000);
+			}, 10);
 
 		},
 
