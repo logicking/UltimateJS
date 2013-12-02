@@ -25,7 +25,7 @@ guiFactory.addClass(GuiDiv);
 GuiDiv.prototype.initialize = function(params) {
 	this.divname = params['divname'];
 	this.backgrounds = new Array();
-	this.disableViewport();
+//	this.disableViewport();
 	// short alias for background
 	if (params['image']) {
 		params['background'] = {

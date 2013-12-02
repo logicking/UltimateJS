@@ -139,7 +139,7 @@ var Screen = (function() {
 		if (typeof rotateMsgHeightWidthRatio != "number") {
 			rotateMsgHeightWidthRatio = obj.height() / obj.width();
 		}
-		
+
 		var windowInnerWidth = selectValue(w, window.innerWidth);
 		var rotateMsgW = Math.min(MAX_WIDTH, windowInnerWidth);
 		var rotateMsgH = rotateMsgW * rotateMsgHeightWidthRatio;
@@ -155,7 +155,7 @@ var Screen = (function() {
 		if(fixedHeight){
 			h = fixedHeight;
 		}
-		// alert("resize " + Screen.isCorrectOrientation());
+
 		if (!Screen.isCorrectOrientation()) {
 			resizeRotateMsg(w, h);
 			if (!Loader.loadingMessageShowed()) {
@@ -163,7 +163,6 @@ var Screen = (function() {
 				$("#rotateMsg")['css']("z-index", 99999999);
 			}
 		} else {
-
 			// absorb nearly simultaneous calls to resize
 			clearTimeout(resizeTimeoutHandle);
 			resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
@@ -172,6 +171,27 @@ var Screen = (function() {
 			$("#rotateMsg")['css']("z-index", 0);
 			$("#rotateMsg")['css']("display", "none");
 		}
+			
+		// A little hack for S3
+		setTimeout(function() {
+			if (!Screen.isCorrectOrientation()) {
+				resizeRotateMsg(w, h);
+				if (!Loader.loadingMessageShowed()) {
+					$("#rotateMsg")['css']("display", "block");
+					$("#rotateMsg")['css']("z-index", 99999999);
+				}
+			} else {
+				// absorb nearly simultaneous calls to resize
+				clearTimeout(resizeTimeoutHandle);
+				resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
+				windowScrollDown();
+
+				$("#rotateMsg")['css']("z-index", 0);
+				$("#rotateMsg")['css']("display", "none");
+			}
+		}, 500);
+		// alert("resize " + Screen.isCorrectOrientation());
+		
 		return;
 	}
 
