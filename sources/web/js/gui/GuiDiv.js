@@ -4,6 +4,8 @@
 GuiDiv.prototype = new GuiElement();
 GuiDiv.prototype.constructor = GuiDiv;
 
+VIEWPORT_KILLER = false;
+
 /**
  * @constructor
  */
@@ -25,7 +27,7 @@ guiFactory.addClass(GuiDiv);
 GuiDiv.prototype.initialize = function(params) {
 	this.divname = params['divname'];
 	this.backgrounds = new Array();
-//	this.disableViewport();
+	if (VIEWPORT_KILLER) this.disableViewport();
 	// short alias for background
 	if (params['image']) {
 		params['background'] = {
