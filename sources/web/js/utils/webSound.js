@@ -10,6 +10,9 @@ WebSound.prototype.play = function(sndInst, callback) {
 	var source = this.context.createBufferSource();
 	sndInst.source = source;
 	sndInst.source.connect(this.context.destination);
+	if(!sndInst.buffer){
+		return;
+	}
 	sndInst.source.buffer = sndInst.buffer;
 	sndInst.source.loop = sndInst.loop;
 	sndInst.source.gain.value = sndInst.volume;
@@ -27,8 +30,12 @@ WebSound.prototype.play = function(sndInst, callback) {
 };
 
 WebSound.prototype.stop = function(sndInst) {
-	if (sndInst) {
-		sndInst.source.noteOff(0);
+	if (sndInst && sndInst.source) {
+		try{
+			sndInst.source.noteOff(0);
+		}catch(e){
+//			alert("WEB STOPERR:"+e);
+		}
 	}
 };
 

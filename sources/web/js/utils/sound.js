@@ -48,8 +48,12 @@ var Sound = (function() {
 				}
 			} else {
 				$['each'](this.channels, function(index, value) {
-					if (index != "background" && value.playing != null) {
-						that.instance.stop(value['playing']);
+					try{
+						if (index != "background" && value && value.playing != null) {
+							that.instance.stop(value['playing']);
+						}
+					}catch(e){
+//						console.err("STOPERR"+e);
 					}
 				});
 			}

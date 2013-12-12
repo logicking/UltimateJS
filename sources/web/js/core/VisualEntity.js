@@ -92,9 +92,9 @@ VisualEntity.prototype.attachToGui = function(guiParent, clampByParentViewport) 
 
 };
 
-VisualEntity.prototype.destroy = function() {
+VisualEntity.prototype.destroy = function(dontRemoveVisual) {
 	VisualEntity.parent.destroy.call(this);
-	if (this.guiParent) {
+	if (this.guiParent && !dontRemoveVisual) {
 		var that = this;
 		$['each'](this.visuals, function(id, visualInfo) {
 			that.guiParent.removeGui(visualInfo.visual);

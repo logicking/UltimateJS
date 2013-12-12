@@ -53,7 +53,6 @@ BackgroundState.prototype.init = function(params) {
 	});
 
 	if (params["loader"]) {
-		console.log("LOADER EXISTS");
 		this.loader = guiFactory.createObject("GuiDiv", {
 			parent : this.mask,
 			image : params['loader'].image,

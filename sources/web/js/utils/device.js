@@ -192,7 +192,7 @@ var Device = (function() {
 		},
 
 		supports3dTransfrom : function() {
-			return Modernizr.csstransforms3d;
+			return false;//Modernizr.csstransforms3d;
 		},
 		nativeRender : function() {
 			return nativeRender;
@@ -207,7 +207,7 @@ var Device = (function() {
 			return 'ontouchstart' in document.documentElement;
 		},
 		getPositionFromEvent : function(e) {
-			if (e['originalEvent'] && e['originalEvent'].touches) {
+			if (e['originalEvent'] && e['originalEvent'].touches && e['originalEvent'].touches[0]) {
 				// alert(" touch " + e.touches[0].pageX);
 				return {
 					x : e['originalEvent']['touches'][0].pageX,

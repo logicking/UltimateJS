@@ -148,7 +148,9 @@ var Screen = (function() {
 	};
 	
 	function windowOnResize(event, w, h) {
-		console.log("RESRRESRERSD", fixedWidth, fixedHeight);
+		if(DO_NOT_RESIZE){
+			return;
+		}
 		if(fixedWidth){
 			w = fixedWidth;
 		}
