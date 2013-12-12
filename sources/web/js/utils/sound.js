@@ -247,7 +247,7 @@ var Sound = (function() {
 
 	try {
 		context = new webkitAudioContext();
-//		 context = null;
+//		context = null;
 	} catch (e) {
 		context = null;
 		console.log("WEB Audio not supported");

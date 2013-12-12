@@ -198,8 +198,12 @@ var viewporter;
 					document.documentElement.style.minHeight = window.innerHeight + 'px';
 
 					// set the right height for the body wrapper to allow bottom positioned elements
-					document.getElementById('viewporter').style.position = 'relative';
-					document.getElementById('viewporter').style.height = window.innerHeight + 'px';
+					var docViewporter = document.getElementById('viewporter');
+					if (docViewporter && docViewporter.style) {
+						docViewporter.style.position = 'relative';
+						docViewporter.style.height = window.innerHeight + 'px';						
+					}
+
 
 					clearInterval(check);
 
