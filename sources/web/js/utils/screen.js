@@ -13,6 +13,8 @@ var ENHANCED_BASE_HEIGHT = 640;
 var ENHANCED_BASE_MARGIN_WIDTH = 169;
 var ENHANCED_BASE_MARGIN_HEIGHT = 70;
 
+var DO_NOT_RESIZE = false;
+
 var Screen = (function() {
 	var screenConsts = {};
 
