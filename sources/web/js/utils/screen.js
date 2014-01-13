@@ -35,6 +35,10 @@ var Screen = (function() {
 	var fixedWidth = null;
 	var fixedHeight = null;
 
+	var oldW = null;
+	var oldH = null;
+	var orientationFlag = null;
+
 	var widthRatio = 1;
 	var heightRatio = 1;
 
@@ -159,21 +163,34 @@ var Screen = (function() {
 		if(fixedHeight){
 			h = fixedHeight;
 		}
-
+		
+		oldW = null;
+		oldH = null;
+		orientationFlag = null;
+		
 		if (!Screen.isCorrectOrientation()) {
 			resizeRotateMsg(w, h);
 			if (!Loader.loadingMessageShowed()) {
 				$("#rotateMsg")['css']("display", "block");
 				$("#rotateMsg")['css']("z-index", 99999999);
 			}
+			orientationFlag = true;
 		} else {
 			// absorb nearly simultaneous calls to resize
-			clearTimeout(resizeTimeoutHandle);
-			resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
+			if (!orientationFlag || (oldW != w || oldH != h)) {
+				oldW = w;
+				oldH = h;
+				
+				clearTimeout(resizeTimeoutHandle);
+				resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
+			}
+			
 			windowScrollDown();
 
 			$("#rotateMsg")['css']("z-index", 0);
 			$("#rotateMsg")['css']("display", "none");
+			
+			orientationFlag = false;
 		}
 			
 		// A little hack for S3
