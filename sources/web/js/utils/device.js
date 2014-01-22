@@ -11,6 +11,7 @@ var Device = (function() {
 	var userAgentParsed = null;
 	var androidOsVersion = null;
 	var isAppleMobileOs = null;
+	var isIpod = null;
 	var isIeBrowser = null;
 	var isWebkitBrowser = null;
 
@@ -32,6 +33,7 @@ var Device = (function() {
 
 		// check apple iOs
 		isAppleMobileOs = (/iphone|ipod|ipad/gi).test(navigator.platform);
+		isIpod = (/iphone|ipod|ipad/gi).test(navigator.platform);
 
 		isWebkitBrowser = userAgent.indexOf("webkit") > -1;
 
@@ -187,6 +189,10 @@ var Device = (function() {
 			return isAppleMobileOs;
 		},
 
+		isIpodDevice : function() {
+			return isIpod;
+		},
+		
 		isMobile : function() {
 			return Device.isTouch();
 		},
@@ -285,6 +291,10 @@ var Device = (function() {
 
 		// becnmark test for slow devices
 		isSlow : function() {
+//			if (Device.isIpodDevice()) {
+//				alert("ipod");
+				return true;
+//			}
 			if ((Device.isAndroid() && Device.androidVersion() < 2.3)
 					|| benchmarkTest < 80) {
 				// alert("Yes, we are slow");
