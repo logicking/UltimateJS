@@ -291,10 +291,9 @@ var Device = (function() {
 
 		// becnmark test for slow devices
 		isSlow : function() {
-//			if (Device.isIpodDevice()) {
-//				alert("ipod");
+			if (Device.isIpodDevice()) {
 				return true;
-//			}
+			}
 			if ((Device.isAndroid() && Device.androidVersion() < 2.3)
 					|| benchmarkTest < 80) {
 				// alert("Yes, we are slow");
