@@ -53,20 +53,38 @@ BackgroundState.prototype.init = function(params) {
 	});
 
 	if (params["loader"]) {
-		this.loader = guiFactory.createObject("GuiDiv", {
-			parent : this.mask,
-			image : params['loader'].image,
-			background : {
-				image : params['loader'].image
-			},
-			style : "spite",
-			width : params['loader'].width?params['loader'].width:274,
-			height : params['loader'].height?params['loader'].height:66,
-			x : "50%",
-			y : "65%",
-			offsetX : params['loader'].width?(-params['loader'].width/2):-137,
-			offsetY : params['loader'].height?(-params['loader'].height/2):-33
-		});
+		if (params["loader"].text) {
+			this.loader = guiFactory.createObject("GuiLabel", {
+				parent : this.mask,
+				image : params['loader'].image,
+				text : params["loader"].text,
+				style : params["loader"].style?params["loader"].style:"spite",
+				fontSize : params["loader"].fontSize?params["loader"].fontSize:40,
+				width : params['loader'].width?params['loader'].width:274,
+				height : params['loader'].height?params['loader'].height:66,
+				x : "50%",
+				y : "65%",
+				offsetX : params['loader'].width?(-params['loader'].width/2):-137,
+				offsetY : params['loader'].height?(-params['loader'].height/2):-33,
+				align : "center"
+			});
+		} else {
+			this.loader = guiFactory.createObject("GuiDiv", {
+				parent : this.mask,
+				image : params['loader'].image,
+				background : {
+					image : params['loader'].image
+				},
+				style : "spite",
+				width : params['loader'].width?params['loader'].width:274,
+				height : params['loader'].height?params['loader'].height:66,
+				x : "50%",
+				y : "65%",
+				offsetX : params['loader'].width?(-params['loader'].width/2):-137,
+				offsetY : params['loader'].height?(-params['loader'].height/2):-33
+			});
+		}
+
 		this.loader.setClickTransparent(true);
 		this.addGui(this.loader);
 		this.loader.$()['css']("opacity", 0);
