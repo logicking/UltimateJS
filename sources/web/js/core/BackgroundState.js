@@ -63,7 +63,7 @@ BackgroundState.prototype.init = function(params) {
 				width : params['loader'].width?params['loader'].width:274,
 				height : params['loader'].height?params['loader'].height:66,
 				x : "50%",
-				y : "65%",
+				y : params["loader"].y?params["loader"].y:"65%",
 				offsetX : params['loader'].width?(-params['loader'].width/2):-137,
 				offsetY : params['loader'].height?(-params['loader'].height/2):-33,
 				align : "center"
