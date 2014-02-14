@@ -136,6 +136,10 @@ var Resources = (function() {
 				// name
 				// supposing that we have all images for this resolution
 				// available
+				if (!name || name == 'undefined') {
+					return null;
+				} 
+				
 				if (!imageFilename) {
 					imageFilename = resolutions[currentResolution].folder
 							+ name;
@@ -153,6 +157,7 @@ var Resources = (function() {
 			if(assets[name]){
 //				console.log("IN ASS", assets[name].complete);
 			}
+
 			return imageFilename;
 		},
 

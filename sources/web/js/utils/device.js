@@ -8,6 +8,8 @@ var Device = (function() {
 
 	var storageSupported = null;
 
+	var reserveStorage = {};
+	
 	var userAgentParsed = null;
 	var androidOsVersion = null;
 	var isAppleMobileOs = null;
@@ -151,6 +153,8 @@ var Device = (function() {
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
 				storage.setItem(key, val);
+			} else {
+				reserveStorage[key] = val;
 			}
 		},
 		getStorageItem : function(key, defaultVal) {
@@ -159,6 +163,8 @@ var Device = (function() {
 				var val = storage.getItem(key);
 				return (val != null) ? val : defaultVal;
 			} else {
+				if (reserveStorage[key])
+					return reserveStorage[key];
 				return defaultVal;
 			}
 		},
@@ -167,6 +173,9 @@ var Device = (function() {
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
 				storage.removeItem(key);
+			} else {
+				if (reserveStorage[key])
+					delete reserveStorage[key];
 			}
 		},
 

@@ -300,7 +300,7 @@ GuiDiv.prototype.showBackground = function() {
 	$['each'](this.backgrounds, function(i, back) {
 		if (!back)
 			return;
-		urls += "url('" + back.url + "'),";
+		if (back.url) urls += "url('" + back.url + "'),";
 		repeats += back.repeat + ",";
 	});
 	urls = urls.substr(0, urls.length - 1);
