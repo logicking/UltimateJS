@@ -15,6 +15,8 @@ function GuiDialog() {
 GuiDialog.inheritsFrom(GuiDiv);
 GuiDialog.prototype.className = "GuiDialog";
 
+GuiDialog.prototype.maskDivSoul = null;
+
 GuiDialog.prototype.createInstance = function(params) {
 	var entity = new GuiDialog(params['parent'], params['style'], params['width'], params['height'], null);
 	entity.initialize(params);
@@ -42,16 +44,19 @@ GuiDialog.prototype.initialize = function(params) {
 
 	// an transparent PNG image 1x1 pixel size
 	// to prevent clicks
-	this.maskDiv = guiFactory.createObject("GuiDiv", {
-		"parent" : "body",
-		// "image" :
-		// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
-		"style" : "mask",
-		"width" : "FULL_WIDTH",
-		"height" : "FULL_HEIGHT",
-		"x" : 0,
-		"y" : 0
-	});
+	if (!GuiDialog.prototype.maskDivSoul) {
+		GuiDialog.prototype.maskDivSoul = guiFactory.createObject("GuiDiv", {
+			"parent" : "body",
+			// "image" :
+			// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
+			"style" : "mask",
+			"width" : "FULL_WIDTH",
+			"height" : "FULL_HEIGHT",
+			"x" : 0,
+			"y" : 0
+		});
+	}
+	this.maskDiv = GuiDialog.prototype.maskDivSoul;
 //	this.maskDiv.setPosition(this.parent.width/2 - this.maskDiv.width, this.parent.height/2 - this.maskDiv.height);
 	this.maskDiv.setBackground("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=");
 	this.maskDiv.bind(function(e) {
