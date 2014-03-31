@@ -169,12 +169,12 @@ var Screen = (function() {
 		orientationFlag = null;
 		
 		if (!Screen.isCorrectOrientation()) {
-			resizeRotateMsg(w, h);
 			if (!Loader.loadingMessageShowed()) {
+				resizeRotateMsg(w, h);
 				$("#rotateMsg")['css']("display", "block");
 				$("#rotateMsg")['css']("z-index", 99999999);
+				orientationFlag = true;
 			}
-			orientationFlag = true;
 		} else {
 			// absorb nearly simultaneous calls to resize
 			if (!orientationFlag || (oldW != w || oldH != h)) {
@@ -196,8 +196,8 @@ var Screen = (function() {
 		// A little hack for S3
 		setTimeout(function() {
 			if (!Screen.isCorrectOrientation()) {
-				resizeRotateMsg(w, h);
 				if (!Loader.loadingMessageShowed()) {
+					resizeRotateMsg(w, h);
 					$("#rotateMsg")['css']("display", "block");
 					$("#rotateMsg")['css']("z-index", 99999999);
 				}

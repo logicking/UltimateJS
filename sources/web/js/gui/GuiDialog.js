@@ -84,6 +84,7 @@ GuiDialog.prototype.init = function() {
 GuiDialog.prototype.show = function() {
 	GuiDialog.parent.show.call(this);
 	if (this.maskDiv) {
+		this.maskDiv.resize();
 		this.maskDiv.show();
 	}
 	this.visible = true;
