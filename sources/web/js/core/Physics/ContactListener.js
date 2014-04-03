@@ -52,6 +52,8 @@ ContactListener.prototype.getContacts = function(body) {
 //	Main part of the listener
 //
 ContactListener.prototype.update = function() {
+    //TODO: check it
+    return;
 	var that = this;
 	var contactList = this.getContacts(this.body);
 

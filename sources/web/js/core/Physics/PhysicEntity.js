@@ -42,7 +42,8 @@ PhysicEntity.prototype.init = function(params) {
 		this.physics['m_userData'] = this;
 
 		this.updatePositionFromPhysics();
-		if (!this.physics['IsStatic']() || Physics.debugMode())
+//TODO: check
+		if (!this.physics.m_type == b2Body.b2_staticBody || Physics.debugMode())
 			Physics.updateItemAdd(this);
 	}
 };
@@ -51,42 +52,41 @@ PhysicEntity.prototype.init = function(params) {
 // Create and register physics body function
 //
 PhysicEntity.prototype.createPhysics = function() {
-	var that = this;
-	var shapeDefinition;
+	//var shapeDefinition;
+    var fixDef;
 	var bodyDefinition;
 	var physicParams = this.params['physics']; // preloaded from json
 	var logicPosition = {
 		x : this.params.x,
 		y : this.params.y
 	};
-
 	function setShapeParams(shapeDefinition, physicParams) {
-		shapeDefinition.density = selectValue(physicParams['density'],
-				(physicParams['static'] == true) ? 0 : 1);
+		shapeDefinition.density = selectValue(physicParams['density'], 1);
 		shapeDefinition.restitution = selectValue(physicParams.restitution, 1);
 		shapeDefinition.friction = selectValue(physicParams.friction, 0);
 	}
 
 	bodyDefinition = new b2BodyDef();
-
-	// Configuring shape params depends on "type" in json
+    bodyDefinition.type = physicParams['static'] ? b2Body.b2_staticBody : b2Body.b2_dynamicBody;
+    bodyDefinition.userData = null;
+    // Configuring shape params depends on "type" in json
 	switch (physicParams.type) {
 	case "Box": {
-		shapeDefinition = new b2BoxDef();
-		shapeDefinition.extents = new b2Vec2(physicParams.width / 2,
-				physicParams.height / 2);
-		setShapeParams(shapeDefinition, physicParams);
-		bodyDefinition.AddShape(shapeDefinition);
+		///////////////
+        fixDef = new b2FixtureDef();
+        fixDef.shape = new b2PolygonShape;
+        fixDef.shape.SetAsBox(physicParams.width / 2, physicParams.height / 2);
+        setShapeParams(fixDef, physicParams);
+        //////////////
 		break;
 	}
 	case "Circle": {
-		shapeDefinition = new b2CircleDef();
-		shapeDefinition.radius = physicParams.radius;
-		setShapeParams(shapeDefinition, physicParams);
-		bodyDefinition.AddShape(shapeDefinition);
-		//bodyDefinition.bullet == true;
+        fixDef = new b2FixtureDef();
+        fixDef.shape = new b2CircleShape(physicParams.radius);
+		setShapeParams(fixDef, physicParams);
 		break;
 	}
+    /*
 	case "Poly": {
 		shapeDefinition = new b2PolyDef();
 		shapeDefinition.vertexCount = physicParams.vertexCount;
@@ -168,17 +168,17 @@ PhysicEntity.prototype.createPhysics = function() {
 			}
 		});
 		break;
-	}
+	}*/
 	}
 
 	// Configuring and creating body (returning it)
-
 	bodyDefinition.position.Set(0, 0);
 	bodyDefinition.linearDamping = physicParams.linearDamping;
-	physicWorld = Physics.getWorld();
+    bodyDefinition.angularDamping = physicParams.angularDamping != null ? physicParams.angularDamping : 0;
+	var physicWorld = Physics.getWorld();
 	this.physics = physicWorld.CreateBody(bodyDefinition);
-	this.physics.SetCenterPosition(
-			new b2Vec2(logicPosition.x, logicPosition.y), 0);
+    this.physics.CreateFixture(fixDef);
+    this.physics.SetPosition(new b2Vec2(logicPosition.x, logicPosition.y), 0);
 	this.destructable = physicParams["destructable"];
 	if (this.destructable)
 		this.health = physicParams["health"];
@@ -215,8 +215,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 
 	if (that.physics==null)
 		return;
-	that.setPosition(that.physics.m_position.x - that.params.physics.x
-			- that.params.physics.width / 2, that.physics.m_position.y
+	that.setPosition(that.physics.GetPosition().x - that.params.physics.x
+			- that.params.physics.width / 2, that.physics.GetPosition().y
 			- that.params.physics.y - that.params.physics.height / 2);
 
 	if (that.params.physics.type != "Circle")
@@ -226,8 +226,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 			angleInDeg = MathUtils.toDeg(angleInDeg);
 
 			var localPoint = {
-				"x" : that.physics.GetCenterPosition()['x'],
-				"y" : that.physics.GetCenterPosition()['y']
+				"x" : that.physics.GetPosition()['x'],
+				"y" : that.physics.GetPosition()['y']
 			};
 			localPoint.x -= (visualInfo.visual.width / 2);
 			localPoint.y -= (visualInfo.visual.height / 2);
@@ -269,7 +269,7 @@ PhysicEntity.prototype.updatePhysics = function() {
 
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
 PhysicEntity.prototype.getPhysicsRotation = function() {
-	return this.physics['GetRotation']();
+	return this.physics.GetAngle();
 };
 
 PhysicEntity.prototype.onDragBegin = function() {
@@ -293,20 +293,20 @@ PhysicEntity.prototype.rotateByAxis = function(axis, angle) {
 	matRot.reset();
 	matRot.translate(-axis.x, -axis.y);
 	matTrans.multiply(matRot);
-	that = this;
+	var that = this;
 	$['each'](this.visuals, function(id, visualInfo) {
 		var t = matTrans.transformPoint(that.params.x - that.params.physics.x,
 				that.params.y - that.params.physics.y);
-		that.physics.SetCenterPosition(new b2Vec2(t[0], t[1]), that.physics.GetRotation());
+		that.physics.SetPosition(new b2Vec2(t[0], t[1]));
 	});
 };
 
 // Rotates physics bodyand updates visual position
 PhysicEntity.prototype.rotate = function(angleInRad) {
-	var position = this.physics.GetCenterPosition();
-	var oldAngle = this.physics.GetRotation();
+	var position = this.physics.GetPosition();
+	var oldAngle = this.physics.GetAngle();
 	var newAngle = oldAngle + angleInRad;
-	this.physics.SetCenterPosition(position, newAngle / 2);
+	this.physics.SetPositionAndAngle(position, newAngle / 2);
 
 	this.updatePositionFromPhysics();
 };
