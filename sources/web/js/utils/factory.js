@@ -43,7 +43,7 @@ function AbstractFactory() {
 			if (preprocessParamsCallback) {
 				preprocessParamsCallback(name, params);
 			}
-			obj = that.createObject(value["class"], params);
+            var obj = that.createObject(value["class"], params);
 			objects[name] = obj;
 			if (onCreateCallback) {
 				onCreateCallback(name, obj, params);
