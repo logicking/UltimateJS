@@ -331,8 +331,7 @@ PhysicEntity.prototype.onDamage = function(damage) {
 	// damage levels - show animation of different damages levels
 	if (this.params.physics.destructionLevels) {
 		$['each'](that.params.physics.destructionLevels, function(id, value) {
-			if ((that.health < value["minHealth"])
-					|| (that.health == value["minHealth"])) {
+			if (that.health <= value["minHealth"]) {
 				$['each'](that.visuals, function(id, visualInfo) {
 					visualInfo.visual.playAnimation(value["animName"],
 							ANIM_DELAY, false, true);
