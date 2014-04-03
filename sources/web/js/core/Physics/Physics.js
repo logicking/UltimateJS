@@ -137,8 +137,8 @@ var Physics = (function() {
         }
         b2dToGameRatio = ratio != null ? ratio : 1;
         world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
-        //contactProcessor = new ContactProcessor();
-        //contactListener = new ContactListener(contactProcessor);
+        contactProcessor = new ContactProcessor();
+        contactListener = new ContactListener(contactProcessor);
 	}
 
 	function createWorldBorder(params) {

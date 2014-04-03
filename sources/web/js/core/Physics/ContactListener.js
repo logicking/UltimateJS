@@ -36,8 +36,8 @@ ContactListener.prototype.getContacts = function(body) {
 		for (; contact != null; contact = contact['m_next']) {
 			if ($.inArray(contact, contacts) == -1)
 				{
-					contactIDs.push(contact.contact.m_shape1.m_body.m_userData.id + ':'
-							+ contact.contact.m_shape2.m_body.m_userData.id);
+					contactIDs.push(contact.contact.m_fixtureA.m_body.m_userData.id + ':'
+							+ contact.contact.m_fixtureB.m_body.m_userData.id);
 					contacts.push(contact.contact);
 				}
 		}
@@ -52,8 +52,6 @@ ContactListener.prototype.getContacts = function(body) {
 //	Main part of the listener
 //
 ContactListener.prototype.update = function() {
-    //TODO: check it
-    return;
 	var that = this;
 	var contactList = this.getContacts(this.body);
 
@@ -63,23 +61,16 @@ ContactListener.prototype.update = function() {
 	if (this.activeContactIDs && this.contactProcessor) {
 		$['each'](newContactIDs, function(id, value) {
 			if ($.inArray(value, that.activeContactIDs) == -1) {
-				var type1 = newContacts[id].m_shape1.m_body.m_userData.params["type"];
-				var type2 = newContacts[id].m_shape2.m_body.m_userData.params["type"];
-//				that.contactShape1 = newContacts[id].m_shape1;
-//				that.contactShape2 = newContacts[id].m_shape2;
-//				that.currentContact = newContacts[id];
+				var type1 = newContacts[id].m_fixtureA.m_body.m_userData.params["type"];
+				var type2 = newContacts[id].m_fixtureB.m_body.m_userData.params["type"];
 				var contact = newContacts[id];
 				that.contactProcessor.processBegin(type1, type2, contact);								
 			}
 		});
 		$['each'](that.activeContactIDs, function(id, value) {
 			if ($.inArray(value, newContactIDs) == -1) {
-				var type1 = that.activeContacts[id].m_shape1.m_body.m_userData.params["type"];
-				var type2 = that.activeContacts[id].m_shape2.m_body.m_userData.params["type"];
-
-//				that.contactShape1 = that.activeContacts[id].m_shape1;
-//				that.contactShape2 = that.activeContacts[id].m_shape2;
-//				that.currentContact = that.activeContacts[id];
+				var type1 = that.activeContacts[id].m_fixtureA.m_body.m_userData.params["type"];
+				var type2 = that.activeContacts[id].m_fixtureB.m_body.m_userData.params["type"];
 				var contact = that.activeContacts[id];
 				that.contactProcessor.processEnd(type1, type2, contact);
 			}
