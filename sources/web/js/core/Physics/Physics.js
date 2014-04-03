@@ -79,7 +79,7 @@ function DebugCanvas() {
 
     var debugDraw = new b2DebugDraw();
     debugDraw.SetSprite(canvasElm.getContext("2d"));
-    //debugDraw.SetDrawScale(30.0);
+    debugDraw.SetDrawScale(Physics.getB2dToGameRatio());
     debugDraw.SetFillAlpha(0.5);
     debugDraw.SetLineThickness(1.0);
     debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
@@ -88,7 +88,7 @@ function DebugCanvas() {
 
 var Physics = (function() {
 	var world = null;
-    var ratio = 1; // Box2d to Ultimate.js coordinates //TODO: implement
+    var b2dToGameRatio = 1; // Box2d to Ultimate.js coordinates //TODO: implement
 	var worldBorder = null;
 	var timeout = null;
 	var pause = false;
@@ -118,8 +118,9 @@ var Physics = (function() {
      *
      * @param gravity b2Vec2(x, y). Default: b2Vec2(0, 10)
      * @param sleep default: true;
+     * @param ratio Box2d to Ultimate.js coordinates
      */
-	function createWorld(gravity, sleep) {
+	function createWorld(gravity, sleep, ratio) {
 		/*if (world != null)
 			return;
 		var worldAABB = new b2AABB();
@@ -134,6 +135,7 @@ var Physics = (function() {
         if (world != null) {
             return;
         }
+        b2dToGameRatio = ratio != null ? ratio : 1;
         world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
         //contactProcessor = new ContactProcessor();
         //contactListener = new ContactListener(contactProcessor);
@@ -294,11 +296,17 @@ var Physics = (function() {
 	}
 
 	return { // public interface
+        createWorld : function(gravity, sleep, ratioB2dToUl) {
+            createWorld(gravity, sleep, ratioB2dToUl);
+        },
 		getWorld : function() {
 			createWorld();
 			assert(world, "No physics world created!");
 			return world;
 		},
+        getB2dToGameRatio : function() {
+            return b2dToGameRatio;
+        },
 		createWorldBorder : function(params) {
 			createWorldBorder(params);
 		},

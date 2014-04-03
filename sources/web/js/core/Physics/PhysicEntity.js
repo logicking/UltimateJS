@@ -57,8 +57,8 @@ PhysicEntity.prototype.createPhysics = function() {
 	var bodyDefinition;
 	var physicParams = this.params['physics']; // preloaded from json
 	var logicPosition = {
-		x : this.params.x,
-		y : this.params.y
+		x : this.params.x / Physics.getB2dToGameRatio(),
+		y : this.params.y / Physics.getB2dToGameRatio()
 	};
 	function setShapeParams(shapeDefinition, physicParams) {
 		shapeDefinition.density = selectValue(physicParams['density'], 1);
@@ -75,14 +75,15 @@ PhysicEntity.prototype.createPhysics = function() {
 		///////////////
         fixDef = new b2FixtureDef();
         fixDef.shape = new b2PolygonShape;
-        fixDef.shape.SetAsBox(physicParams.width / 2, physicParams.height / 2);
+        fixDef.shape.SetAsBox(physicParams.width / (2 * Physics.getB2dToGameRatio()), physicParams.height /
+            (2 * Physics.getB2dToGameRatio()));
         setShapeParams(fixDef, physicParams);
         //////////////
 		break;
 	}
 	case "Circle": {
         fixDef = new b2FixtureDef();
-        fixDef.shape = new b2CircleShape(physicParams.radius);
+        fixDef.shape = new b2CircleShape(physicParams.radius / Physics.getB2dToGameRatio());
 		setShapeParams(fixDef, physicParams);
 		break;
 	}
@@ -206,7 +207,6 @@ PhysicEntity.prototype.setContactCallback = function(callback) {
 
 PhysicEntity.prototype.createVisual = function() {
 	PhysicEntity.parent.createVisual.call(this);
-
 };
 
 // Update visual position from physics world
@@ -215,8 +215,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 
 	if (that.physics==null)
 		return;
-	that.setPosition(that.physics.GetPosition().x - that.params.physics.x
-			- that.params.physics.width / 2, that.physics.GetPosition().y
+	that.setPosition(that.physics.GetPosition().x * Physics.getB2dToGameRatio() - that.params.physics.x
+			- that.params.physics.width / 2, that.physics.GetPosition().y * Physics.getB2dToGameRatio()
 			- that.params.physics.y - that.params.physics.height / 2);
 
 	if (that.params.physics.type != "Circle")
@@ -226,8 +226,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 			angleInDeg = MathUtils.toDeg(angleInDeg);
 
 			var localPoint = {
-				"x" : that.physics.GetPosition()['x'],
-				"y" : that.physics.GetPosition()['y']
+				"x" : that.physics.GetPosition()['x'] * Physics.getB2dToGameRatio(),
+				"y" : that.physics.GetPosition()['y'] * Physics.getB2dToGameRatio()
 			};
 			localPoint.x -= (visualInfo.visual.width / 2);
 			localPoint.y -= (visualInfo.visual.height / 2);
