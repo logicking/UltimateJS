@@ -52,8 +52,7 @@ PhysicEntity.prototype.init = function(params) {
 // Create and register physics body function
 //
 PhysicEntity.prototype.createPhysics = function() {
-	//var shapeDefinition;
-    var fixDef;
+    var fixtureDefList = [];
 	var bodyDefinition;
 	var physicParams = this.params['physics']; // preloaded from json
 	var logicPosition = {
@@ -72,19 +71,19 @@ PhysicEntity.prototype.createPhysics = function() {
     // Configuring shape params depends on "type" in json
 	switch (physicParams.type) {
 	case "Box": {
-		///////////////
-        fixDef = new b2FixtureDef();
+        var fixDef = new b2FixtureDef();
         fixDef.shape = new b2PolygonShape;
         fixDef.shape.SetAsBox(physicParams.width / (2 * Physics.getB2dToGameRatio()), physicParams.height /
             (2 * Physics.getB2dToGameRatio()));
         setShapeParams(fixDef, physicParams);
-        //////////////
+        fixtureDefList.push(fixDef);
 		break;
 	}
 	case "Circle": {
-        fixDef = new b2FixtureDef();
+        var fixDef = new b2FixtureDef();
         fixDef.shape = new b2CircleShape(physicParams.radius / Physics.getB2dToGameRatio());
 		setShapeParams(fixDef, physicParams);
+        fixtureDefList.push(fixDef);
 		break;
 	}
     /*
@@ -125,61 +124,79 @@ PhysicEntity.prototype.createPhysics = function() {
 			bodyDefinition.AddShape(shapeDef);
 		});
 		break;
-	}
+	}*/
 	case "PrimitiveComposite": {
 		$['each'](physicParams.shapes, function(id, shapeData) {
 			switch (shapeData.type) {
-				case "Box": {
-					shapeDefinition = new b2BoxDef();
-					shapeDefinition.extents = new b2Vec2(shapeData.width / 2,
-							shapeData.height / 2);
-					setShapeParams(shapeDefinition, shapeData);
-					shapeDefinition.localPosition = new b2Vec2(shapeData.x, shapeData.y);
-
-					bodyDefinition.AddShape(shapeDefinition);
-
-					break;
-				}
-				case "Circle": {
-					shapeDefinition = new b2CircleDef();
-					shapeDefinition.radius = physicParams.radius;
-					setShapeParams(shapeDefinition, physicParams);
-
-					bodyDefinition.AddShape(shapeDefinition);
-					break;
-				}
+                case "Box": {
+                    fixDef = new b2FixtureDef();
+                    fixDef.shape = new b2PolygonShape();
+                    var localPos = new b2Vec2(shapeData.x / Physics.getB2dToGameRatio(), shapeData.y /
+                        Physics.getB2dToGameRatio());
+                    fixDef.shape.SetAsOrientedBox(shapeData.width / (2 * Physics.getB2dToGameRatio()), shapeData.height /
+                        (2 * Physics.getB2dToGameRatio()), localPos);
+                    setShapeParams(fixDef, shapeData);
+                    fixtureDefList.push(fixDef);
+                    break;
+                    /* var shapeDefinition = new b2BoxDef();
+                     shapeDefinition.extents = new b2Vec2(shapeData.width / 2,
+                     shapeData.height / 2);
+                     setShapeParams(shapeDefinition, shapeData);
+                     shapeDefinition.localPosition = new b2Vec2(shapeData.x, shapeData.y);
+                     bodyDefinition.AddShape(shapeDefinition);
+                     break;*/
+                }
+                case "Circle": {
+                    var fixDef = new b2FixtureDef();
+                    fixDef.shape = new b2CircleShape(shapeData.radius / Physics.getB2dToGameRatio());
+                    setShapeParams(fixDef, physicParams);
+                    fixDef.shape.SetLocalPosition(new b2Vec2(shapeData.x / Physics.getB2dToGameRatio(), shapeData.y /
+                        Physics.getB2dToGameRatio()));
+                    fixtureDefList.push(fixDef);
+                    break;
+                    /*shapeDefinition = new b2CircleDef();
+                     shapeDefinition.radius = physicParams.radius;
+                     setShapeParams(shapeDefinition, physicParams);
+                     bodyDefinition.AddShape(shapeDefinition);
+                     break;*/
+                }
 				case "Poly": {
-					shapeDefinition = new b2PolyDef();
+                    // TODO: implement
+					/*shapeDefinition = new b2PolyDef();
 					shapeDefinition.vertexCount = physicParams.vertexCount;
 					shapeDefinition.vertices = physicParams.vertices;
 					setShapeParams(shapeDefinition, physicParams);
 
-					bodyDefinition.AddShape(shapeDefinition);
+					bodyDefinition.AddShape(shapeDefinition);*/
 					break;
 				}
 				case "Triangle": {
-					shapeDefinition = new b2PolyDef();
+                    // TODO: implement
+					/*shapeDefinition = new b2PolyDef();
 					shapeDefinition.vertexCount = 3;
 					shapeDefinition.vertices = physicParams.vertices;
-
 					bodyDefinition.AddShape(shapeDefinition);
-					setShapeParams(shapeDefinition, physicParams);
+					setShapeParams(shapeDefinition, physicParams);*/
 					break;
 				}
 			}
 		});
 		break;
-	}*/
+	}
 	}
 
 	// Configuring and creating body (returning it)
 	bodyDefinition.position.Set(0, 0);
-	bodyDefinition.linearDamping = physicParams.linearDamping;
+	bodyDefinition.linearDamping = physicParams.linearDamping != null ? physicParams.linearDamping : 0;
     bodyDefinition.angularDamping = physicParams.angularDamping != null ? physicParams.angularDamping : 0;
 	var physicWorld = Physics.getWorld();
 	this.physics = physicWorld.CreateBody(bodyDefinition);
-    this.physics.CreateFixture(fixDef);
-    this.physics.SetPosition(new b2Vec2(logicPosition.x, logicPosition.y), 0);
+    var that = this;
+    $.each(fixtureDefList, function(id, fixDef) {
+        that.physics.CreateFixture(fixDef);
+    });
+
+    this.physics.SetPosition(logicPosition);
 	this.destructable = physicParams["destructable"];
 	if (this.destructable)
 		this.health = physicParams["health"];
@@ -215,9 +232,9 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 
 	if (that.physics==null)
 		return;
-	that.setPosition(that.physics.GetPosition().x * Physics.getB2dToGameRatio() - that.params.physics.x
-			- that.params.physics.width / 2, that.physics.GetPosition().y * Physics.getB2dToGameRatio()
-			- that.params.physics.y - that.params.physics.height / 2);
+	that.setPosition(that.physics.GetPosition().x * Physics.getB2dToGameRatio() - that.params.physics.x -
+        that.params.physics.width / 2, that.physics.GetPosition().y * Physics.getB2dToGameRatio() -
+        that.params.physics.y - that.params.physics.height / 2);
 
 	if (that.params.physics.type != "Circle")
 
