@@ -294,6 +294,17 @@ PhysicEntity.prototype.getPhysicsRotation = function() {
 };
 
 /**
+ *
+ * @param {b2Vec2} pos logic position
+ */
+PhysicEntity.prototype.setPhysicsPosition = function(pos) {
+    var pos = new b2Vec2(pos.x, pos.y);
+    pos.Multiply(1 / Physics.getB2dToGameRatio());
+    this.physics.SetPosition(pos);
+    this.updatePositionFromPhysics();
+};
+
+/**
  * get logic position (using b2dToGameRatio)
  * @returns {b2Vec2}
  */
