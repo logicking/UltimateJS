@@ -239,9 +239,9 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 
 	if (that.physics==null)
 		return;
-	that.setPosition(that.physics.GetPosition().x * Physics.getB2dToGameRatio() - that.params.physics.x -
-        that.params.physics.width / 2, that.physics.GetPosition().y * Physics.getB2dToGameRatio() -
-        that.params.physics.y - that.params.physics.height / 2);
+    var pos = this.getPosition();
+	that.setPosition(pos.x - that.params.physics.x - that.params.physics.width / 2, pos.y - that.params.physics.y -
+        that.params.physics.height / 2);
 
 	if (that.params.physics.type != "Circle")
 
@@ -249,10 +249,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 			var angleInDeg = that.getPhysicsRotation().toFixed(3);
 			angleInDeg = MathUtils.toDeg(angleInDeg);
 
-			var localPoint = {
-				"x" : that.physics.GetPosition()['x'] * Physics.getB2dToGameRatio(),
-				"y" : that.physics.GetPosition()['y'] * Physics.getB2dToGameRatio()
-			};
+			var localPoint = that.getPosition();
 			localPoint.x -= (visualInfo.visual.width / 2);
 			localPoint.y -= (visualInfo.visual.height / 2);
 
@@ -294,6 +291,16 @@ PhysicEntity.prototype.updatePhysics = function() {
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
 PhysicEntity.prototype.getPhysicsRotation = function() {
 	return this.physics.GetAngle();
+};
+
+/**
+ * get logic position (using b2dToGameRatio)
+ * @returns {b2Vec2}
+ */
+PhysicEntity.prototype.getPosition = function() {
+    var pos = this.physics.GetPosition().Copy();
+    pos.Multiply(Physics.getB2dToGameRatio());
+    return pos;
 };
 
 PhysicEntity.prototype.onDragBegin = function() {
