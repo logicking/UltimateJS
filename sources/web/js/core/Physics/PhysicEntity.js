@@ -156,7 +156,7 @@ PhysicEntity.prototype.createPhysics = function() {
                     case "Circle": {
                         var fixDef = new b2FixtureDef();
                         fixDef.shape = new b2CircleShape(shapeData.radius / Physics.getB2dToGameRatio());
-                        setShapeParams(fixDef, physicParams);
+                        setShapeParams(fixDef, shapeData);
                         fixDef.shape.SetLocalPosition(new b2Vec2(shapeData.x / Physics.getB2dToGameRatio(), shapeData.y /
                             Physics.getB2dToGameRatio()));
                         fixtureDefList.push(fixDef);
