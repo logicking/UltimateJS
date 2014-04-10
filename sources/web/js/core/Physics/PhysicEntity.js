@@ -59,16 +59,16 @@ PhysicEntity.prototype.createPhysics = function() {
         x : this.params.x / Physics.getB2dToGameRatio(),
         y : this.params.y / Physics.getB2dToGameRatio()
     };
-    function setShapeParams(shapeDefinition, physicParams) {
-        shapeDefinition.density = selectValue(physicParams['density'], 1);
-        shapeDefinition.restitution = selectValue(physicParams.restitution, 1);
-        shapeDefinition.friction = selectValue(physicParams.friction, 0);
-        shapeDefinition.isSensor = selectValue(physicParams.sensor, false);
-        shapeDefinition.userData = selectValue(physicParams.userData, false);
+    function setShapeParams(fixtureDefinition, physicParams) {
+        fixtureDefinition.density = selectValue(physicParams['density'], 1);
+        fixtureDefinition.restitution = selectValue(physicParams.restitution, 1);
+        fixtureDefinition.friction = selectValue(physicParams.friction, 0);
+        fixtureDefinition.isSensor = selectValue(physicParams.sensor, false);
+        fixtureDefinition.userData = selectValue(physicParams.userData, false);
         if (physicParams.filter != null) {
-            shapeDefinition.filter.categoryBits = selectValue(physicParams.filter.categoryBits, 0x0001);
-            shapeDefinition.filter.groupIndex = selectValue(physicParams.filter.groupIndex, 0);
-            shapeDefinition.filter.maskBits = selectValue(physicParams.filter.maskBits, 0xFFFF);
+            fixtureDefinition.filter.categoryBits = selectValue(physicParams.filter.categoryBits, 0x0001);
+            fixtureDefinition.filter.groupIndex = selectValue(physicParams.filter.groupIndex, 0);
+            fixtureDefinition.filter.maskBits = selectValue(physicParams.filter.maskBits, 0xFFFF);
         }
     }
 
@@ -93,6 +93,7 @@ PhysicEntity.prototype.createPhysics = function() {
             fixtureDefList.push(fixDef);
             break;
         }
+        // TODO: implement Poly, Triangle etc.
         /*
          case "Poly": {
          shapeDefinition = new b2PolyDef();
@@ -133,39 +134,27 @@ PhysicEntity.prototype.createPhysics = function() {
          break;
          }*/
         case "PrimitiveComposite": {
-            $['each'](physicParams.shapes, function(id, shapeData) {
-                switch (shapeData.type) {
+            $['each'](physicParams.shapes, function(id, fixtureData) {
+                switch (fixtureData.type) {
                     case "Box": {
                         fixDef = new b2FixtureDef();
                         fixDef.shape = new b2PolygonShape();
-                        var localPos = new b2Vec2(shapeData.x / Physics.getB2dToGameRatio(), shapeData.y /
+                        var localPos = new b2Vec2(fixtureData.x / Physics.getB2dToGameRatio(), fixtureData.y /
                             Physics.getB2dToGameRatio());
-                        fixDef.shape.SetAsOrientedBox(shapeData.width / (2 * Physics.getB2dToGameRatio()), shapeData.height /
+                        fixDef.shape.SetAsOrientedBox(fixtureData.width / (2 * Physics.getB2dToGameRatio()), fixtureData.height /
                             (2 * Physics.getB2dToGameRatio()), localPos);
-                        setShapeParams(fixDef, shapeData);
+                        setShapeParams(fixDef, fixtureData);
                         fixtureDefList.push(fixDef);
                         break;
-                        /* var shapeDefinition = new b2BoxDef();
-                         shapeDefinition.extents = new b2Vec2(shapeData.width / 2,
-                         shapeData.height / 2);
-                         setShapeParams(shapeDefinition, shapeData);
-                         shapeDefinition.localPosition = new b2Vec2(shapeData.x, shapeData.y);
-                         bodyDefinition.AddShape(shapeDefinition);
-                         break;*/
                     }
                     case "Circle": {
                         var fixDef = new b2FixtureDef();
-                        fixDef.shape = new b2CircleShape(shapeData.radius / Physics.getB2dToGameRatio());
-                        setShapeParams(fixDef, shapeData);
-                        fixDef.shape.SetLocalPosition(new b2Vec2(shapeData.x / Physics.getB2dToGameRatio(), shapeData.y /
+                        fixDef.shape = new b2CircleShape(fixtureData.radius / Physics.getB2dToGameRatio());
+                        setShapeParams(fixDef, fixtureData);
+                        fixDef.shape.SetLocalPosition(new b2Vec2(fixtureData.x / Physics.getB2dToGameRatio(), fixtureData.y /
                             Physics.getB2dToGameRatio()));
                         fixtureDefList.push(fixDef);
                         break;
-                        /*shapeDefinition = new b2CircleDef();
-                         shapeDefinition.radius = physicParams.radius;
-                         setShapeParams(shapeDefinition, physicParams);
-                         bodyDefinition.AddShape(shapeDefinition);
-                         break;*/
                     }
                     case "Poly": {
                         // TODO: implement
@@ -220,13 +209,6 @@ PhysicEntity.prototype.getContactedBody = function() {
 
 PhysicEntity.prototype.getContactList = function() {
 	return this.physics.m_contactList;
-};
-
-PhysicEntity.prototype.setContactCallback = function(callback) {
-	var shape = this.physics['GetShapeList']();
-	for (; shape != null; shape = shape['m_next']) {
-		shape['contactCallback'] = callback;
-	}
 };
 
 PhysicEntity.prototype.createVisual = function() {
