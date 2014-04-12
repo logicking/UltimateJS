@@ -387,8 +387,8 @@ GuiElement.prototype.setRealPosition = function(x, y) {
 };
 
 GuiElement.prototype.resize = function() {
-	w = this.calcPercentageWidth(this.width);
-	h = this.calcPercentageHeight(this.height);
+	var w = this.calcPercentageWidth(this.width);
+	var h = this.calcPercentageHeight(this.height);
 	this.setRealSize(w, h);
 	this.setPosition(this.x, this.y);
 
