@@ -242,10 +242,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 					* Screen.heightRatio());
 			matTrans.multiply(matRot);
 
-//            visualInfo.visual.setTransform(matTrans.m, 0);
-            visualInfo.visual.setTransform({
-                matrix : matTrans.m
-            });
+            visualInfo.visual.setTransform(matTrans.m, 0);
 		});
 };
 
