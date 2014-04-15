@@ -12,6 +12,8 @@ Session.prototype.init = function(params){
 	var that = this;
 	this.userId = params["userId"];
 	this.accountId = "default";
+	this.session_key = params["session_key"]
+	this.session_secret_key = params["session_secret_key"];
 	var callback = params["callback"];
 	var that = this;
 	var rows = [];
@@ -23,70 +25,67 @@ Session.prototype.init = function(params){
 	EntityManager.instance.getAccountIdByUserId(that.userId, function(accId){
 //		console.log("got Account ID", accId);
 		if(!accId){
-//			console.err_log("No AccId found. New User!");
+			console.log("No AccId found. New User!");
 			
 			EntityManager.instance.getUniqueId(function(unique){
 				that.accountId = unique;
+//				console.log("accountId=%s, userId=%s", that.accountId, that.userId);
 				that.authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
 //				et = Date.now();
 				EntityManager.instance.getAccountDefaultUpdate(that.accountId, null, function(defaultUpdate){
 //					console.err_log("Got default update.", defaultUpdate);
 					var num = defaultUpdate.count;
 					defaultUpdate = defaultUpdate.update;
-					var counter = 0;
+					
+					EntityManager.instance.backupAllEntities(defaultUpdate, function(){
+//						console.err_log("Got default update.", defaultUpdate);
+						var counter = 0;
 
-					var nextPart = function(){
-						var scores = defaultUpdate[that.accountId].scores;
-						ScoreTable.instance.setDefaultScore(that.userId, scores, function(){
-							Server.instance.extendEntities(defaultUpdate, that );
-//							console.log("=======Extended entites=======");
-//							console.log("Extention time: ", Date.now() - et);
-//							et = Date.now();
-							Server.instance.getEntity(that, that.accountId, function(account){
-								account.setAlive(true);
-								account.recActivity("login_time=" + Date.now());
-//								console.log("get Account entity time: ", Date.now() - et);
-								Server.instance.addSession(that);
-								account.userId = that.userId;
-								account.userLogin = true;
-								account.recActivity("SI");// for stat
-//								console.log("Set userId to account on session init");
+//						var nextPart = function(){
+//							console.log("accountId: ", that.accountId);
+							var scores = defaultUpdate[that.accountId].scores;
+//							console.log("SCORES OF DEFAULT:", scores);
+							ScoreTable.instance.setDefaultScore(that.userId, scores, function(){
+								Server.instance.extendEntities(defaultUpdate, that );
+//								console.log("=======Extended entites=======");
+//								console.log("Extention time: ", Date.now() - et);
 //								et = Date.now();
-								Server.instance.restoreFromCache(account.id, that);
-//								console.log("Restore from cache time: ", Date.now() - et);
-								that.reportActivity();
-//								console.err_trace("End of new User's session init trace.");
-								if(callback){
-									callback();
-								}
-							}, false, true);
-						});
-					};
+								Server.instance.getEntity(that, that.accountId, function(account){
+									account.setAlive(true);
+									account.recActivity("login_time=" + Date.now());
+//									console.log("get Account entity time: ", Date.now() - et);
+									Server.instance.addSession(that);
+									
+									account.userId = that.userId;
+									account.userLogin = true;
+									account.recActivity("SI");// for stat
+//									console.log("Set userId to account on session init");
+//									et = Date.now();
+									Server.instance.restoreFromCache(account.id, that);
+//									console.log("Restore from cache time: ", Date.now() - et);
+									that.reportActivity();
+//									console.err_trace("End of new User's session init trace.");
+									if(callback){
+										callback();
+									}
+								}, false, true);
+							});
+					}); 
 
-					for(var id in defaultUpdate){
-						var entity = defaultUpdate[id];
-						entity["id"] = id;
-						EntityManager.instance.backupEntity(entity, function(){
-							counter++;
-							if(counter >= num){
-								nextPart();
-							}
-						});
-					}
-				}); 
-
-			});
+				});
+					});
+//					
 //			EntityManager.instance.backupAllEntities(Server.instance.entities, function(){
 
 //			});
 			return;
 		}
 		that.accountId = accId;
-//		console.err_log("Found previous record with accId=%s.", accId);
+		console.log("Found previous record with accId=%s.", accId);
 		Server.instance.getEntity(that, that.accountId, function(account){
-			account.setAlive(true);
+			
 			if(!account){
-				console.err_log("Record found but Account not FOUND!");
+				console.err_log("Record found but Account not FOUND!", that.userId);
 				
 				var query = that.authClient.query( "DELETE FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ that.userId ] );
 				query.on( "error", function(error){
@@ -100,6 +99,7 @@ Session.prototype.init = function(params){
 
 				return;
 			}
+			account.setAlive(true);
 			Server.instance.addSession(that);
 			account.userId = that.userId;
 			account.userLogin = true;

@@ -10,7 +10,7 @@ OrderManager.prototype.init = function(params){
 	this.client = params["client"];
 	this.handlers = {};
 	this.apiQueue = [];
-	var _self = this;
+//	var _self = this;
 
 //	OrderManager.instance = this;
 };
@@ -18,10 +18,13 @@ OrderManager.prototype.init = function(params){
 OrderManager.prototype.getApiCallback = function(){
 	var that = this;
 	return function(req, res){
-		console.log("vk_api callback");
+//		console.log("Order manager callback");
 		var json = req.body;
-//		console.log("req: ", req);
-		console.log("body: ", req.body);
+		if( JSON.stringify(json) == "{}"){
+			json = url.parse(req.url, true).query;
+		}
+//		console.log("body: ", req.body);
+//		console.log("json: ", json);
 		if(!that.isValid(json)){
 			if(that.notValid){
 				that.notValid(json, res);	
@@ -85,7 +88,7 @@ OrderManager.prototype.setValidCheckFunction = function(func, errorFunc){
 };
 
 OrderManager.prototype.newOrder = function(id, status, callback){
-	var query = this.client.query("INSERT INTO orders (id, data) VALUES ($1, $2)", [id, JSON.stringify(status)]);
+	var query = this.client.query("INSERT INTO " + sconf.ordersTable +  " (id, data) VALUES ($1, $2)", [id, JSON.stringify(status)]);
 	query.on("end", function(result){
 		if(callback){
 //			console.log("New order record created.", status);
@@ -98,7 +101,7 @@ OrderManager.prototype.getStatus = function(id, data, callback){
 	var that = this;
 	var status = null;
 	
-	var query = this.client.query("SELECT * FROM orders WHERE id = $1", [id]);
+	var query = this.client.query("SELECT * FROM " + sconf.ordersTable +  " WHERE id = $1", [id]);
 	
 	query.on("row", function(row){
 		status = row;
@@ -129,7 +132,7 @@ OrderManager.prototype.statusChange = function(id, status, callback){
 	
 	var that = this;
 	
-	var query = this.client.query("UPDATE orders SET data = $1 WHERE id = $2", [JSON.stringify(status), id]);
+	var query = this.client.query("UPDATE " + sconf.ordersTable +  " SET data = $1 WHERE id = $2", [JSON.stringify(status), id]);
 	query.on("end", function(result){
 		if(callback){
 			callback(status);
