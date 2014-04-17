@@ -42,7 +42,7 @@ PhysicScene.prototype.addChild = function(child) {
 
 PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
-	that = this;
+	var that = this;
 	function updateWorld() {
 		Physics.updateWorld(30);
 		that.setTimeout(updateWorld, 15);

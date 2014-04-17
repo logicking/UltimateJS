@@ -13,7 +13,6 @@ var htmlSound = function() {
 };
 
 htmlSound.prototype.play = function(sndInst, callback) {
-	var that = this;
 	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 
 	if (!spriteInst || spriteInst.play) {
@@ -35,7 +34,6 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	spriteInst.audio.currentTime = spriteInst.startTime;
 	spriteInst.play = true;
 	spriteInst.audio.play();
-
 };
 
 htmlSound.prototype.stop = function(sndInst) {
