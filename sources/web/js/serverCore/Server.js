@@ -145,8 +145,16 @@ Server.prototype.init = function(sconf, callback, droptable) {
 		});
 	}
 	
+	
+	if (callback) {
+		callback();
+	}
+	return;
+	
+	
 	if (!that.client) {
 		that.client = new pg.Client(conString);
+		
 		that.client.connect(function(){
 			
 			
