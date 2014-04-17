@@ -15,6 +15,9 @@ function Server() {
 	// };
 };
 
+// sconf - конфиг сервера
+// callback - async callback func
+// droptable - start with clean DB (for test)
 Server.prototype.init = function(sconf, callback, droptable) {
 	var that = this;
 	this.config = sconf;
@@ -41,6 +44,8 @@ Server.prototype.init = function(sconf, callback, droptable) {
 			}
 
 		}
+		
+		// for connetion to DB (tutorial https://github.com/brianc/node-postgres)
 		var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
 
 		
@@ -146,12 +151,13 @@ Server.prototype.init = function(sconf, callback, droptable) {
 	}
 	
 	
-	if (callback) {
-		callback();
-	}
-	return;
+//	На случай если нет БД
+//	if (callback) {
+//		callback();
+//	}
+//	return;
 	
-	
+	// that.client - клиент БД
 	if (!that.client) {
 		that.client = new pg.Client(conString);
 		
@@ -161,20 +167,21 @@ Server.prototype.init = function(sconf, callback, droptable) {
 			(new EntityManager()).init({
 				entityClient : that.client
 			});
-			
+
+			// тестовая очистка БД по droptable
 			if ((!sconf.deploy) && droptable) {
 				console.log("Deleting data from DB... ");
 				var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
 				entity_table_delquery.on("end", function() {
 					var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
 					users_accounts_delquery.on("end", function() {
-						var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
-						scores_delquery.on("end", function() {
+//						var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
+//						scores_delquery.on("end", function() {
 							console.log("Deleted data from DB. ");
 							if (callback) {
 								callback();
 							}
-						});
+//						});
 
 					});
 				});
@@ -794,7 +801,7 @@ Server.prototype.extendEntities = function(data, session) {
 			this.addEntityInstance(data[id], session ? [ session ] : null);
 		} else {
 			data[id]['id'] = id;
-			// console.log("Creating with data: ", data[id]);
+			 console.log("Creating with data: ", data[id]);
 			var entity = EntityManager.instance.createEntity(data[id]);
 			this.addEntityInstance(entity, session ? [ session ] : null);
 			// entity.addListener(session);

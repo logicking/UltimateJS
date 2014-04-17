@@ -25,7 +25,7 @@ Session.prototype.init = function(params){
 	EntityManager.instance.getAccountIdByUserId(that.userId, function(accId){
 //		console.log("got Account ID", accId);
 		if(!accId){
-			console.log("No AccId found. New User!");
+//			console.log("No AccId found. New User!");
 			
 			EntityManager.instance.getUniqueId(function(unique){
 				that.accountId = unique;
@@ -33,7 +33,7 @@ Session.prototype.init = function(params){
 				that.authClient.query("INSERT INTO " + sconf.users_accounts_table + "(userId, account) VALUES ($1, $2)", [ that.userId, that.accountId ] );
 //				et = Date.now();
 				EntityManager.instance.getAccountDefaultUpdate(that.accountId, null, function(defaultUpdate){
-//					console.err_log("Got default update.", defaultUpdate);
+					console.err_log("Got default update.", defaultUpdate);
 					var num = defaultUpdate.count;
 					defaultUpdate = defaultUpdate.update;
 					
@@ -43,24 +43,33 @@ Session.prototype.init = function(params){
 
 //						var nextPart = function(){
 //							console.log("accountId: ", that.accountId);
-							var scores = defaultUpdate[that.accountId].scores;
+//							var scores = defaultUpdate[that.accountId].scores;     // частный случай для шариков!!!!!
 //							console.log("SCORES OF DEFAULT:", scores);
-							ScoreTable.instance.setDefaultScore(that.userId, scores, function(){
+//							ScoreTable.instance.setDefaultScore(that.userId, scores, function(){ // частный случай для шариков!!!!!
 								Server.instance.extendEntities(defaultUpdate, that );
 //								console.log("=======Extended entites=======");
 //								console.log("Extention time: ", Date.now() - et);
 //								et = Date.now();
+								
+								
+								Server.instance.logCache();
+								Server.instance.logEntities();
+								
+								console.log("that.accountId", that.accountId);
 								Server.instance.getEntity(that, that.accountId, function(account){
 									account.setAlive(true);
-									account.recActivity("login_time=" + Date.now());
+									
+									console.log("Account id: ", account.id);
+//									account.recActivity("login_time=" + Date.now());
 //									console.log("get Account entity time: ", Date.now() - et);
 									Server.instance.addSession(that);
 									
 									account.userId = that.userId;
 									account.userLogin = true;
-									account.recActivity("SI");// for stat
+//									account.recActivity("SI");// for stat
 //									console.log("Set userId to account on session init");
 //									et = Date.now();
+									
 									Server.instance.restoreFromCache(account.id, that);
 //									console.log("Restore from cache time: ", Date.now() - et);
 									that.reportActivity();
@@ -69,7 +78,7 @@ Session.prototype.init = function(params){
 										callback();
 									}
 								}, false, true);
-							});
+//							});
 					}); 
 
 				});
