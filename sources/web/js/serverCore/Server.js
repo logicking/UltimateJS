@@ -72,12 +72,14 @@ Server.prototype.init = function(sconf, callback, droptable) {
 				}
 				return;
 			}
+			// switchingState - flag, to disable switching state more than once 
 			session.switchingState = true;
 			var newCallback = function(){
 				session.switchingState = false;
 				return callback.apply(this, arguments);
 			}
 			// args[0] - id of current state, args[1] - new state's id
+			// State - is an entity itself
 			var curState = Server.instance.getEntity(session, args[0], null, true);
 			if (!session) {
 				console.err_log("No session on server.");
