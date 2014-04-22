@@ -20,6 +20,9 @@ Entity.prototype.init = function(params) {
 		this.account = Server.instance.getEntity(null, params["accountId"], null, true);
 		if(!this.account){
 			console.err_log("[CRITICAL ERROR]: No Account found for accountId=%s", params["accountId"]);
+			console.err_log("Entity Initializing: ", params);
+			console.err_log("ACCOUNT isInEntities: ", Server.instance.isInEntities(params["accountId"]));
+			console.err_log("ACCOUNT isInCache: ", Server.instance.isInCache(params["accountId"]));
 		}
 		
 	}else{
@@ -100,9 +103,9 @@ Entity.prototype.addChild = function(child) {
 //	console.log("child: ", child);
 	this.children = this.children ? this.children : new Array();
 	this.assert(child != this, "Can't be parent for itself");
-	this.assert(child.parent != null, "Can't assign as child id='" + child.id
-			+ "' since there's parent id='"
-			+ (child.parent instanceof Entity ? child.parent.id : child.parent) + "' ");
+//	this.assert(child.parent == null, "Can't assign as child id='" + child.id
+//			+ "' since there's parent id='"
+//			+ (child.parent instanceof Entity ? child.parent.id : child.parent) + "' ");
 	child.parent = this;
 	var addListenersToChildren = function(child, listener){
 		var children;

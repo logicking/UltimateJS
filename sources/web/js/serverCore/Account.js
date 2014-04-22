@@ -18,9 +18,9 @@ Account.inheritsFrom(BaseState);
 
 Account.prototype.init = function(params) {
 	params = params ? params : {};
-
+	
+	console.log("account params: ", params);
 	Account.parent.init.call(this, params);
-	this.id = selectValue(params['id'], "Account01");
 	// associative array of all active entities
 	this.allEntities = new Object();
 	// entities that should be update on timely basis

@@ -24,19 +24,19 @@ console.log("Script entry point.");
 	
 	
 	if(ENABLE_REMOTE_CONSOLE && !sconf.deploy){
-		request.post(consoleUrl + "resetLog", {
-			form : {
-				name : logger,
-				time : Date.now()
-			}
-		}, function(error, response, body){
-			if(error){
-				console.log("Error reseting logs for ", logger);
-				console.log("Error: ", error);
-				return;
-			}
-			console.log("Success reseting log for ", logger);
-		});
+//		request.post(consoleUrl + "resetLog", {
+//			form : {
+//				name : logger,
+//				time : Date.now()
+//			}
+//		}, function(error, response, body){
+//			if(error){
+//				console.log("Error reseting logs for ", logger);
+//				console.log("Error: ", error);
+//				return;
+//			}
+//			console.log("Success reseting log for ", logger);
+//		});
 
 	}
 	
@@ -56,15 +56,15 @@ console.log("Script entry point.");
 			if(ENABLE_REMOTE_CONSOLE){
 				if(ONLY_ERRORS){
 					if(error_flag){
-						request.post(consoleUrl + "logmsg", {
-							form : json
-						});
+//						request.post(consoleUrl + "logmsg", {
+//							form : json
+//						});
 					}
 					
 				}else{
-					request.post(consoleUrl + "logmsg", {
-						form : json
-					});
+//					request.post(consoleUrl + "logmsg", {
+//						form : json
+//					});
 				}
 				
 

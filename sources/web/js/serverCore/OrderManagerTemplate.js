@@ -16,6 +16,6 @@ OrderManagerTemplate.prototype.addApiCallback = function(func){
 
 OrderManagerTemplate.prototype.setOrderManager = function(manager){
 	this.orderManager = manager;
-	orderManager.template = this;
+	this.orderManager.template = this;
 };
 

@@ -38,7 +38,12 @@ GuiElement.prototype.create = function(src) {
 	}
 
 	src = (src == null) ? "" : src;
-	this.parent.jObject.append(this.generate(src));
+	var generated = this.generate(src);
+	if(this.id == "GuiDiv1990"){
+		console.log("Generated source for element: ", generated);
+	}
+	
+	this.parent.jObject.append(generated);
 
 	// remember jQuery object
 	this.jObject = $("#" + this.id);

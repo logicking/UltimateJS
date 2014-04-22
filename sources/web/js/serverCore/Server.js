@@ -15,6 +15,9 @@ function Server() {
 	// };
 };
 
+// sconf - конфиг сервера
+// callback - async callback func
+// droptable - start with clean DB (for test)
 Server.prototype.init = function(sconf, callback, droptable) {
 	var that = this;
 	this.config = sconf;
@@ -41,61 +44,54 @@ Server.prototype.init = function(sconf, callback, droptable) {
 			}
 
 		}
+		
+		// for connetion to DB (tutorial https://github.com/brianc/node-postgres)
 		var conString = "tcp://" + sconf.username + ":" + sconf.userpasswd + "@" + sconf.dburl + "/" + sconf.dbname;
 
-		if (!that.client) {
-			that.client = new pg.Client(conString);
-			that.client.connect();
-		}
-		console.log("that.client is defined server init: ", !(!that.client));
+		
 		Accounts = {};
 		Sessions = {};
-		(new EntityManager()).init({
-			entityClient : that.client
-		});
+		
 		this.entities = {};
 		this.cache = {};
 		commands = {};
 		Server.instance = this;
 
-		if ((!sconf.deploy) && droptable) {
-			console.log("Deleting data from DB... ");
-			var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
-			entity_table_delquery.on("end", function() {
-				var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
-				users_accounts_delquery.on("end", function() {
-					var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
-					scores_delquery.on("end", function() {
-						if (callback) {
-							callback();
-						}
-					});
-
-				});
-			});
-		} else {
-			if (callback) {
-				callback();
-			}
-		}
+		
 		this.disableAuth = false;
 
+		
+		this.switchConditions = [];
 		this.addCommand("switchState", function(args, session, callback) {
 			// var et = Date.now();
-
+			if(session.switchingState){
+				console.log("Already called switchstate for user ", session.userId);
+				console.log("SwitchState called with args: ", args);
+				if(callback){
+					callback({error_code: 678, error:"Already called switchstate"});
+				}
+				return;
+			}
+			// switchingState - flag, to disable switching state more than once 
+			session.switchingState = true;
+			var newCallback = function(){
+				session.switchingState = false;
+				return callback.apply(this, arguments);
+			}
 			// args[0] - id of current state, args[1] - new state's id
+			// State - is an entity itself
 			var curState = Server.instance.getEntity(session, args[0], null, true);
-			// console.log("Get CUrrent state time: ____________", Date.now() -
-			// et);
-			// parentId;
 			if (!session) {
-				callback({
+				console.err_log("No session on server.");
+				newCallback({
 					error : "No such session on server"
 				});
 				return;
 			}
 			if (!curState) {
-				callback({
+				console.err_log("No Current state on server with id: %d", args[0]);
+				console.err_log("SwitchState args: ", args);
+				newCallback({
 					error : "No such state on server"
 				});
 				return;
@@ -103,52 +99,105 @@ Server.prototype.init = function(sconf, callback, droptable) {
 			var parentId = getParentId(curState);
 			console.log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
 			if (!parentId) {
-				console.log("Current state has no parent");
-				callback({
+				console.err_log("CurrentState(id=%s) has parent with id=%s", curState.id, parentId);
+				console.err_log("Current state params: ", curState.params);
+				
+				newCallback({
 					error : "Current state has no parent"
 				});
 				return;
 			}
-			// et = Date.now();
-
+			
 			Server.instance.getEntity(null, session.accountId, function(account) {
 				if (args[0] == account.initialState) {
 					account.recActivity("LE");
 				}
+				Server.instance.getEntity(session, args[1], function(entity) {
 
+					var errorToSend = null;
+					var walker = function(i, newCallback){
+						if(i >= that.switchConditions.length){
+							if(errorToSend){
+								newCallback(errorToSend);	
+							}else{
+								newCallback();
+							}
+							return;
+						}
+						that.switchConditions[i](curState, entity, account, function(error){
+							if(error){
+								errorToSend = error;
+								walker(that.switchConditions.length, newCallback);
+								return;
+							}
+							walker(i+1, newCallback);
+						});
+						
+					};
+					
+					walker(0, function(error){
+						if(error){
+							newCallback({error: error});
+							return;
+						}
+						curState.setParent(null);
+						entity.setParent(parentId);
+						var changes = session.popChanges();
+						newCallback(changes);
+					});
+
+					
+				}, false, true);
 			});
-			curState.setParent(null);
-			// console.log("Current state setPArent(null) time: ____________",
-			// Date.now() - et);
-			// console.log("CurrentState(id=%s) has parent with id=%s",
-			// curState.id, parentId);
-			// curState.setParent(null);
-			// Server.instance.removeEntity(curState.id, true);
-			et = Date.now();
-			Server.instance.getEntity(session, args[1], function(entity) {
-				// console.log("Get new State Time: _____________", Date.now() -
-				// et);
-				entity.setParent(parentId);
-				// console.log("NewState's parent: ", getParentId(entity));
-				// console.log("OldState's parent: ", getParentId(curState));
-				// Server.instance.getEntity(session, entity.id);
-				// EntityManager.instance.backupAllEntities(Server.instance.entities,
-				// function(){
-				// EntityManager.instance.backupAllEntities(Server.instance.cache,
-				// function(){4
-				et = Date.now();
-				var changes = session.popChanges();
-				// console.log("Pop changes time: _____________", Date.now() -
-				// et);
-				// Server.instance.logEntities("after switchState");
-				// Server.instance.logCache("after switchState");
-				callback(changes);
-				// });
-				// });
-
-			}, false, true);
 		});
 	}
+	
+	
+//	На случай если нет БД
+//	if (callback) {
+//		callback();
+//	}
+//	return;
+	
+	// that.client - клиент БД
+	if (!that.client) {
+		that.client = new pg.Client(conString);
+		
+		that.client.connect(function(){
+			
+			
+			(new EntityManager()).init({
+				entityClient : that.client
+			});
+
+			// тестовая очистка БД по droptable
+			if ((!sconf.deploy) && droptable) {
+				console.log("Deleting data from DB... ");
+				var entity_table_delquery = that.client.query('DELETE FROM ' + that.config.entity_table + " WHERE id <> '-1'");
+				entity_table_delquery.on("end", function() {
+					var users_accounts_delquery = that.client.query('DELETE FROM ' + that.config.users_accounts_table);
+					users_accounts_delquery.on("end", function() {
+//						var scores_delquery = that.client.query('DELETE FROM ' + that.config.score_table);
+//						scores_delquery.on("end", function() {
+							console.log("Deleted data from DB. ");
+							if (callback) {
+								callback();
+							}
+//						});
+
+					});
+				});
+			} else {
+				if (callback) {
+					callback();
+				}
+			}
+		});
+	}
+};
+
+Server.prototype.addSwitchStateCondition = function(func){
+	this.switchConditions.push(func);
 };
 
 Server.prototype.initPgClient = function() {
@@ -240,6 +289,7 @@ Server.prototype.getAccountByUserId = function(session, userId, callback) {
 	query.on("end", function(result) {
 		if ((result.rowCount == 0) || (rows.length == 0)) {
 			callback(null);
+			return;
 		}
 		Server.instance.getEntity(session, rows[0].account, function(account) {
 			callback(account);
@@ -419,7 +469,7 @@ Server.prototype.isInEntities = function(id) {
 Server.prototype.getCache = function(id, listener) {
 
 	if (!this.isInCache(id)) {
-		console.log(console.log("No such entity in cache"));
+//		console.err_log("No such entity in cache");
 		return null;
 	}
 	// console.log("Getting entity from cache id=%s", id);
@@ -753,7 +803,7 @@ Server.prototype.extendEntities = function(data, session) {
 			this.addEntityInstance(data[id], session ? [ session ] : null);
 		} else {
 			data[id]['id'] = id;
-			// console.log("Creating with data: ", data[id]);
+			 console.log("Creating with data: ", data[id]);
 			var entity = EntityManager.instance.createEntity(data[id]);
 			this.addEntityInstance(entity, session ? [ session ] : null);
 			// entity.addListener(session);
@@ -846,29 +896,12 @@ Server.prototype.killAllSessions = function(callback) {
 	}
 
 	var walker = function(index) {
+//		console.err_log("Killed sessions. Clearing cache...");
 		if (index >= list.length) {
-			for(var id in that.entities){
-				console.log("Alive:", id);
-			}
-			for(var id in that.cache){
-				console.log("Cache:", id);
-			}
-			for(var id in Sessions){
-				console.log("Session:", id);
-			}
 			Server.instance.clearCache(function(){
-				console.log("After clearing cache");
-				for(var id in that.entities){
-					console.log("Alive:", id);
-				}
-				for(var id in that.cache){
-					console.log("Cache:", id);
-				}
-				for(var id in Sessions){
-					console.log("Session:", id);
-				}
+				console.err_log("Cleared cache. Calling main callback.");
 				if(callback){
-					callback();
+					callback(list.length);
 				}
 			});
 			
@@ -896,7 +929,13 @@ Server.prototype.onAuth = function(req, res) {
 	// if(!req.isAuthenticated()){
 	// Server.instance.onIFrameAuth(req.data.);
 	// }
-	// console.log("server.onAuth()");
+//	 console.log("server.onAuth()");
+	var friendsInfo = null;
+	if(req.body.friendsInfo){
+		friendsInfo = req.body.friendsInfo;
+	}
+//	console.log("Friends info defined: ", !(!friendsInfo));
+//	console.log("Server.instance.disableAuth: ", Server.instance.disableAuth)
 	if (Server.instance.disableAuth) {
 		var obj = {
 			error : "Auth disabled.",
@@ -907,9 +946,9 @@ Server.prototype.onAuth = function(req, res) {
 	}
 	var that = Server.instance;
 	var userId = null;
-	if (req.session.iFrameAuth) {
+//	if (req.session.iFrameAuth) {
 		userId = req.session.userId;
-	} else {
+//	} else {
 		// if (req.user && req.user.provider) {
 		// if (req.user.provider == "facebook") {
 		// userId = req.user.id;
@@ -918,15 +957,20 @@ Server.prototype.onAuth = function(req, res) {
 		// userId = req.user.uid;
 		// }
 		// }
-	}
+//	}
 
 //	console.log("AuthCallbacks length = ", that.authCallbacks.length);
+		var obj = {
+				error : "Undefined userId (wrong cookie)",
+				error_code : 10
+			};
 	var authError = !userId;
 	if (authError) {
 		console.log("Undefined userId (wrong cookie).");
 		res.end(JSON.stringify(obj));
 		return;
 	}
+	authError = false;
 	function runAuthCallbacks(session, cb) {
 		var walker = function(index) {
 			return function() {
@@ -934,9 +978,11 @@ Server.prototype.onAuth = function(req, res) {
 
 					if (index < that.authCallbacks.length && !authError) {
 						// console.log("Walker %s call.", index);
-						that.authCallbacks[index](session, walker(index + 1), function() {
+						that.authCallbacks[index](session, walker(index + 1), function(error) {
+							
 							console.log("setting error = true");
-							authError = true;
+							authError = error?error:{ error: "Set error called on AUTH."};
+							console.err_log("Authorization error: ", error)
 						});
 					} else {
 						if (cb) {
@@ -956,15 +1002,15 @@ Server.prototype.onAuth = function(req, res) {
 	var session = Server.instance.getSession(userId);
 	// console.log("22222222222222222: ", Date.now() - et);
 
+	
 	if (session) {
-		
-		// console.log("Found session for userId: ", userId);
+		if(friendsInfo){
+			session.friendsInfo = friendsInfo;
+		}
+		 console.log("Found session for userId: ", userId);
 		runAuthCallbacks(session, function() {
 			if (authError) {
-				console.log("Error on auth!!!!");
-				var obj = {
-					error : "Auth error occured."
-				};
+				var obj = authError;
 			} else {
 				var obj = {
 					accountId : session.accountId,
@@ -973,7 +1019,7 @@ Server.prototype.onAuth = function(req, res) {
 				};
 			}
 			// console.log("callback on authCallbacks.");
-			res.end(JSON.stringify(obj));
+				res.end(JSON.stringify(obj));
 		});
 
 		return;
@@ -982,18 +1028,23 @@ Server.prototype.onAuth = function(req, res) {
 
 	// console.log("that.client is defined onAuth: ",
 	// !(!Server.instance.client));
-	// console.log("New session init.");
+	 console.log("New session init.");
 	session.init({
 		"userId" : userId,
 		"authClient" : Server.instance.client,
+		"session_key" : req.session.session_key,
+		"session_secret_key" : req.session.session_secret_key,
 		// "initData": req.session.initData,
 		"callback" : (function() {
+			
+			if(friendsInfo){
+				session.friendsInfo = friendsInfo;
+			}
+			console.log("Session init callback. Now authcallbacks shpuld be running.");
 			runAuthCallbacks(session, function() {
 				if (authError) {
 					console.log("Error on auth!!!!");
-					var obj = {
-						error : "Auth error occured."
-					};
+					var obj = authError;
 				} else {
 					var obj = {
 						accountId : session.accountId,
@@ -1113,32 +1164,34 @@ Server.prototype.onCommand = function(req, res, next) {
 	var json = req.body;
 
 	var command = json['command'], args = json['args'];
-	if (!session.panelValueCount) {
-		session.panelValueCount = 0;
-	}
-	if ((command == "getPanelValues") && (((session.panelValuesTime && (Date.now() - session.panelValuesTime < 1000))) && (session.panelValuesCount > 10))) {
-		console.err_log("Detected lot of getPanelValues calls. User: ", session.userId);
-		res.json({
-			error : "Too many requests.",
-			error_code : 5
-		});
-		return;
-	} else {
-		if (command == "getPanelValues") {
-			if ((Date.now() - session.panelValuesTime) < 1000) {
-				session.panelValuesCount++;
-			} else {
-				session.panelValuesTime = Date.now();
-				session.panelValuesCount = 1;
-			}
-		}
-	}
+//	if (!session.panelValueCount) {
+//		session.panelValueCount = 0;
+//	}
+//	if ((command == "getPanelValues") && (((session.panelValuesTime && (Date.now() - session.panelValuesTime < 1000))) && (session.panelValuesCount > 10))) {
+//		console.err_log("Detected lot of getPanelValues calls. User: ", session.userId);
+//		res.json({
+//			error : "Too many requests.",
+//			error_code : 5
+//		});
+//		return;
+//	} else {
+//		if (command == "getPanelValues") {
+//			if ((Date.now() - session.panelValuesTime) < 1000) {
+//				session.panelValuesCount++;
+//			} else {
+//				session.panelValuesTime = Date.now();
+//				session.panelValuesCount = 1;
+//			}
+//		}
+//	}
 	Server.instance.executeCommand(command, args, session, function(result) {
 		// EntityManager.instance.backupAllEntities(Server.instance.entities,
 		// function(){
 		//
 		// });
-		console.log("Command executed=%s; user=%s; time=%s", command, userId, Date.now() - entryTime + "");
+		if(command != "getPanelValues"){
+			console.log("Command executed=%s; user=%s; time=%s", command, userId, Date.now() - entryTime + "");	
+		}
 		res.json(result);
 	});
 };
@@ -1179,6 +1232,10 @@ Server.prototype.runTimeouts = function(callback) {
 			}
 			var data = JSON.parse(rows[index].data);
 			Server.instance.getEntity(null, data.id, function(account) {
+				if(!account){
+					walker(index + 1);
+					return;
+				};
 				account.reRunLifesRefill(data.refPoint, function() {
 					walker(index + 1);
 				});
@@ -1188,21 +1245,45 @@ Server.prototype.runTimeouts = function(callback) {
 	});
 };
 
-Server.prototype.start = function(app, callback) {
+Server.prototype.start = function(credentials, app, callback) {
 	var that = this;
-
+//	console.log("credentials: ", credentials);
+	console.log("app is a function", (app instanceof Function));
+//	console.log("callback is a func", (typeof(callback) == "function"));
+	var flag = true && credentials;
+	if(typeof(callback) != "function"){
+		callback = app; 	
+		app = credentials;
+		flag = false;
+	}
+	
 	function onClose() {
 		that.client.end();
 	}
-	;
 
 	this.httpServer = http.createServer(app);
 	this.httpServer.on('close', onClose);
+	
+	
+	if(flag){
+		this.httpsServer = https.createServer(credentials, app);
+	}
+	
+	
 	this.httpServer.listen(app.get("port"), function() {
 
-		console.log("Server has started on " + app.get("port"));
-		if (callback) {
-			callback();
+		console.log("HTTP Server has started on " + app.get("port"));
+		if(flag){
+			that.httpsServer.listen(sconf.httpsPort, function() {
+				console.log("HTTPS Server has started on " + sconf.httpsPort);
+				if (callback) {
+					callback();
+				}
+			});
+		}else{
+			if (callback) {
+				callback();
+			}
 		}
 	});
 };

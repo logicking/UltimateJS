@@ -39,8 +39,9 @@ EntityManager.prototype.resetClient = function(){
 
 EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNames, callback){
 	var that = this;
-//	console.log("template", template);
+
 	var template = JSON.parse(JSON.stringify(serverSnapshot));
+//	console.log("template", template);
 	var object = {};
 	var names = {};
 	var id;
@@ -82,11 +83,12 @@ EntityManager.prototype.getAccountDefaultUpdate = function(accountID, replacedNa
 							curJSON[propName] = rememberedName;
 						}
 					}
+					curJSON["id"] = id;
 					entityNum++;
 				}	
 
 				if(callback){
-//					console.log("object:",object);
+//					console.log("object:",object);d
 					callback({update:object, count:entityNum});
 				}
 				return;
@@ -424,7 +426,7 @@ EntityManager.prototype.getUniqueId = function(callback){
 
 EntityManager.prototype.getAccountIdByUserId = function(userId, callback){
 	var that = this;
-	console.log("getAccountIdByUserId call.");
+//	console.log("getAccountIdByUserId call.");
 	var query = that.eClient.query( "SELECT * FROM " + sconf.users_accounts_table + " WHERE userId = $1", [ userId ] );
 	var rows = [];
 	query.on( "error", function(error){
@@ -436,11 +438,11 @@ EntityManager.prototype.getAccountIdByUserId = function(userId, callback){
 	});
 	
 	query.on("end", function(result){
-		console.log("getAccountIdByUserId end of query handler.");
+//		console.log("getAccountIdByUserId end of query handler.");
 		if((result.rowCount>=1) && (rows.length>=1)){
 			var dropWrong = function(list){
 				if(list.length<=1){
-					console.log("getAccountIdByUserId callback(%s) call. Found user accId.", (!callback)?"undefined":"defined");
+//					console.log("getAccountIdByUserId callback(%s) call. Found user accId.", (!callback)?"undefined":"defined");
 					if(callback){
 						callback(list.pop().account);
 					}
@@ -454,7 +456,7 @@ EntityManager.prototype.getAccountIdByUserId = function(userId, callback){
 			};
 			dropWrong(rows);
 		}else{
-			console.log("getAccountIdByUserId callback(%s) call. Not found user accId", (!callback)?"undefined":"defined");
+//			console.log("getAccountIdByUserId callback(%s) call. Not found user accId", (!callback)?"undefined":"defined");
 			if(callback){
 				callback(null);
 			}

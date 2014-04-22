@@ -242,9 +242,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 						-localPoint.y * Screen.heightRatio());
 				matTrans.multiply(matRot);
 
-				visualInfo.visual.setTransform(matTrans.m, 0);
-			});
-	}
+            visualInfo.visual.setTransform(matTrans.m, 0);
+		});
 };
 
 // Makes entity "kinematic" or dynamic
