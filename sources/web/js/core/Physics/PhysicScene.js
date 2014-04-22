@@ -3,6 +3,18 @@
  * PhysicEntity`s container
  */
 
+var div2=document.createElement("div");
+div2.style.position = "fixed";
+div2.style.zIndex = 100000000;
+div2.style.marginTop = 30 + "px";
+div2.style.marginLeft = "200px";
+div2.style.backgroundColor = "white";
+document.body.appendChild(div2);
+
+function log2(message) {
+	div2.innerHTML = message;
+}
+
 // var FLOOR_LEVEL = 352;
 PhysicScene.prototype = new Scene();
 PhysicScene.prototype.constructor = PhysicScene;
@@ -43,12 +55,38 @@ PhysicScene.prototype.addChild = function(child) {
 PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
 	that = this;
+
+	this.physicsUpdateInterval = 15;
+	this.physicsCounter = 0;
 	function updateWorld() {
-		Physics.updateWorld(30);
-		that.setTimeout(updateWorld, 15);
+//		if (!that.newUpdate) {
+			Physics.updateWorld(30);
+			that.setTimeout(updateWorld, 15);
+//		} else {
+//			that.prevUpdateTime = Date.now();
+//			that.physicUpdate(that.physicsUpdateInterval);
+//		}
 	}
 	updateWorld();
-//	Physics.pause(true);
+	Physics.pause(true);
+};
+
+PhysicScene.prototype.physicUpdate = function(dt) {
+	var that = this;
+	var date = Date.now();
+	if(date - this.prevUpdateTime >= 1000){
+		dt = date - this.prevUpdateTime;
+		log2(this.physicsCounter);
+		this.physicsCounter = 0;;
+		this.prevUpdateTime = Date.now();
+	}else{
+		this.physicsCounter++;
+		dt += date - this.prevUpdateTime;
+	}
+	Physics.updateWorld(30);
+	window.requestAnimationFrame(function() {
+		that.physicUpdate(dt);
+	});
 };
 
 PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {

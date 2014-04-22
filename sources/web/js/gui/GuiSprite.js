@@ -339,7 +339,7 @@ GuiSprite.prototype.animate = function(animation, callback) {
 
 GuiSprite.prototype.flip = function(needToBeFlipped) {
 	this.flipped = needToBeFlipped;
-	this.transform();
+//	this.transform();
 };
 
 GuiSprite.prototype.transform = function(transfromations) {
@@ -363,7 +363,7 @@ GuiSprite.prototype.transform = function(transfromations) {
 
 GuiSprite.prototype.rotate = function(angle) {
 	this.angle = angle;
-	this.transform();
+//	this.transform();
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
@@ -379,14 +379,16 @@ GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
 };
 
 GuiSprite.prototype.setPosition = function(x, y) {
-	this.x = x;
-	this.y = y;
+//	if (this.x !== x || this.y !== y) {
+		this.x = x;
+		this.y = y;
 
-	if (this.viewport) {
-		this.clampByViewport();
-	} else {
-		this.setRealPosition(x, y);
-	}
+		if (this.viewport) {
+			this.clampByViewport();
+		} else {
+			this.setRealPosition(x, y);
+		}
+//	}
 };
 
 GuiSprite.prototype.setRealPosition = function(x, y) {
@@ -402,7 +404,7 @@ GuiSprite.prototype.setRealPosition = function(x, y) {
 GuiSprite.prototype.setTransform = function(matrix, angle) {
 	this.angle = angle;
 	this.matrix = matrix;
-	this.transform();
+//	this.transform();
 };
 
 GuiSprite.prototype.resize = function() {

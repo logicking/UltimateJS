@@ -84,7 +84,7 @@ PhysicEntity.prototype.createPhysics = function() {
 		shapeDefinition.radius = physicParams.radius;
 		setShapeParams(shapeDefinition, physicParams);
 		bodyDefinition.AddShape(shapeDefinition);
-		//bodyDefinition.bullet == true;
+		// bodyDefinition.bullet == true;
 		break;
 	}
 	case "Poly": {
@@ -128,43 +128,44 @@ PhysicEntity.prototype.createPhysics = function() {
 	case "PrimitiveComposite": {
 		$['each'](physicParams.shapes, function(id, shapeData) {
 			switch (shapeData.type) {
-				case "Box": {
-					shapeDefinition = new b2BoxDef();
-					shapeDefinition.extents = new b2Vec2(shapeData.width / 2,
-							shapeData.height / 2);
-					setShapeParams(shapeDefinition, shapeData);
-					shapeDefinition.localPosition = new b2Vec2(shapeData.x, shapeData.y);
+			case "Box": {
+				shapeDefinition = new b2BoxDef();
+				shapeDefinition.extents = new b2Vec2(shapeData.width / 2,
+						shapeData.height / 2);
+				setShapeParams(shapeDefinition, shapeData);
+				shapeDefinition.localPosition = new b2Vec2(shapeData.x,
+						shapeData.y);
 
-					bodyDefinition.AddShape(shapeDefinition);
+				bodyDefinition.AddShape(shapeDefinition);
 
-					break;
-				}
-				case "Circle": {
-					shapeDefinition = new b2CircleDef();
-					shapeDefinition.radius = physicParams.radius;
-					setShapeParams(shapeDefinition, physicParams);
+				break;
+			}
+			case "Circle": {
+				shapeDefinition = new b2CircleDef();
+				shapeDefinition.radius = physicParams.radius;
+				setShapeParams(shapeDefinition, physicParams);
 
-					bodyDefinition.AddShape(shapeDefinition);
-					break;
-				}
-				case "Poly": {
-					shapeDefinition = new b2PolyDef();
-					shapeDefinition.vertexCount = physicParams.vertexCount;
-					shapeDefinition.vertices = physicParams.vertices;
-					setShapeParams(shapeDefinition, physicParams);
+				bodyDefinition.AddShape(shapeDefinition);
+				break;
+			}
+			case "Poly": {
+				shapeDefinition = new b2PolyDef();
+				shapeDefinition.vertexCount = physicParams.vertexCount;
+				shapeDefinition.vertices = physicParams.vertices;
+				setShapeParams(shapeDefinition, physicParams);
 
-					bodyDefinition.AddShape(shapeDefinition);
-					break;
-				}
-				case "Triangle": {
-					shapeDefinition = new b2PolyDef();
-					shapeDefinition.vertexCount = 3;
-					shapeDefinition.vertices = physicParams.vertices;
+				bodyDefinition.AddShape(shapeDefinition);
+				break;
+			}
+			case "Triangle": {
+				shapeDefinition = new b2PolyDef();
+				shapeDefinition.vertexCount = 3;
+				shapeDefinition.vertices = physicParams.vertices;
 
-					bodyDefinition.AddShape(shapeDefinition);
-					setShapeParams(shapeDefinition, physicParams);
-					break;
-				}
+				bodyDefinition.AddShape(shapeDefinition);
+				setShapeParams(shapeDefinition, physicParams);
+				break;
+			}
 			}
 		});
 		break;
@@ -213,37 +214,37 @@ PhysicEntity.prototype.createVisual = function() {
 PhysicEntity.prototype.updatePositionFromPhysics = function() {
 	var that = this;
 
-	if (that.physics==null)
+	if (that.physics == null)
 		return;
 	that.setPosition(that.physics.m_position.x - that.params.physics.x
 			- that.params.physics.width / 2, that.physics.m_position.y
 			- that.params.physics.y - that.params.physics.height / 2);
 
-	if (that.params.physics.type != "Circle")
+	if (!this.noUsualRotate) {
+			$['each'](this.visuals, function(id, visualInfo) {
+				var angleInDeg = that.getPhysicsRotation().toFixed(3);
+				angleInDeg = MathUtils.toDeg(angleInDeg);
 
-		$['each'](this.visuals, function(id, visualInfo) {
-			var angleInDeg = that.getPhysicsRotation().toFixed(3);
-			angleInDeg = MathUtils.toDeg(angleInDeg);
+				var localPoint = {
+					"x" : that.physics.GetCenterPosition()['x'],
+					"y" : that.physics.GetCenterPosition()['y']
+				};
+				localPoint.x -= (visualInfo.visual.width / 2);
+				localPoint.y -= (visualInfo.visual.height / 2);
 
-			var localPoint = {
-				"x" : that.physics.GetCenterPosition()['x'],
-				"y" : that.physics.GetCenterPosition()['y']
-			};
-			localPoint.x -= (visualInfo.visual.width / 2);
-			localPoint.y -= (visualInfo.visual.height / 2);
+				var matTrans = new Transform();
+				var matRot = new Transform();
+				matTrans.translate((localPoint.x) * Screen.widthRatio(),
+						localPoint.y * Screen.heightRatio());
+				matRot.rotateDegrees(angleInDeg / 2);
+				matTrans.multiply(matRot);
+				matRot.translate(-localPoint.x * Screen.widthRatio(),
+						-localPoint.y * Screen.heightRatio());
+				matTrans.multiply(matRot);
 
-			var matTrans = new Transform();
-			var matRot = new Transform();
-			matTrans.translate((localPoint.x) * Screen.widthRatio(),
-					localPoint.y * Screen.heightRatio());
-			matRot.rotateDegrees(angleInDeg / 2);
-			matTrans.multiply(matRot);
-			matRot.translate(-localPoint.x * Screen.widthRatio(), -localPoint.y
-					* Screen.heightRatio());
-			matTrans.multiply(matRot);
-
-			visualInfo.visual.setTransform(matTrans.m, 0);
-		});
+				visualInfo.visual.setTransform(matTrans.m, 0);
+			});
+	}
 };
 
 // Makes entity "kinematic" or dynamic
@@ -260,11 +261,11 @@ PhysicEntity.prototype.physicsEnable = function(v) {
 
 // PhysicEntity update function
 PhysicEntity.prototype.updatePhysics = function() {
-	if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused()))
-		{
-			this.updatePositionFromPhysics();
-				//this.physics.SetCenterPosition(this.physics.GetCenterPosition(), this.physics.GetRotation());
-		}
+	if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused())) {
+		this.updatePositionFromPhysics();
+		// this.physics.SetCenterPosition(this.physics.GetCenterPosition(),
+		// this.physics.GetRotation());
+	}
 };
 
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
@@ -297,7 +298,8 @@ PhysicEntity.prototype.rotateByAxis = function(axis, angle) {
 	$['each'](this.visuals, function(id, visualInfo) {
 		var t = matTrans.transformPoint(that.params.x - that.params.physics.x,
 				that.params.y - that.params.physics.y);
-		that.physics.SetCenterPosition(new b2Vec2(t[0], t[1]), that.physics.GetRotation());
+		that.physics.SetCenterPosition(new b2Vec2(t[0], t[1]), that.physics
+				.GetRotation());
 	});
 };
 
@@ -316,6 +318,7 @@ PhysicEntity.prototype.destroy = function() {
 	if (this.physics) {
 		Physics.getWorld().DestroyBody(this.physics);
 	}
+	this.destroyed = true;
 	Account.instance.removeEntity(this.id, true);
 };
 
@@ -347,13 +350,22 @@ PhysicEntity.prototype.onDamage = function(damage) {
 			if (that.params.builtInDestruction)
 				visualInfo.visual.setAnimationEndCallback(function() {
 					that.destroy();
-//					delete that;
+					// delete that;
 				});
 			else {
 				that.destroy();
-//				delete that;
+				// delete that;
 			}
 			return;
 		});
 	}
 };
+
+PhysicEntity.prototype.updateNeedCheck = function() {
+	if (this.destroyed) {
+		return false;
+	}
+	return true;
+};
+
+

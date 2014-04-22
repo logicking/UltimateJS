@@ -1,3 +1,5 @@
+PHYSICS_CAPACITY = 25;
+
 function boxPolyVertices(positionX, positionY, extentionX, extentionY) {
 	var px = positionX;
 	var py = positionY;
@@ -86,6 +88,7 @@ var Physics = (function() {
 	var updateItems = [];
 	var contactListener = null;
 	var contactProcessor = null;
+	var updater = 0;
 	// var activeContacts = new Array();
 
 	function debugDraw() {
@@ -312,9 +315,29 @@ var Physics = (function() {
 			}
 
 			//contactListener.update();
-
-			for ( var i = 0; i < updateItems.length; ++i)
-				updateItems[i].updatePhysics();
+					
+			var _b = 0;
+			var _l = updateItems.length;
+			
+			for ( var i = _b; i < _l; ++i) 
+				if (updateItems[i].className === 'CannonBall' && (!updateItems[i].updateNeedCheck || updateItems[i].updateNeedCheck())) {
+					updateItems[i].updatePhysics();
+				}
+			
+			_b = PHYSICS_CAPACITY * updater;
+			_l = PHYSICS_CAPACITY + PHYSICS_CAPACITY *updater;
+			updater++;
+			
+			if (_l > updateItems.length) {
+				_l = updateItems.length;
+				updater = 0;
+			}
+				
+			for ( var i = _b; i < _l; ++i) {
+				if (updateItems[i].className !== 'CannonBall' && (!updateItems[i].updateNeedCheck || updateItems[i].updateNeedCheck())) {
+					updateItems[i].updatePhysics();
+				}
+			}
 		},
 		createSphere : function(x, y, radius, localPosition) {
 			var sphereSd = new b2CircleDef();
