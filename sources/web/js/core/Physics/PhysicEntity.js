@@ -244,6 +244,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 
             visualInfo.visual.setTransform(matTrans.m, 0);
 		});
+	}
 };
 
 // Makes entity "kinematic" or dynamic
