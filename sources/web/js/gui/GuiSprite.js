@@ -470,6 +470,7 @@ GuiSprite.prototype.recolor = function (changingColorPairs) {
                     imageData.data[i] = newColor.r;
                     imageData.data[i + 1] = newColor.g;
                     imageData.data[i + 2] = newColor.b;
+                    break;
                 }
             }
         }
