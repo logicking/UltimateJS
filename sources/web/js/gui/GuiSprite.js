@@ -430,3 +430,64 @@ GuiSprite.prototype.resizeBackground = function() {
 	var size = Screen.calcRealSize(this.totalWidth, this.totalHeight);
 	this.jObject['css']("background-size", size.x + "px " + size.y + "px");
 };
+
+/**
+ * usage:
+ * var changingColorPairs = [];
+ * var pair1 = new ColorRgbChangingPair(new ColorRgb(1, 1, 1), new ColorRgb(2, 2, 2));
+ * var pair2 = new ColorRgbChangingPair(new ColorRgb(3, 3, 3), new ColorRgb(4, 4, 4));
+ * changingColorPairs.push(pair);
+ * changingColorPairs.push(pair2);
+ * guiSprite.recolor(changingColorPairs);
+ *
+ * @param [{ColorRgbChangingPair}] changingColorPairs
+ */
+GuiSprite.prototype.recolor = function (changingColorPairs) {
+    var that = this;
+
+    function recolorImage(img, changingColorPairs) {
+        var c = document.createElement('canvas');
+        var ctx = c.getContext("2d");
+        var w = img.width;
+        var h = img.height;
+        c.width = w;
+        c.height = h;
+        // draw the image on the temporary canvas
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // pull the entire image into an array of pixel data
+        var imageData = ctx.getImageData(0, 0, w, h);
+
+        // examine every pixel,
+        // change any old rgb to the new-rgb
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            // is this pixel the old rgb?
+            for (var j = 0; j < changingColorPairs.length; j++) {
+                var currentColor = changingColorPairs[j].a;
+                var newColor = changingColorPairs[j].b;
+                if (imageData.data[i] == currentColor.r && imageData.data[i + 1] == currentColor.g && imageData.data[i + 2] == currentColor.b) {
+                    // change to your new rgb
+                    imageData.data[i] = newColor.r;
+                    imageData.data[i + 1] = newColor.g;
+                    imageData.data[i + 2] = newColor.b;
+                }
+            }
+        }
+        // put the altered data back on the canvas
+        ctx.putImageData(imageData, 0, 0);
+        var url = c.toDataURL();
+        console.dir("URL: " + url);
+        that.setBackgroundFromParams({image: url}, null);
+        c.remove();
+        return url;
+    }
+
+    var image = new Image();
+    image.onload = function () {
+        recolorImage(image, changingColorPairs);
+    }
+    var src = this.jObject.css("background-image");
+    src = src.replace('url(', '').replace(')', '');
+    image.src = src;
+    console.dir("src: " + src);
+};
