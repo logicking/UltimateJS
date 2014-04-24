@@ -47,6 +47,10 @@ GuiScroll.prototype.createScroll = function() {
 			: true;
 	this.vScroll = (this.params['vScroll'] != null) ? this.params['vScroll']
 			: true;
+	
+	if (this.params["fixedHeight"])
+	this.setFixedHeight(this.params["fixedHeight"]);
+	
 	this.scroll = new iScroll(this.id, {
 		'hScroll' : this.hScroll,
 		'vScroll' : this.vScroll,
@@ -116,9 +120,13 @@ GuiScroll.prototype.createScroll = function() {
 	});
 };
 
-GuiScroll.prototype.refresh = function() {
+GuiScroll.prototype.refresh = function(height) {
 	this.scroll['scrollTo'](0, 0, 0, false);
-	this.scroll['refresh']();
+	if (this.fixedHeight) {
+		this.scroll['refresh'](this.fixedHeight * Screen.heightRatio());
+	} else {
+		this.scroll['refresh']();
+	}
 };
 
 GuiScroll.prototype.addListItem = function(item) {
@@ -172,6 +180,10 @@ GuiScroll.prototype.resize = function() {
 	GuiScroll.parent.resize.call(this);
 	this.resizeScroll();
 	if (this.scroll) {
-		this.scroll.refresh();
+		this.refresh();
 	}
+};
+
+GuiScroll.prototype.setFixedHeight = function(height) {
+	this.fixedHeight = height;
 };

@@ -867,7 +867,7 @@ iScroll.prototype = {
 		if (that.options.onDestroy) that.options.onDestroy.call(that);
 	},
 
-	refresh: function () {
+	refresh: function (height) {
 		var that = this,
 			offset,
 			i, l,
@@ -881,7 +881,7 @@ iScroll.prototype = {
 
 		that.minScrollY = -that.options.topOffset || 0;
 		that.scrollerW = m.round(that.scroller.offsetWidth * that.scale);
-		that.scrollerH = m.round((that.scroller.offsetHeight + that.minScrollY) * that.scale);
+		that.scrollerH = m.round(((height?height:that.scroller.offsetHeight)+ that.minScrollY) * that.scale);
 		that.maxScrollX = that.wrapperW - that.scrollerW;
 		that.maxScrollY = that.wrapperH - that.scrollerH + that.minScrollY;
 		that.dirX = 0;
