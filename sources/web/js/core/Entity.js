@@ -46,20 +46,23 @@ Entity.prototype.log = function(msg) {
 };
 
 Entity.prototype.destroy = function() {
-	this.clearTimeouts();
-	var child;
-	if (this.parent) {
-		this.parent.removeChild(this);
-	}
-	if (this.children) {
-		for ( var i = 0; i < this.children.length; i++) {
-			child = this.children[i];
-			// child.destroy();//may be not necessary
-			this.removeChild(child);
-			Account.instance.removeEntity(child.id);
-			i--;
+	try {
+		this.clearTimeouts();
+		var child;
+		if (this.parent) {
+			this.parent.removeChild(this);
+		}
+		if (this.children) {
+			for ( var i = 0; i < this.children.length; i++) {
+				child = this.children[i];
+				// child.destroy();//may be not necessary
+				this.removeChild(child);
+				Account.instance.removeEntity(child.id);
+				i--;
+			}
 		}
 	}
+	catch (e) {console.log(e);}
 };
 
 Entity.prototype.addChild = function(child) {

@@ -137,67 +137,70 @@ var Sound = (function() {
 			// }
 		},
 		play : function(id, loop, priority, channel) {
-			var that = this;
-			if (!this.soundBuffers[id] || (!this.isOn() && channel != "background")) {
-				return;
-			}
-			var callback = null;
+			try {
+				var that = this;
+				if (!this.soundBuffers[id] || (!this.isOn() && channel != "background")) {
+					return;
+				}
+				var callback = null;
 
-			var ch = this.getChannel(channel);
-			var sound = this.soundBuffers[id];
-			if (typeof loop === 'function') {
-				callback = loop;
-				loop = false;
-			}
-			var sndInstance = {
-				id : id,
-				priority : priority ? priority : sound.priority,
-				loop : loop ? true : false,
-				offset : sound.offset,
-				volume : ch.muted ? 0 : ch.volume,
-				duration : sound.duration,
-				spriteName : sound.spriteName,
-				buffer : this.sprites[sound.spriteName] ? this.sprites[sound.spriteName] : this.sprite
-			};
-			if (ch.playing != null) {
-				var num = this.channelCount++;
-				var chName = "channel" + num;
-				this.channels[chName] = {
-					playing : null,
-					volume : 1
+				var ch = this.getChannel(channel);
+				var sound = this.soundBuffers[id];
+				if (typeof loop === 'function') {
+					callback = loop;
+					loop = false;
+				}
+				var sndInstance = {
+					id : id,
+					priority : priority ? priority : sound.priority,
+					loop : loop ? true : false,
+					offset : sound.offset,
+					volume : ch.muted ? 0 : ch.volume,
+					duration : sound.duration,
+					spriteName : sound.spriteName,
+					buffer : this.sprites[sound.spriteName] ? this.sprites[sound.spriteName] : this.sprite
 				};
-				ch = this.channels[chName];
-				ch.playing = sndInstance;
-				this.instance.play(sndInstance, function() {
-					if (callback) {
-						callback();
-					}
-					ch.playing = null;
-					that.channels[chName] = null;
-					delete that.channels[chName];
-				});
+				if (ch.playing != null) {
+					var num = this.channelCount++;
+					var chName = "channel" + num;
+					this.channels[chName] = {
+						playing : null,
+						volume : 1
+					};
+					ch = this.channels[chName];
+					ch.playing = sndInstance;
+					this.instance.play(sndInstance, function() {
+						if (callback) {
+							callback();
+						}
+						ch.playing = null;
+						that.channels[chName] = null;
+						delete that.channels[chName];
+					});
 
-				// if (ch.playing.priority > sndInstance.priority) {
-				// return;
-				// } else {
-				// this.instance.stop(ch.playing);
-				// ch.playing = sndInstance;
-				// this.instance.play(sndInstance, function() {
-				// if(callback){
-				// callback();
-				// }
-				// ch.playing = null;
-				// });
-				// }
-			} else {
-				ch.playing = sndInstance;
-				this.instance.play(sndInstance, function() {
-					if (callback) {
-						callback();
-					}
-					ch.playing = null;
-				});
+					// if (ch.playing.priority > sndInstance.priority) {
+					// return;
+					// } else {
+					// this.instance.stop(ch.playing);
+					// ch.playing = sndInstance;
+					// this.instance.play(sndInstance, function() {
+					// if(callback){
+					// callback();
+					// }
+					// ch.playing = null;
+					// });
+					// }
+				} else {
+					ch.playing = sndInstance;
+					this.instance.play(sndInstance, function() {
+						if (callback) {
+							callback();
+						}
+						ch.playing = null;
+					});
+				}
 			}
+			catch (e) {console.log(e);}
 		},
 		init : function(name, forceSprite, callback, createChannels) {
 			// createChannels is using only in jSound

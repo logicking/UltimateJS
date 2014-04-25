@@ -55,6 +55,11 @@ GuiDialog.prototype.initialize = function(params) {
 			"x" : 0,
 			"y" : 0
 		});
+		var tempFunc = GuiDialog.prototype.maskDivSoul.remove;
+		GuiDialog.prototype.maskDivSoul.remove = function() {
+			GuiDialog.prototype.maskDivSoul = null;
+			tempFunc.call(this);
+		};
 	}
 	this.maskDiv = GuiDialog.prototype.maskDivSoul;
 //	this.maskDiv.setPosition(this.parent.width/2 - this.maskDiv.width, this.parent.height/2 - this.maskDiv.height);
