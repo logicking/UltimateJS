@@ -50,7 +50,7 @@ GuiSprite.prototype.initialize = function(params) {
 	} else {
 		this.totalTile = params['totalTile'];
 	}
-	this.flipped = false;
+    this.flipped = params['flipped'] != null ? params['flipped'] : false;
 
 	this.setBackground(this.totalSrc);
 
