@@ -153,20 +153,20 @@ Account.prototype.removeRenderEntity = function(entity) {
 
 // Regular render update for registered enities
 Account.prototype.render = function() {
-//	var dt = Date.now() - this.lastRenderTime;
-//	if(dt != 0){
-//		$['each'](this.renderEntities, function(id, entity) {
-//			if (entity && entity.isVisible && entity.isVisible()) {
-//				
-//				entity.render(dt);
-//			}
-//		});
-//	}
-//	var that = this;
-//	this.lastRenderTime = Date.now();
-//	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
-//		that.render();
-//	});
+	var dt = Date.now() - this.lastRenderTime;
+	if(dt != 0){
+		$['each'](this.renderEntities, function(id, entity) {
+			if (entity && entity.isVisible && entity.isVisible()) {
+				
+				entity.render(dt);
+			}
+		});
+	}
+	var that = this;
+	this.lastRenderTime = Date.now();
+	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+		that.render();
+	});
 };
 
 // Regular scheduled update for registered enities

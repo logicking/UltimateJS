@@ -161,6 +161,15 @@ var Resources = (function() {
 			return imageFilename;
 		},
 
+		// return an asset preloaded
+		getAsset : function(id) {
+			for ( var i in assets) {
+				if (i === id) {
+					return assets[i];
+				}
+			}
+			return null;
+		},
 		// return an array of registered images filenames,
 		// used for preloading
 		getUsedImages : function() {
