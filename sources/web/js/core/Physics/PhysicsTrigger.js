@@ -37,7 +37,9 @@ CreatePhysicsTrigger = function(world, rect, action) {
 	instance.update = function() {
 		var body = instance.world.m_bodyList;
 		for (; body != null; body = body['m_next']) {
-			if (instance.checkIfIn(body.m_position))
+            var pos = body.GetPosition().Copy();
+            pos.Multiply(Physics.getB2dToGameRatio());
+			if (instance.checkIfIn(pos))
 				instance.action(body);
 		}
 	};

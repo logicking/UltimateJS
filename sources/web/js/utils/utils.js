@@ -400,3 +400,53 @@ function RandomNumberGenerator(seed)
 		return number / 18446744073709551616;
 	};
 };
+
+/**
+ *
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ * @constructor
+ */
+function ColorRgb(r, g, b) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+}
+
+ColorRgb.prototype.copy = function() {
+    return new ColorRgb(this.r, this.g, this.b);
+};
+/**
+ *
+ * @param {ColorRgb} colorRgb
+ */
+ColorRgb.prototype.add = function(colorRgb) {
+    this.r += colorRgb.r;
+    this.g += colorRgb.g;
+    this.b += colorRgb.b;
+};
+
+/**
+ *
+ * @param {ColorRgb} colorRgb
+ */
+ColorRgb.prototype.subtract = function(colorRgb) {
+    this.r -= colorRgb.r;
+    this.g -= colorRgb.g;
+    this.b -= colorRgb.b;
+};
+
+/**
+ *
+ * @param {ColorRgb} a current color
+ * @param {ColorRgb} b new color
+ * @constructor
+ */
+function ColorRgbChangingPair(a, b) {
+    this.a = a;
+    this.b = b;
+}
+
+
+

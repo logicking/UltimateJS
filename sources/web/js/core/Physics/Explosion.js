@@ -22,7 +22,7 @@ Physics.explode = function(params) { // (center, radius, force, duration,
 		setTimeout(function() {
 			var body = world.m_bodyList;
 			for (; body != null; body = body['m_next']) {
-				var bodyCenter = body.GetCenterPosition();
+				var bodyCenter = body.GetPosition();
 				var rVec = new b2Vec2(bodyCenter.x - params.center.x,
 						bodyCenter.y - params.center.y);
 				var dist = rVec.Length();
@@ -36,7 +36,7 @@ Physics.explode = function(params) { // (center, radius, force, duration,
 							body.WakeUp();
 							body
 									.ApplyImpulse(impulse, body
-											.GetCenterPosition());
+											.GetPosition());
 							body.AllowSleeping(true);
 						}
 					}

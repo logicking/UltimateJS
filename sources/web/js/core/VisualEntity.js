@@ -176,7 +176,7 @@ VisualEntity.prototype.resize = function() {
 
 VisualEntity.prototype.update = function(updateTime, x, y){
 	if(x && y){
-		this.stpX = x - this.x;;
+		this.stpX = x - this.x;
 		this.stpY = y - this.y;
 	}
 };

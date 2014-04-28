@@ -55,6 +55,16 @@ GuiCanvas.prototype.init = function() {
 };
 
 GuiCanvas.prototype.initialize = function(params) {
+	
+	if (params['innerScene']) {
+		// main scene is located on normal position inside enhanced scene
+		params['width'] = params['width'] ? params['width'] : BASE_WIDTH;
+		params['height'] = params['height'] ? params['height'] : BASE_HEIGHT;
+		params['x'] = params['x'] ? params['x'] : ENHANCED_BASE_MARGIN_WIDTH;
+		params['y'] = params['y'] ? params['y'] : ENHANCED_BASE_MARGIN_HEIGHT;
+		this.innerScene = true;
+	}
+	
 	this.params = params;
 
 	this.parent = params['parent'];
@@ -70,7 +80,7 @@ GuiCanvas.prototype.initialize = function(params) {
 	this.width = params['width'];
 	this.height = params['height'];
 	this.enable = true;
-	this.children = new GuiCContainer();
+	this.children = new GuiContainer();
 	this.children.init();
 
 	this.src = params['html'] ? params['html'] : this.src;
@@ -79,9 +89,12 @@ GuiCanvas.prototype.initialize = function(params) {
 	} else {
 		this.create();
 	}
-
-	var img = Resources.getAsset(params.image);
-	this.terrainPattern = this.contex.createPattern(img, 'repeat');
+	
+	this.terrainPattern = null;
+	if (params.image) {
+		var img = Resources.getAsset(params.image);
+		this.terrainPattern = this.contex.createPattern(img, 'repeat');
+	}
 	// attach 'this' as data to the element, so we can reference to it by
 	// element id
 	this.jObject['data']("GuiCanvas", this);
@@ -106,6 +119,14 @@ GuiCanvas.prototype.initialize = function(params) {
 	if (typeof params['opacity'] == "number") {
 		this.setOpacity(params['opacity']);
 	}
+	
+	this.baseDiv = guiFactory.createObject("GuiDiv", {
+		"parent" : this.parent,
+		"width" : this.width,
+		"height" : this.parent,
+		"x" : this.x,
+		"y" : this.y
+	});
 
 	this.resize();
 	Account.instance.addRenderEntity(this);
@@ -501,8 +522,10 @@ GuiCanvas.prototype.getEventPosition = function(e) {
 
 
 GuiCanvas.prototype.render = function() {
-    this.contex.fillStyle = this.terrainPattern;
-    this.contex.fillRect(0, 0, this.width, this.height);
+	if (this.terrainPattern) {
+	    this.contex.fillStyle = this.terrainPattern;
+	    this.contex.fillRect(0, 0, this.width, this.height);
+	}
 
 	this.children.render(this.contex);
 	this.contex.restore();
