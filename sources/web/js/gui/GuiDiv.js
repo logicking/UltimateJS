@@ -73,9 +73,18 @@ GuiDiv.prototype.initialize = function(params) {
 	assert(!this.innerScene || this.parent.enhancedScene,
 			"inner scene should always be child to enhanced scene");
 
-		if (this.innerScene) {
-			this.clampByParentViewport();
-		}
+	if (this.innerScene) {
+		this.clampByParentViewport();
+	}
+	
+	if (params['canvas']) {
+		this.canvas = guiFactory.createObject("GuiCanvas", {
+			"parent" : this,
+			"style" : "dialog",
+			"width" : this.width,
+			"height" : this.height
+		});
+	}
 };
 
 GuiDiv.prototype.generate = function(src) {

@@ -328,8 +328,25 @@ GuiCSprite.prototype.calcPercentageHeight = function(val) {
 	return val;
 };
 
+GuiCSprite.prototype.setZ = function(z) {
+};
+
+GuiCSprite.prototype.hide = function() {
+	this.visible = false;
+};
+
+GuiCSprite.prototype.show = function() {
+	this.visible = true;
+};
+
+GuiCSprite.prototype.clampByParentViewport = function() {
+	this.visible = true;
+};
+
 GuiCSprite.prototype.render = function(ctx) {
-    var x = this.calcPercentageWidth(this.x) + this.offsetX;
+	if (!this.visible) 
+		return;
+	var x = this.calcPercentageWidth(this.x) + this.offsetX;
     var y =  this.calcPercentageHeight(this.y) + this.offsetY;
     var w = this.width;
     var h =  this.height;

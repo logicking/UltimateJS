@@ -323,7 +323,7 @@ var Physics = (function() {
 				return;
 
 			var world = this.getWorld();
-            world.Step(delta / 1350, 10, 10);
+            world.Step(delta / 1350, 5, 5);
 			if (timeout)
 				timeout.tick(delta);
 

@@ -55,16 +55,6 @@ GuiCanvas.prototype.init = function() {
 };
 
 GuiCanvas.prototype.initialize = function(params) {
-	
-	if (params['innerScene']) {
-		// main scene is located on normal position inside enhanced scene
-		params['width'] = params['width'] ? params['width'] : BASE_WIDTH;
-		params['height'] = params['height'] ? params['height'] : BASE_HEIGHT;
-		params['x'] = params['x'] ? params['x'] : ENHANCED_BASE_MARGIN_WIDTH;
-		params['y'] = params['y'] ? params['y'] : ENHANCED_BASE_MARGIN_HEIGHT;
-		this.innerScene = true;
-	}
-	
 	this.params = params;
 
 	this.parent = params['parent'];
