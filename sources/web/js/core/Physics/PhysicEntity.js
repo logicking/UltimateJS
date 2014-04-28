@@ -336,11 +336,15 @@ PhysicEntity.prototype.rotate = function(angleInRad) {
 };
 
 PhysicEntity.prototype.destroy = function() {
-	PhysicEntity.parent.destroy.call(this);
-	if (this.physics) {
-		Physics.getWorld().DestroyBody(this.physics);
-	}
-	Account.instance.removeEntity(this.id, true);
+    PhysicEntity.parent.destroy.call(this);
+    if (this.physics) {
+        if (Physics.getWorld().IsLocked() ) {
+            Physics.addBodyToDestroy(this.physics);
+        } else {
+            Physics.getWorld().DestroyBody(this.physics);
+        }
+    }
+    Account.instance.removeEntity(this.id, true);
 };
 
 // damage received by other object

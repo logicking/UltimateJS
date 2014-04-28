@@ -96,6 +96,7 @@ var Physics = (function() {
 	var debugMode = true;
 	var debugCanvas = null;
 	var updateItems = [];
+    var bodiesToDestroy = [];
 	var contactListener = null;
 	var contactProcessor = null;
 	// var activeContacts = new Array();
@@ -308,6 +309,9 @@ var Physics = (function() {
         getB2dToGameRatio : function() {
             return b2dToGameRatio;
         },
+        addBodyToDestroy : function(body) {
+            bodiesToDestroy.push(body);
+        },
 		createWorldBorder : function(params) {
 			createWorldBorder(params);
 		},
@@ -333,6 +337,12 @@ var Physics = (function() {
             world.ClearForces();
 			for ( var i = 0; i < updateItems.length; ++i)
 				updateItems[i].updatePhysics();
+            if (bodiesToDestroy.length > 0) {
+                for ( var i = 0; i < bodiesToDestroy.length; ++i) {
+                    world.DestroyBody(bodiesToDestroy[i]);
+                }
+                bodiesToDestroy = [];
+            }
 		},
 		createSphere : function(x, y, radius, localPosition) {
 			var sphereSd = new b2CircleDef();
