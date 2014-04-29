@@ -339,9 +339,12 @@ PhysicEntity.prototype.rotate = function(angleInRad) {
 PhysicEntity.prototype.destroy = function() {
 	PhysicEntity.parent.destroy.call(this);
 	
-	$['each'](this.visuals, function(id, visualInfo) {
-		visualInfo.visual.hide();
-	});
+	if (this.visuals) {
+		$['each'](this.visuals, function(id, visualInfo) {
+			visualInfo.visual.hide();
+		});
+	}
+
 	
 	if (this.physics) {
 		Physics.getWorld().DestroyBody(this.physics);
