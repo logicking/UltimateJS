@@ -44,7 +44,7 @@ PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
 	var that = this;
 	function updateWorld() {
-		Physics.updateWorld(30);
+		Physics.updateWorld();
 		that.setTimeout(updateWorld, 15);
 	}
 	updateWorld();

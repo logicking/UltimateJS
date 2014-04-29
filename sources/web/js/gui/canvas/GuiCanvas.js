@@ -24,6 +24,7 @@ GuiCanvas.prototype.create = function(src) {
 	canvas.id = this.id;	
 	canvas.width = this.width;	
 	canvas.height = this.height;
+	canvas.style.position = "absolute";
 	document.body.appendChild(canvas);	
 	
 	if (!this.setParent(this.parent)) {
@@ -119,7 +120,7 @@ GuiCanvas.prototype.initialize = function(params) {
 	});
 
 	this.resize();
-	Account.instance.addRenderEntity(this);
+	Account.instance.addScheduledEntity(this);
 };
 
 GuiCanvas.prototype.setOffset = function(offsetX, offsetY) {
@@ -510,11 +511,21 @@ GuiCanvas.prototype.getEventPosition = function(e) {
 	return result;
 };
 
+GuiCanvas.prototype.update = function() {
+	this.render();
+};
+
+GuiCanvas.prototype.isEnabled = function() {
+	return true;
+};
+
 
 GuiCanvas.prototype.render = function() {
 	if (this.terrainPattern) {
 	    this.contex.fillStyle = this.terrainPattern;
 	    this.contex.fillRect(0, 0, this.width, this.height);
+	} else {
+		this.contex.clearRect(0, 0, this.width, this.height);
 	}
 
 	this.children.render(this.contex);

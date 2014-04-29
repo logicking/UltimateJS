@@ -218,6 +218,10 @@ GuiDiv.prototype.resize = function() {
 	if (this.viewport) {
 		this.clampByViewport();
 	}
+	
+	if (this.canvas) {
+		this.canvas.resize(this.width, this.height);
+	}
 };
 
 GuiDiv.prototype.dragBegin = function(e) {

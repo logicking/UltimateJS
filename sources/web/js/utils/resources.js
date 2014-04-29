@@ -168,7 +168,9 @@ var Resources = (function() {
 					return assets[i];
 				}
 			}
-			return null;
+			var obj = new Image();
+			obj.src = Resources.getImage(id);
+			return obj;
 		},
 		// return an array of registered images filenames,
 		// used for preloading

@@ -17,6 +17,8 @@ guiFactory.addClass(GuiCSprite);
 
 GuiCSprite.prototype.initialize = function(params) {
 	var that = this;
+	
+	this.params = params;
 
 	this.x = params.x||0;
 	this.y = params.y||0;
@@ -70,6 +72,14 @@ GuiCSprite.prototype.initialize = function(params) {
 	if(params['frames']){
 		this.frames = params['frames']; 
 	}
+
+	if (this.parent.canvas) {
+		this.parent.canvas.addGui(this);
+	} else {
+		this.parent.addGui(this);
+	}
+	
+	this.show();
 };
 
 
@@ -282,8 +292,8 @@ GuiCSprite.prototype.setPosition = function(x, y) {
 GuiCSprite.prototype.setRealPosition = function(x, y) {
 };
 
-GuiCSprite.prototype.setTransform = function(matrix, angle) {
-	this.angle = angle;
+GuiCSprite.prototype.setTransform = function(matrix) {
+//	this.angle = angle;
 	this.matrix = matrix;
 };
 
@@ -331,6 +341,9 @@ GuiCSprite.prototype.calcPercentageHeight = function(val) {
 GuiCSprite.prototype.setZ = function(z) {
 };
 
+GuiCSprite.prototype.remove = function() {
+};
+
 GuiCSprite.prototype.hide = function() {
 	this.visible = false;
 };
@@ -355,14 +368,21 @@ GuiCSprite.prototype.render = function(ctx) {
 //	var pos = Screen.calcRealSize(x, y);
 	var bx = this.backgroundPosition.x;
 	var by = this.backgroundPosition.y * this.height;
+
+	var ratio = {
+		x : this.transformOrigin?this.transformOrigin.x:0.5,
+		y : this.transformOrigin?this.transformOrigin.y:0.5
+	};
 	
-	ctx.translate(x, y);
-	ctx.translate(this.width/2, this.height/2);
+	ctx.translate((x+this.width*ratio.x), (y+this.height*ratio.y));
+//	ctx.translate(x - (this.width/4), (y - this.height/4));
 	ctx.rotate(MathUtils.toRad(this.angle)); 
+//	ctx.translate(-this.width * this.transformOrigin?this.transformOrigin.x:0.5, -this.height * this.transformOrigin?this.transformOrigin.y:0.5);
+
     ctx.drawImage(this.img,
 		    bx, by,
             w, h,
-            0, 0,
+            -this.width*ratio.x, -this.height*ratio.y,
             w, h);
 //    ctx.drawImage(this.img,
 //    		      this.backgroundPosition.x, this.backgroundPosition.y,
