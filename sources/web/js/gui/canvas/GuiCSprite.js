@@ -1,7 +1,10 @@
-/*
- * GuiCSprite - sprite of GuiScene
- */
 
+/**
+ * GuiCSprite is a sprite for GuiCanvas (UltimateJS) based on GuiSprite.js but not inherit from
+ * @author Glukozavr
+ * @date April-May 2014
+ * @constructor
+ */
 function GuiCSprite() {
 }
 
@@ -15,6 +18,25 @@ GuiCSprite.prototype.createInstance = function(params) {
 
 guiFactory.addClass(GuiCSprite);
 
+/**
+ * Initial function to save and use incoming params
+ * @param params may contain:
+ * - parent
+ * - width
+ * - height
+ * - image
+ * - offsetX
+ * - offsetY
+ * - x
+ * - y
+ * - z
+ * - hide
+ * - opacity
+ * - totalImage,
+ * - totalImageWidth,
+ * - totalImageHeight,
+ * - totalTile
+ */
 GuiCSprite.prototype.initialize = function(params) {
 	var that = this;
 	
@@ -49,8 +71,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	};
 
 	this.backgroundSize = {
-			x : this.total.width,
-			y : this.total.height
+			w : this.total.width,
+			h : this.total.height
 	};
 	
 	this.rotate(0);
@@ -313,9 +335,6 @@ GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 };
 
 GuiCSprite.prototype.resizeBackground = function() {
-	var size = Screen.calcRealSize(this.total.width, this.total.height);
-	this.backgroundSize.x = size.x;
-	this.backgroundSize.y = size.y;
 };
 
 GuiCSprite.prototype.calcPercentageWidth = function(val) {
@@ -359,34 +378,24 @@ GuiCSprite.prototype.clampByParentViewport = function() {
 GuiCSprite.prototype.render = function(ctx) {
 	if (!this.visible) 
 		return;
-	var x = this.calcPercentageWidth(this.x) + this.offsetX;
-    var y =  this.calcPercentageHeight(this.y) + this.offsetY;
-    var w = this.width;
-    var h =  this.height;
-    var tw = this.total.width;
-    var th = this.total.height;
-//	var pos = Screen.calcRealSize(x, y);
-	var bx = this.backgroundPosition.x;
-	var by = this.backgroundPosition.y * this.height;
+	var x = parseInt(this.calcPercentageWidth(this.x) + this.offsetX);
+    var y =  parseInt(this.calcPercentageHeight(this.y) + this.offsetY);
+    var w = parseInt(this.width);
+    var h =  parseInt(this.height);
+	var bx = parseInt(this.backgroundPosition.x);
+	var by = parseInt(this.backgroundPosition.y * this.height);
 
 	var ratio = {
 		x : this.transformOrigin?this.transformOrigin.x:0.5,
 		y : this.transformOrigin?this.transformOrigin.y:0.5
 	};
 	
-	ctx.translate((x+this.width*ratio.x), (y+this.height*ratio.y));
-//	ctx.translate(x - (this.width/4), (y - this.height/4));
-	ctx.rotate(MathUtils.toRad(this.angle)); 
-//	ctx.translate(-this.width * this.transformOrigin?this.transformOrigin.x:0.5, -this.height * this.transformOrigin?this.transformOrigin.y:0.5);
+	ctx.translate(parseInt(x+w*ratio.x), parseInt(y+h*ratio.y));
+	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
 
     ctx.drawImage(this.img,
 		    bx, by,
             w, h,
-            -this.width*ratio.x, -this.height*ratio.y,
+            -parseInt(this.width*ratio.x), -parseInt(this.height*ratio.y),
             w, h);
-//    ctx.drawImage(this.img,
-//    		      this.backgroundPosition.x, this.backgroundPosition.y,
-//                  this.width, this.height,
-//                  pos.x, pos.y,
-//                  this.backgroundSize.x, this.backgroundSize.y);
 };
