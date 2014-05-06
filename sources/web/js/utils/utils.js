@@ -400,3 +400,19 @@ function RandomNumberGenerator(seed)
 		return number / 18446744073709551616;
 	};
 };
+
+function cloneObject(obj) {
+	if ( "object" === typeof obj && obj.length) {
+		var ar = [];
+		for (var i = 0; i < obj.length; i++) {
+			ar[i] = cloneObject(obj[i]);
+		}
+		return ar;
+	}
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = {};
+    for (var smth in obj) {
+    	copy[smth] = cloneObject(obj[smth]);
+    }
+    return copy;
+}
