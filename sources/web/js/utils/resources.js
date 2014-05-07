@@ -160,7 +160,14 @@ var Resources = (function() {
 
 			return imageFilename;
 		},
-
+        /**
+         *
+         * @param {string} name
+         * @return {Image} image
+         */
+        getImageObject: function (name) {
+            return assets[name];
+        },
 		// return an array of registered images filenames,
 		// used for preloading
 		getUsedImages : function() {

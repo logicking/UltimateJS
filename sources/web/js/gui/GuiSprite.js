@@ -435,6 +435,7 @@ GuiSprite.prototype.resizeBackground = function() {
  */
 GuiSprite.prototype.recolor = function (changingColorPairs, imageCreatedCallback) {
     var that = this;
+    //TODO: take image from resources
     var image = new Image();
     image.onload = function () {
         var url = recolorImage(image, changingColorPairs);
@@ -455,6 +456,7 @@ GuiSprite.prototype.recolor = function (changingColorPairs, imageCreatedCallback
  */
 GuiSprite.prototype.recolorFullImage = function (changingColorPair, imageCreatedCallback) {
     var that = this;
+    //TODO: take image from resources
     var image = new Image();
     image.onload = function () {
         var url = recolorFullImage(image, changingColorPair);
