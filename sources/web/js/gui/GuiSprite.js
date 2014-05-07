@@ -114,18 +114,6 @@ GuiSprite.prototype.addAnimation = function(animationName, frames, row,
 	};
 };
 
-GuiSprite.prototype.addComplexAnimation = function(animationObj){
-	//complex animations must have one frame rate
-	var that = this;
-	var frames = [];
-	$['each'](animationObj.frames, function(index, value){
-		var animPart = that.animations[value]; 
-		frames = frames.concat(animPart.frames);
-	});
-	
-};
-
-
 GuiSprite.prototype.update = function(dt) {
 	if (this.currentAnimation == null && this.spatialAnimation == null) {
 		return;
@@ -488,6 +476,75 @@ GuiSprite.prototype.recolor = function (changingColorPairs) {
     var image = new Image();
     image.onload = function () {
         recolorImage(image, changingColorPairs);
+    }
+    var src = this.jObject.css("background-image");
+    src = src.replace('url(', '').replace(')', '');
+    image.src = src;
+    console.dir("src: " + src);
+};
+
+/**
+ *
+ * @param {ColorRgbChangingPair} changingColorPair
+ */
+GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
+    var that = this;
+
+    function recolorImage(img, changingColorPair) {
+        var c = document.createElement('canvas');
+        var ctx = c.getContext("2d");
+        var w = img.width;
+        var h = img.height;
+        c.width = w;
+        c.height = h;
+        // draw the image on the temporary canvas
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // pull the entire image into an array of pixel data
+        var imageData = ctx.getImageData(0, 0, w, h);
+
+        // examine every pixel,
+        // change any old rgb to the new-rgb
+        var imageDataColor = new ColorRgb(0, 0, 0);
+        for (var i = 0; i < imageData.data.length; i += 4) {
+            // transparent
+            if (imageData.data[i] === 0 && imageData.data[i + 1] === 0 && imageData.data[i + 2] === 0 && imageData.data[i + 3] === 0) {
+                continue;
+            }
+
+            var currentColor = changingColorPair.a;
+            var newColor = changingColorPair.b;
+            imageDataColor.set(imageData.data[i], imageData.data[i + 1], imageData.data[i + 2]);
+
+            // offset to main color
+            imageDataColor.subtract(currentColor);
+            imageDataColor.add(newColor);
+
+            imageData.data[i] = imageDataColor.r;
+            imageData.data[i + 1] = imageDataColor.g;
+            imageData.data[i + 2] = imageDataColor.b;
+
+
+            /*if (imageData.data[i] == currentColor.r && imageData.data[i + 1] == currentColor.g && imageData.data[i + 2] == currentColor.b) {
+                // change to your new rgb
+                imageData.data[i] = newColor.r;
+                imageData.data[i + 1] = newColor.g;
+                imageData.data[i + 2] = newColor.b;
+                break;
+            }*/
+        }
+        // put the altered data back on the canvas
+        ctx.putImageData(imageData, 0, 0);
+        var url = c.toDataURL();
+        console.dir("URL: " + url);
+        that.setBackgroundFromParams({image: url}, null);
+        c.remove();
+        return url;
+    }
+
+    var image = new Image();
+    image.onload = function () {
+        recolorImage(image, changingColorPair);
     }
     var src = this.jObject.css("background-image");
     src = src.replace('url(', '').replace(')', '');

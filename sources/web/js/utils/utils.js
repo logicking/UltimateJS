@@ -414,6 +414,18 @@ function ColorRgb(r, g, b) {
     this.b = b;
 }
 
+/**
+ *
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ */
+ColorRgb.prototype.set = function(r, g, b) {
+    this.r = r;
+    this.g = g;
+    this.b = b;
+};
+
 ColorRgb.prototype.copy = function() {
     return new ColorRgb(this.r, this.g, this.b);
 };
