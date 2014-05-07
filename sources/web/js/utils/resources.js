@@ -170,6 +170,7 @@ var Resources = (function() {
 			}
 			var obj = new Image();
 			obj.src = Resources.getImage(id);
+			assets[id] = obj;
 			return obj;
 		},
 		// return an array of registered images filenames,

@@ -405,8 +405,10 @@ GuiCanvas.prototype.setSize = function(width, height, noResize) {
  */
 GuiCanvas.prototype.setRealSize = function(width, height) {
 	var size = Screen.calcRealSize(width, height);
-	this.jObject['css']("width", size.x);
-	this.jObject['css']("height", size.y);
+	this.contex.canvas.width = size.x;
+	this.contex.canvas.height = size.y;
+//	this.jObject['css']("width", size.x);
+//	this.jObject['css']("height", size.y);
 };
 
 /**
@@ -676,11 +678,13 @@ GuiCanvas.prototype.isEnabled = function() {
  * Render of the canvas. draw the background and render children
  */
 GuiCanvas.prototype.render = function() {
+	var w = this.width*Screen.widthRatio();
+	var h = this.height*Screen.heightRatio();
 	if (this.terrainPattern) {
 	    this.contex.fillStyle = this.terrainPattern;
-	    this.contex.fillRect(0, 0, this.width, this.height);
+	    this.contex.fillRect(0, 0, w, h);
 	} else {
-		this.contex.clearRect(0, 0, this.width, this.height);
+		this.contex.clearRect(0, 0, w, h);
 	}
 
 	this.children.render(this.contex);

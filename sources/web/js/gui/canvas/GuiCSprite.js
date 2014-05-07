@@ -65,6 +65,25 @@ GuiCSprite.prototype.initialize = function(params) {
 	
 	this.img = Resources.getAsset(this.total.image);
 	
+	this.img.onload = function() {
+		that.imageHeight = Math.round(that.img.height / Math.round(that.total.height / that.height));
+		that.imageWidth = Math.round(that.img.width / Math.round(that.total.width / that.width));
+//		that.img.setAttribute("height", that.height);
+//		that.img.setAttribute("width", that.width);
+		that.scale = {
+				x : that.width / that.imageWidth,
+				y : that.height / that.imageHeight
+		};
+	};
+//	this.imageHeight = parseInt(this.img.height / parseInt(this.total.height / this.height));
+//	this.imageWidth = parseInt(this.img.width / parseInt(this.total.width / this.width));
+	this.imageHeight = this.height;
+	this.imageWidth = this.width;
+	that.scale = {
+			x : that.width / that.imageWidth,
+			y : that.height / that.imageHeight
+	};
+	
 	this.backgroundPosition = {
 		x : 0,
 		y : 0
@@ -378,24 +397,34 @@ GuiCSprite.prototype.clampByParentViewport = function() {
 GuiCSprite.prototype.render = function(ctx) {
 	if (!this.visible) 
 		return;
-	var x = parseInt(this.calcPercentageWidth(this.x) + this.offsetX);
-    var y =  parseInt(this.calcPercentageHeight(this.y) + this.offsetY);
-    var w = parseInt(this.width);
-    var h =  parseInt(this.height);
-	var bx = parseInt(this.backgroundPosition.x);
-	var by = parseInt(this.backgroundPosition.y * this.height);
+	var scrnRatio = {
+			x : Screen.widthRatio(),
+			y : Screen.heightRatio()
+	};
+	
+	var x = Math.round((this.calcPercentageWidth(this.x) + this.offsetX)*scrnRatio.x);
+    var y =  Math.round((this.calcPercentageHeight(this.y) + this.offsetY)*scrnRatio.y);
+    var w = Math.round(this.width*scrnRatio.x);//this.imageWidth;//
+    var h =  Math.round(this.height*scrnRatio.y);//this.imageHeight;//
+	var bx = Math.round(this.backgroundPosition.x);
+	var by = Math.round(this.backgroundPosition.y * this.height);
 
 	var ratio = {
 		x : this.transformOrigin?this.transformOrigin.x:0.5,
 		y : this.transformOrigin?this.transformOrigin.y:0.5
 	};
 	
-	ctx.translate(parseInt(x+w*ratio.x), parseInt(y+h*ratio.y));
+	ctx.translate(parseInt((x+w*ratio.x)), parseInt((y+h*ratio.y)));
 	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
+//	ctx.scale(this.scale.x, this.scale.y); 
 
+	try {
     ctx.drawImage(this.img,
 		    bx, by,
-            w, h,
-            -parseInt(this.width*ratio.x), -parseInt(this.height*ratio.y),
+		    this.width, this.height,
+            -parseInt(w*ratio.x), -parseInt(h*ratio.y),
             w, h);
+	}
+	catch (e) {
+	}
 };
