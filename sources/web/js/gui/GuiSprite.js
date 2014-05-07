@@ -428,44 +428,26 @@ GuiSprite.prototype.resizeBackground = function() {
  * var pair2 = new ColorRgbChangingPair(new ColorRgb(3, 3, 3), new ColorRgb(4, 4, 4));
  * changingColorPairs.push(pair);
  * changingColorPairs.push(pair2);
- * guiSprite.recolor(changingColorPairs, function(url) {}; );
+ * guiSprite.recolor(changingColorPairs);
  *
  * @param [{ColorRgbChangingPair}] changingColorPairs
- * @param {function} imageCreatedCallback function(imageUrl) {};
+ * @return {string} imageUrl
  */
-GuiSprite.prototype.recolor = function (changingColorPairs, imageCreatedCallback) {
-    var that = this;
-    //TODO: take image from resources
-    var image = new Image();
-    image.onload = function () {
-        var url = recolorImage(image, changingColorPairs);
-        that.setBackgroundFromParams({image: url}, null);
-        if (imageCreatedCallback != null) {
-            imageCreatedCallback(url);
-        }
-    };
-    var src = this.jObject.css("background-image");
-    src = src.replace('url(', '').replace(')', '');
-    image.src = src;
+GuiSprite.prototype.recolor = function (changingColorPairs) {
+    var image = Resources.getImageObject(this.params.totalImage);
+    var url = recolorImage(image, changingColorPairs);
+    this.setBackgroundFromParams({image: url}, null);
+    return url;
 };
 
 /**
  *
  * @param {ColorRgbChangingPair} changingColorPair
- * @param {function} imageCreatedCallback function(imageUrl) {};
+ * @return {string} imageUrl
  */
-GuiSprite.prototype.recolorFullImage = function (changingColorPair, imageCreatedCallback) {
-    var that = this;
-    //TODO: take image from resources
-    var image = new Image();
-    image.onload = function () {
-        var url = recolorFullImage(image, changingColorPair);
-        that.setBackgroundFromParams({image: url}, null);
-        if (imageCreatedCallback != null) {
-            imageCreatedCallback(url);
-        }
-    };
-    var src = this.jObject.css("background-image");
-    src = src.replace('url(', '').replace(')', '');
-    image.src = src;
+GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
+    var image = Resources.getImageObject(this.params.totalImage);
+    var url = recolorFullImage(image, changingColorPair);
+    this.setBackgroundFromParams({image: url}, null);
+    return url;
 };
