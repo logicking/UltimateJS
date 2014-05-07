@@ -428,13 +428,19 @@ GuiSprite.prototype.resizeBackground = function() {
  * var pair2 = new ColorRgbChangingPair(new ColorRgb(3, 3, 3), new ColorRgb(4, 4, 4));
  * changingColorPairs.push(pair);
  * changingColorPairs.push(pair2);
- * guiSprite.recolor(changingColorPairs);
+ * guiSprite.recolor(changingColorPairs, function(url) {}; );
  *
  * @param [{ColorRgbChangingPair}] changingColorPairs
+ * @param {function} imageCreatedCallback function(imageUrl) {};
  */
-GuiSprite.prototype.recolor = function (changingColorPairs) {
+GuiSprite.prototype.recolor = function (changingColorPairs, imageCreatedCallback) {
     var that = this;
 
+    /**
+     * @return {string} URL
+     * @param img
+     * @param changingColorPairs
+     */
     function recolorImage(img, changingColorPairs) {
         var c = document.createElement('canvas');
         var ctx = c.getContext("2d");
@@ -467,7 +473,6 @@ GuiSprite.prototype.recolor = function (changingColorPairs) {
         // put the altered data back on the canvas
         ctx.putImageData(imageData, 0, 0);
         var url = c.toDataURL();
-        console.dir("URL: " + url);
         that.setBackgroundFromParams({image: url}, null);
         c.remove();
         return url;
@@ -475,19 +480,22 @@ GuiSprite.prototype.recolor = function (changingColorPairs) {
 
     var image = new Image();
     image.onload = function () {
-        recolorImage(image, changingColorPairs);
-    }
+        var url = recolorImage(image, changingColorPairs)
+        if (imageCreatedCallback != null) {
+            imageCreatedCallback(url);
+        }
+    };
     var src = this.jObject.css("background-image");
     src = src.replace('url(', '').replace(')', '');
     image.src = src;
-    console.dir("src: " + src);
 };
 
 /**
  *
  * @param {ColorRgbChangingPair} changingColorPair
+ * @param {function} imageCreatedCallback function(imageUrl) {};
  */
-GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
+GuiSprite.prototype.recolorFullImage = function (changingColorPair, imageCreatedCallback) {
     var that = this;
 
     function recolorImage(img, changingColorPair) {
@@ -523,20 +531,10 @@ GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
             imageData.data[i] = imageDataColor.r;
             imageData.data[i + 1] = imageDataColor.g;
             imageData.data[i + 2] = imageDataColor.b;
-
-
-            /*if (imageData.data[i] == currentColor.r && imageData.data[i + 1] == currentColor.g && imageData.data[i + 2] == currentColor.b) {
-                // change to your new rgb
-                imageData.data[i] = newColor.r;
-                imageData.data[i + 1] = newColor.g;
-                imageData.data[i + 2] = newColor.b;
-                break;
-            }*/
         }
         // put the altered data back on the canvas
         ctx.putImageData(imageData, 0, 0);
         var url = c.toDataURL();
-        console.dir("URL: " + url);
         that.setBackgroundFromParams({image: url}, null);
         c.remove();
         return url;
@@ -544,10 +542,12 @@ GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
 
     var image = new Image();
     image.onload = function () {
-        recolorImage(image, changingColorPair);
-    }
+        var url = recolorImage(image, changingColorPair)
+        if (imageCreatedCallback != null) {
+            imageCreatedCallback(url);
+        }
+    };
     var src = this.jObject.css("background-image");
     src = src.replace('url(', '').replace(')', '');
     image.src = src;
-    console.dir("src: " + src);
 };
