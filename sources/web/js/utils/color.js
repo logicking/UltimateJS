@@ -114,7 +114,11 @@ function recolorImage(img, changingColorPairs) {
     // put the altered data back on the canvas
     ctx.putImageData(imageData, 0, 0);
     var url = c.toDataURL("image/png");
-    c.remove();
+    try {
+        c.remove();
+    } catch (e) {
+        console.error("recolorImage: " + e);
+    }
     return url;
 }
 
@@ -161,6 +165,10 @@ function recolorFullImage(img, changingColorPair) {
     // put the altered data back on the canvas
     ctx.putImageData(imageData, 0, 0);
     var url = c.toDataURL("image/png");
-    c.remove();
+    try {
+        c.remove();
+    } catch (e) {
+        console.error("recolorFullImage: " + e);
+    }
     return url;
 }
