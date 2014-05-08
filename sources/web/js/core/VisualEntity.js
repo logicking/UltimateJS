@@ -24,7 +24,7 @@ VisualEntity.prototype.init = function(params) {
 	this.visible = selectValue(params['visible'], true);
 	this.visuals = {}; // associative array of all attached visuals
 	this.updateTime = GLOBAL_UPDATE_INTERVAL;
-	var renderable = selectValue(params['renderable'], true);
+	var renderable = selectValue(params['renderable'], false);
 	this.setRenderable(renderable);
 };
 

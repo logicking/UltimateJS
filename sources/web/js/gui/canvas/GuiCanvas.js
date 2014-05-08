@@ -143,7 +143,8 @@ GuiCanvas.prototype.initialize = function(params) {
 	this.resize();
 	
 	// Adding GuiCanvas for update
-	Account.instance.addScheduledEntity(this);
+//	Account.instance.addScheduledEntity(this);
+	Account.instance.addRenderEntity(this);
 };
 
 /**
@@ -546,6 +547,7 @@ GuiCanvas.prototype.setParent = function(newParent, saveGlobalPosition) {
  */
 GuiCanvas.prototype.remove = function() {
 
+	Account.instance.removeRenderEntity(this);
 	// console.log("Removing item with id %s, classname = %s", this.id,
 	// this.className);
 	if(this.tooltip){

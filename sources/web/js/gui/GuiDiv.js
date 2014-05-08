@@ -506,6 +506,8 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 
 
 GuiDiv.prototype.remove = function() {
+	if (this.canvas)
+		this.canvas.remove();
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
 };
