@@ -80,9 +80,8 @@ GuiDiv.prototype.initialize = function(params) {
 	if (params['canvas']) {
 		this.canvas = guiFactory.createObject("GuiCanvas", {
 			"parent" : this,
-			"style" : "dialog",
-			"width" : this.width,
-			"height" : this.height
+			"width" : params['canvas'].width?params['canvas'].width:this.width,
+			"height" : params['canvas'].height?params['canvas'].height:this.height
 		});
 	}
 };
