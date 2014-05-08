@@ -24,8 +24,8 @@
 		<concat destfile="${dir.min}/ultimateJS.js">
 			<filelist dir="${dir.engine}/${dir.scripts}">
 				<file name="thirdParty/viewporter.js" />
-
 				<file name="utils/utils.js" />
+				<file name="utils/color.js" />
 				<file name="utils/assert.js" />
 				<file name="utils/sound.js" />
 				<file name="utils/screen.js" />
@@ -35,7 +35,6 @@
 				<file name="utils/dragDropManager.js" />
 				<file name="utils/factory.js" />
 				<file name="utils/resources.js" />
-
 				<file name="core/EntityFactory.js" />
 				<file name="core/Entity.js" />
 				<file name="core/Account.js" />
@@ -79,74 +78,8 @@
 			</filelist>
 		</concat>
 		<concat destfile="${dir.min}/box2d.js">
-			<filelist dir="${dir.engine}/${dir.box2d}">
-				<file name="prototype.js" />
-				<file name="excanvas.js" />
-				<file name="draw_world.js" />
-				<file name="common/b2Settings.js" />
-				<file name="common/math/b2Vec2.js" />
-				<file name="common/math/b2Mat22.js" />
-				<file name="common/math/b2Math.js" />
-				<file name="collision/b2AABB.js" />
-				<file name="collision/b2Bound.js" />
-				<file name="collision/b2BoundValues.js" />
-				<file name="collision/b2Pair.js" />
-				<file name="collision/b2PairCallback.js" />
-				<file name="collision/b2BufferedPair.js" />
-				<file name="collision/b2PairManager.js" />
-				<file name="collision/b2BroadPhase.js" />
-				<file name="collision/b2Collision.js" />
-				<file name="collision/Features.js" />
-				<file name="collision/b2ContactID.js" />
-				<file name="collision/b2ContactPoint.js" />
-				<file name="collision/b2Distance.js" />
-				<file name="collision/b2Manifold.js" />
-				<file name="collision/b2OBB.js" />
-				<file name="collision/b2Proxy.js" />
-				<file name="collision/ClipVertex.js" />
-				<file name="collision/shapes/b2Shape.js" />
-				<file name="collision/shapes/b2ShapeDef.js" />
-				<file name="collision/shapes/b2BoxDef.js" />
-				<file name="collision/shapes/b2CircleDef.js" />
-				<file name="collision/shapes/b2CircleShape.js" />
-				<file name="collision/shapes/b2MassData.js" />
-				<file name="collision/shapes/b2PolyDef.js" />
-				<file name="collision/shapes/b2PolyShape.js" />
-				<file name="dynamics/b2Body.js" />
-				<file name="dynamics/b2BodyDef.js" />
-				<file name="dynamics/b2CollisionFilter.js" />
-				<file name="dynamics/b2Island.js" />
-				<file name="dynamics/b2TimeStep.js" />
-				<file name="dynamics/contacts/b2ContactNode.js" />
-				<file name="dynamics/contacts/b2Contact.js" />
-				<file name="dynamics/contacts/b2ContactConstraint.js" />
-				<file name="dynamics/contacts/b2ContactConstraintPoint.js" />
-				<file name="dynamics/contacts/b2ContactRegister.js" />
-				<file name="dynamics/contacts/b2ContactSolver.js" />
-				<file name="dynamics/contacts/b2CircleContact.js" />
-				<file name="dynamics/contacts/b2Conservative.js" />
-				<file name="dynamics/contacts/b2NullContact.js" />
-				<file name="dynamics/contacts/b2PolyAndCircleContact.js" />
-				<file name="dynamics/contacts/b2PolyContact.js" />
-				<file name="dynamics/b2ContactManager.js" />
-				<file name="dynamics/b2World.js" />
-				<file name="dynamics/b2WorldListener.js" />
-				<file name="dynamics/joints/b2JointNode.js" />
-				<file name="dynamics/joints/b2Joint.js" />
-				<file name="dynamics/joints/b2JointDef.js" />
-				<file name="dynamics/joints/b2DistanceJoint.js" />
-				<file name="dynamics/joints/b2DistanceJointDef.js" />
-				<file name="dynamics/joints/b2Jacobian.js" />
-				<file name="dynamics/joints/b2GearJoint.js" />
-				<file name="dynamics/joints/b2GearJointDef.js" />
-				<file name="dynamics/joints/b2MouseJoint.js" />
-				<file name="dynamics/joints/b2MouseJointDef.js" />
-				<file name="dynamics/joints/b2PrismaticJoint.js" />
-				<file name="dynamics/joints/b2PrismaticJointDef.js" />
-				<file name="dynamics/joints/b2PulleyJoint.js" />
-				<file name="dynamics/joints/b2PulleyJointDef.js" />
-				<file name="dynamics/joints/b2RevoluteJoint.js" />
-				<file name="dynamics/joints/b2RevoluteJointDef.js" />
+            <filelist dir="${dir.engine}/${dir.box2d}">
+				<file name="Box2dWeb-2.1.a.3.js" />
 			</filelist>
 		</concat>
 	</target>

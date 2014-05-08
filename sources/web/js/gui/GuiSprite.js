@@ -50,7 +50,7 @@ GuiSprite.prototype.initialize = function(params) {
 	} else {
 		this.totalTile = params['totalTile'];
 	}
-	this.flipped = false;
+    this.flipped = params['flipped'] != null ? params['flipped'] : false;
 
 	this.setBackground(this.totalSrc);
 
@@ -113,18 +113,6 @@ GuiSprite.prototype.addAnimation = function(animationName, frames, row,
 		frameDuration : frameDuration
 	};
 };
-
-GuiSprite.prototype.addComplexAnimation = function(animationObj){
-	//complex animations must have one frame rate
-	var that = this;
-	var frames = [];
-	$['each'](animationObj.frames, function(index, value){
-		var animPart = that.animations[value]; 
-		frames = frames.concat(animPart.frames);
-	});
-	
-};
-
 
 GuiSprite.prototype.update = function(dt) {
 	if (this.currentAnimation == null && this.spatialAnimation == null) {
@@ -431,4 +419,35 @@ GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 GuiSprite.prototype.resizeBackground = function() {
 	var size = Screen.calcRealSize(this.totalWidth, this.totalHeight);
 	this.jObject['css']("background-size", size.x + "px " + size.y + "px");
+};
+
+/**
+ * usage:
+ * var changingColorPairs = [];
+ * var pair1 = new ColorRgbChangingPair(new ColorRgb(1, 1, 1), new ColorRgb(2, 2, 2));
+ * var pair2 = new ColorRgbChangingPair(new ColorRgb(3, 3, 3), new ColorRgb(4, 4, 4));
+ * changingColorPairs.push(pair);
+ * changingColorPairs.push(pair2);
+ * guiSprite.recolor(changingColorPairs);
+ *
+ * @param [{ColorRgbChangingPair}] changingColorPairs
+ * @return {string} imageUrl
+ */
+GuiSprite.prototype.recolor = function (changingColorPairs) {
+    var image = Resources.getImageObject(this.params.totalImage);
+    var url = recolorImage(image, changingColorPairs);
+    this.setBackgroundFromParams({image: url}, null);
+    return url;
+};
+
+/**
+ *
+ * @param {ColorRgbChangingPair} changingColorPair
+ * @return {string} imageUrl
+ */
+GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
+    var image = Resources.getImageObject(this.params.totalImage);
+    var url = recolorFullImage(image, changingColorPair);
+    this.setBackgroundFromParams({image: url}, null);
+    return url;
 };

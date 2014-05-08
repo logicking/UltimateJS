@@ -1,4 +1,15 @@
-PHYSICS_CAPACITY = 25;
+b2Math = Box2D.Common.Math.b2Math;
+b2Vec2 = Box2D.Common.Math.b2Vec2;
+b2BodyDef = Box2D.Dynamics.b2BodyDef;
+b2Body = Box2D.Dynamics.b2Body;
+b2FixtureDef = Box2D.Dynamics.b2FixtureDef;
+b2Fixture = Box2D.Dynamics.b2Fixture;
+b2World = Box2D.Dynamics.b2World;
+b2MassData = Box2D.Collision.Shapes.b2MassData;
+b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
+b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
+b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef;
 
 function boxPolyVertices(positionX, positionY, extentionX, extentionY) {
 	var px = positionX;
@@ -54,50 +65,42 @@ function calculateSignedAngle(vec1,vec2){
  */
 
 function DebugCanvas() {
+    //setup debug draw
+    var canvasElm = document.getElementById("debugCanvas");
+    if (!canvasElm) {
+        $("#root")
+            .append(
+            "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px;'></canvas>");
+        canvasElm = document.getElementById("debugCanvas");
+    }
+    canvasElm.width = BASE_WIDTH;
+    canvasElm.height = BASE_HEIGHT;
+    canvasElm.style.width = canvasElm.width * Screen.widthRatio();
+    canvasElm.style.height = canvasElm.height * Screen.heightRatio();
 
-	var canvasElm = document.getElementById("debugCanvas");
-	if (!canvasElm) {
-		$("#root")
-				.append(
-						"<canvas id='debugCanvas' width='800' height='500' style='position :absolute; top: 0 px; left: 0 px;'></canvas>");
-		canvasElm = document.getElementById("debugCanvas");
-	}
-	this.debugDrawContext = canvasElm.getContext("2d");
-	var canvasElm = document.getElementById("debugCanvas");
-	this.debugDrawContext = canvasElm.getContext("2d");
-	canvasElm.width = BASE_WIDTH;
-	canvasElm.height = BASE_HEIGHT;
-
-	canvasElm.style.width = BASE_WIDTH * Screen.widthRatio();
-	canvasElm.style.height = BASE_HEIGHT * Screen.heightRatio();
-
-	this.debugCanvasWidth = parseInt(canvasElm.width);
-	this.debugCanvasHeight = parseInt(canvasElm.height);
-	debugCanvasTop = parseInt(canvasElm.style.top);
-	debugCanvasLeft = parseInt(canvasElm.style.left);
-	eLog("left " + canvasElm.style.left, "top " + canvasElm.style.top);
+    var debugDraw = new b2DebugDraw();
+    debugDraw.SetSprite(canvasElm.getContext("2d"));
+    debugDraw.SetDrawScale(Physics.getB2dToGameRatio());
+    debugDraw.SetFillAlpha(0.5);
+    debugDraw.SetLineThickness(1.0);
+    debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
+    Physics.getWorld().SetDebugDraw(debugDraw);
 };
 
 var Physics = (function() {
 	var world = null;
+    var b2dToGameRatio = 1; // Box2d to Ultimate.js coordinates //TODO: implement
 	var worldBorder = null;
 	var timeout = null;
 	var pause = false;
 	var debugMode = true;
 	var debugCanvas = null;
 	var updateItems = [];
+    var bodiesToDestroy = [];
 	var contactListener = null;
 	var contactProcessor = null;
-	var updater = 0;
 	// var activeContacts = new Array();
 
-	function debugDraw() {
-		if (!debugCanvas)
-			return;
-		debugCanvas.debugDrawContext.clearRect(0, 0,
-				debugCanvas.debugCanvasWidth, debugCanvas.debugCanvasHeight);
-		drawWorld(world, debugCanvas.debugDrawContext);
-	}
 
 	function debugDrawing(v) {
 
@@ -113,8 +116,14 @@ var Physics = (function() {
 
 	}
 
-	function createWorld() {
-		if (world != null)
+    /**
+     *
+     * @param gravity b2Vec2(x, y). Default: b2Vec2(0, 10)
+     * @param sleep default: true;
+     * @param ratio Box2d to Ultimate.js coordinates
+     */
+	function createWorld(gravity, sleep, ratio) {
+		/*if (world != null)
 			return;
 		var worldAABB = new b2AABB();
 		worldAABB['minVertex']['Set'](-1000, -1000);
@@ -124,8 +133,14 @@ var Physics = (function() {
 		world = new b2World(worldAABB, gravity, doSleep);
 
 		contactProcessor = new ContactProcessor();
-		contactListener = new ContactListener(contactProcessor);
-
+		contactListener = new ContactListener(contactProcessor);*/
+        if (world != null) {
+            return;
+        }
+        b2dToGameRatio = ratio != null ? ratio : 1;
+        world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
+        contactProcessor = new ContactProcessor();
+        contactListener = new ContactListener(contactProcessor);
 	}
 
 	function createWorldBorder(params) {
@@ -283,11 +298,20 @@ var Physics = (function() {
 	}
 
 	return { // public interface
+        createWorld : function(gravity, sleep, ratioB2dToUl) {
+            createWorld(gravity, sleep, ratioB2dToUl);
+        },
 		getWorld : function() {
 			createWorld();
 			assert(world, "No physics world created!");
 			return world;
 		},
+        getB2dToGameRatio : function() {
+            return b2dToGameRatio;
+        },
+        addBodyToDestroy : function(body) {
+            bodiesToDestroy.push(body);
+        },
 		createWorldBorder : function(params) {
 			createWorldBorder(params);
 		},
@@ -303,41 +327,22 @@ var Physics = (function() {
 				return;
 
 			var world = this.getWorld();
-
-			world['Step'](delta / 1350, 50);
-			// this.getWorld().Step(delta / 1000 * (1.0), 20);
-			// this.getWorld().Step(delta / 1000 * (0.00), 20);
+            world.Step(delta / 1350, 10, 10);
 			if (timeout)
 				timeout.tick(delta);
 
 			if (debugCanvas) {
-				debugDraw();
+                world.DrawDebugData();
 			}
-
-			//contactListener.update();
-					
-			var _b = 0;
-			var _l = updateItems.length;
-			
-			for ( var i = _b; i < _l; ++i) 
-				if (updateItems[i].className === 'CannonBall' && (!updateItems[i].updateNeedCheck || updateItems[i].updateNeedCheck())) {
-					updateItems[i].updatePhysics();
-				}
-			
-			_b = PHYSICS_CAPACITY * updater;
-			_l = PHYSICS_CAPACITY + PHYSICS_CAPACITY *updater;
-			updater++;
-			
-			if (_l > updateItems.length) {
-				_l = updateItems.length;
-				updater = 0;
-			}
-				
-			for ( var i = _b; i < _l; ++i) {
-				if (updateItems[i].className !== 'CannonBall' && (!updateItems[i].updateNeedCheck || updateItems[i].updateNeedCheck())) {
-					updateItems[i].updatePhysics();
-				}
-			}
+            world.ClearForces();
+			for ( var i = 0; i < updateItems.length; ++i)
+				updateItems[i].updatePhysics();
+            if (bodiesToDestroy.length > 0) {
+                for ( var i = 0; i < bodiesToDestroy.length; ++i) {
+                    world.DestroyBody(bodiesToDestroy[i]);
+                }
+                bodiesToDestroy = [];
+            }
 		},
 		createSphere : function(x, y, radius, localPosition) {
 			var sphereSd = new b2CircleDef();
@@ -419,7 +424,7 @@ var Physics = (function() {
 		clearTimeout : function() {
 			timeout = null;
 		},
-		setTimout : function(callback, time) {
+		setTimeout : function(callback, time) {
 			timeout = {
 				time : 0,
 				callback : callback,
@@ -463,36 +468,18 @@ var Physics = (function() {
 			return debugMode;
 		},
 		explode : function() {
-			
+
 		}
 	};
 })();
 
-//
-/*
- * if (callbacks.BeginContact) listener.BeginContact = function(contact) {
- * callbacks.BeginContact(contact.GetFixtureA().GetBody().GetUserData(),
- * contact.GetFixtureB().GetBody().GetUserData()); } if (callbacks.EndContact)
- * listener.EndContact = function(contact) {
- * callbacks.EndContact(contact.GetFixtureA().GetBody().GetUserData(),
- * contact.GetFixtureB().GetBody().GetUserData()); } if (callbacks.PostSolve)
- * listener.PostSolve = function(contact, impulse) {
- * callbacks.PostSolve(contact.GetFixtureA().GetBody().GetUserData(),
- * contact.GetFixtureB().GetBody().GetUserData(), impulse.normalImpulses[0]); }
- * this.world.SetContactListener(listener);
- */
-
+//TODO: remove?
 var collisionCallback = function() {
 	var entity1 = contact.GetFixtureA().GetBody().GetUserData();
 	var entity2 = contact.GetFixtureB().GetBody().GetUserData();
 	var material1 = entity1.descriptions.material;
 	var material2 = entity2.descriptions.material;
 
-	/*
-	 * MaterialImpact : { sound particles object1Damage }
-	 * 
-	 * 
-	 */
 	var materialImpact = Physics.getMaterialImpact(material1, material2);
 
 	if (entity1.beginContact) {
