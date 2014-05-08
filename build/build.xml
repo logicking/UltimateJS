@@ -24,8 +24,8 @@
 		<concat destfile="${dir.min}/ultimateJS.js">
 			<filelist dir="${dir.engine}/${dir.scripts}">
 				<file name="thirdParty/viewporter.js" />
-
 				<file name="utils/utils.js" />
+				<file name="utils/color.js" />
 				<file name="utils/assert.js" />
 				<file name="utils/sound.js" />
 				<file name="utils/screen.js" />
@@ -35,7 +35,6 @@
 				<file name="utils/dragDropManager.js" />
 				<file name="utils/factory.js" />
 				<file name="utils/resources.js" />
-
 				<file name="core/EntityFactory.js" />
 				<file name="core/Entity.js" />
 				<file name="core/Account.js" />
