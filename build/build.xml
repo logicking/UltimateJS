@@ -66,8 +66,10 @@
 				<file name="gui/GuiScene.js" />
 				<file name="gui/GuiDialog.js" />
 
+				<file name="gui/GuiCanvas.js" />
+				<file name="gui/GuiCSprite.js" />
 			</filelist>
-			
+
 		</concat>
 		<concat destfile="${dir.min}/thirdParty.js">
 			<filelist dir="${dir.engine}/${dir.scripts}">
