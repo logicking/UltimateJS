@@ -176,6 +176,10 @@ GuiScroll.prototype.resizeScroll = function() {
 	}
 };
 
+GuiScroll.prototype.setFixedHeight = function(height) {
+	this.fixedHeight = height;
+};
+
 GuiScroll.prototype.resize = function() {
 	GuiScroll.parent.resize.call(this);
 	this.resizeScroll();
@@ -184,6 +188,3 @@ GuiScroll.prototype.resize = function() {
 	}
 };
 
-GuiScroll.prototype.setFixedHeight = function(height) {
-	this.fixedHeight = height;
-};

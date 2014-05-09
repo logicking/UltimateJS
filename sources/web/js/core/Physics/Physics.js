@@ -321,29 +321,29 @@ var Physics = (function() {
 		getContactListener : function() {
 			return contactListener;
 		},
-		updateWorld : function(delta) {
+        updateWorld: function () {
 
-			if (pause)
-				return;
+            if (pause)
+                return;
 
-			var world = this.getWorld();
-            world.Step(delta / 1350, 10, 10);
-			if (timeout)
-				timeout.tick(delta);
+            var world = this.getWorld();
+            world.Step(1 / 45, 5, 5);
+            if (timeout)
+                timeout.tick(45);
 
-			if (debugCanvas) {
+            if (debugCanvas) {
                 world.DrawDebugData();
-			}
+            }
             world.ClearForces();
-			for ( var i = 0; i < updateItems.length; ++i)
-				updateItems[i].updatePhysics();
+            for (var i = 0; i < updateItems.length; ++i)
+                updateItems[i].updatePhysics();
             if (bodiesToDestroy.length > 0) {
-                for ( var i = 0; i < bodiesToDestroy.length; ++i) {
+                for (var i = 0; i < bodiesToDestroy.length; ++i) {
                     world.DestroyBody(bodiesToDestroy[i]);
                 }
                 bodiesToDestroy = [];
             }
-		},
+        },
 		createSphere : function(x, y, radius, localPosition) {
 			var sphereSd = new b2CircleDef();
 			setupShapeDef(sphereSd);

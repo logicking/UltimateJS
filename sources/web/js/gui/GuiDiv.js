@@ -73,9 +73,17 @@ GuiDiv.prototype.initialize = function(params) {
 	assert(!this.innerScene || this.parent.enhancedScene,
 			"inner scene should always be child to enhanced scene");
 
-		if (this.innerScene) {
-			this.clampByParentViewport();
-		}
+	if (this.innerScene) {
+		this.clampByParentViewport();
+	}
+	
+	if (params['canvas']) {
+		this.canvas = guiFactory.createObject("GuiCanvas", {
+			"parent" : this,
+			"width" : params['canvas'].width?params['canvas'].width:this.width,
+			"height" : params['canvas'].height?params['canvas'].height:this.height
+		});
+	}
 };
 
 GuiDiv.prototype.generate = function(src) {
@@ -208,6 +216,10 @@ GuiDiv.prototype.resize = function() {
 	// Consider removing this from GuiDiv
 	if (this.viewport) {
 		this.clampByViewport();
+	}
+	
+	if (this.canvas) {
+		this.canvas.resize(this.width, this.height);
 	}
 };
 
@@ -494,6 +506,8 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 
 
 GuiDiv.prototype.remove = function() {
+	if (this.canvas)
+		this.canvas.remove();
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
 };

@@ -231,21 +231,22 @@ PhysicEntity.prototype.updatePositionFromPhysics = function() {
 			var angleInDeg = that.getPhysicsRotation().toFixed(3);
 			angleInDeg = MathUtils.toDeg(angleInDeg);
 
-			var localPoint = that.getPosition();
-			localPoint.x -= (visualInfo.visual.width / 2);
-			localPoint.y -= (visualInfo.visual.height / 2);
+//			var localPoint = that.getPosition();
+//			localPoint.x -= (visualInfo.visual.width / 2);
+//			localPoint.y -= (visualInfo.visual.height / 2);
+//
+//			var matTrans = new Transform();
+//			var matRot = new Transform();
+//			matTrans.translate((localPoint.x) * Screen.widthRatio(),
+//					localPoint.y * Screen.heightRatio());
+//			matRot.rotateDegrees(angleInDeg / 2);
+//			matTrans.multiply(matRot);
+//			matRot.translate(-localPoint.x * Screen.widthRatio(), -localPoint.y
+//					* Screen.heightRatio());
+//			matTrans.multiply(matRot);
 
-			var matTrans = new Transform();
-			var matRot = new Transform();
-			matTrans.translate((localPoint.x) * Screen.widthRatio(),
-					localPoint.y * Screen.heightRatio());
-			matRot.rotateDegrees(angleInDeg / 2);
-			matTrans.multiply(matRot);
-			matRot.translate(-localPoint.x * Screen.widthRatio(), -localPoint.y
-					* Screen.heightRatio());
-			matTrans.multiply(matRot);
-
-			visualInfo.visual.setTransform(matTrans.m, 0);
+//			visualInfo.visual.setTransform(matTrans.m, 0);
+			visualInfo.visual.rotate(angleInDeg);
 		});
 };
 
