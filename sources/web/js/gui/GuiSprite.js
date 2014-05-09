@@ -434,7 +434,7 @@ GuiSprite.prototype.resizeBackground = function() {
  * @return {string} imageUrl
  */
 GuiSprite.prototype.recolor = function (changingColorPairs) {
-    var image = Resources.getImageObject(this.params.totalImage);
+    var image = Resources.getAsset(this.params.totalImage);
     var url = recolorImage(image, changingColorPairs);
     this.setBackgroundFromParams({image: url}, null);
     return url;
@@ -446,7 +446,7 @@ GuiSprite.prototype.recolor = function (changingColorPairs) {
  * @return {string} imageUrl
  */
 GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
-    var image = Resources.getImageObject(this.params.totalImage);
+    var image = Resources.getAsset(this.params.totalImage);
     var url = recolorFullImage(image, changingColorPair);
     this.setBackgroundFromParams({image: url}, null);
     return url;

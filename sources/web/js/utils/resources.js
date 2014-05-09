@@ -163,9 +163,9 @@ var Resources = (function() {
         /**
          *
          * @param {string} name
-         * @return {Image} image
+         * @return {Object} asset
          */
-        getImageObject: function (name) {
+        getAsset: function (name) {
             return assets[name];
         },
 		// return an array of registered images filenames,

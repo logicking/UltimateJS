@@ -66,8 +66,8 @@
                 <file name="gui/GuiScene.js"/>
                 <file name="gui/GuiDialog.js"/>
 
-                <file name="gui/GuiCanvas.js"/>
-                <file name="gui/GuiCSprite.js"/>
+                <file name="gui/canvas/GuiCanvas.js"/>
+                <file name="gui/canvas/GuiCSprite.js"/>
             </filelist>
 
         </concat>
