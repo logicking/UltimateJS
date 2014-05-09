@@ -33,7 +33,8 @@ Scene.prototype.createVisual = function(noChildAttach) {
 		y : params['y'],
 		width : params['width'],
 		height : params['height'],
-		background : params['background']
+		background : params['background'],
+		canvas : params['canvas']
 	});
 
 	var visualInfo = {};

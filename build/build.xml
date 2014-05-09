@@ -1,185 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="UltimateJS" default="copy" basedir=".">
-	<!-- Some settings we need for the build -->
-	<property file="build.properties" />
-	<target name="copy" depends="prepare,concatenateGameScripts, copyScripts, build" />
-	<target name="build" depends="prepare,compileGameScripts" />
-	<!-- clean up resources-->
-	<target name="cleanUp">
-	</target>
-	<!-- compile scripts-->
-	<taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${jscompiler.jar}" />
-	<!-- prepare to copy resources-->
-	<target name="prepare" depends="cleanUp">
-		<!--delete dir="${deploy.home}" /-->
-		<mkdir dir="${deploy.home}" />
-	</target>
-	<!-- compile scripts-->
-	<target name="concatenateGameScripts">
-		<concat destfile="${dir.min}/loader.js">
-			<filelist dir="${dir.engine}/${dir.scripts}">
-				<file name="utils/loader.js" />
-			</filelist>
-		</concat>
-		<concat destfile="${dir.min}/ultimateJS.js">
-			<filelist dir="${dir.engine}/${dir.scripts}">
-				<file name="thirdParty/viewporter.js" />
+    <!-- Some settings we need for the build -->
+    <property file="build.properties"/>
+    <target name="copy" depends="prepare,concatenateGameScripts, copyScripts, build"/>
+    <target name="build" depends="prepare,compileGameScripts"/>
+    <!-- clean up resources-->
+    <target name="cleanUp">
+    </target>
+    <!-- compile scripts-->
+    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${jscompiler.jar}"/>
+    <!-- prepare to copy resources-->
+    <target name="prepare" depends="cleanUp">
+        <!--delete dir="${deploy.home}" /-->
+        <mkdir dir="${deploy.home}"/>
+    </target>
+    <!-- compile scripts-->
+    <target name="concatenateGameScripts">
+        <concat destfile="${dir.min}/loader.js">
+            <filelist dir="${dir.engine}/${dir.scripts}">
+                <file name="utils/loader.js"/>
+            </filelist>
+        </concat>
+        <concat destfile="${dir.min}/ultimateJS.js">
+            <filelist dir="${dir.engine}/${dir.scripts}">
+                <file name="thirdParty/viewporter.js"/>
+                <file name="utils/utils.js"/>
+                <file name="utils/color.js"/>
+                <file name="utils/assert.js"/>
+                <file name="utils/sound.js"/>
+                <file name="utils/screen.js"/>
+                <file name="utils/touch.js"/>
+                <file name="utils/transform.js"/>
+                <file name="utils/device.js"/>
+                <file name="utils/dragDropManager.js"/>
+                <file name="utils/factory.js"/>
+                <file name="utils/resources.js"/>
+                <file name="core/EntityFactory.js"/>
+                <file name="core/Entity.js"/>
+                <file name="core/Account.js"/>
+                <file name="core/BaseState.js"/>
+                <file name="core/VisualEntity.js"/>
+                <file name="core/Scene.js"/>
+                <file name="core/Item.js"/>
+                <file name="core/SimpleCountdown.js"/>
+                <file name="core/Countdown.js"/>
+                <file name="core/Inventory.js"/>
+                <file name="core/BackgroundState.js"/>
+                <file name="core/Physics/Physics.js"/>
+                <file name="core/Physics/Explosion.js"/>
+                <file name="core/Physics/ContactProcessor.js"/>
+                <file name="core/Physics/ContactListener.js"/>
+                <file name="core/Physics/PhysicEntity.js"/>
+                <file name="core/Physics/PhysicScene.js"/>
+                <file name="core/Physics/PhysicsTrigger.js"/>
+                <file name="core/Effect.js"/>
 
-				<file name="utils/utils.js" />
-				<file name="utils/assert.js" />
-				<file name="utils/sound.js" />
-				<file name="utils/screen.js" />
-				<file name="utils/touch.js" />
-				<file name="utils/transform.js" />
-				<file name="utils/device.js" />
-				<file name="utils/dragDropManager.js" />
-				<file name="utils/factory.js" />
-				<file name="utils/resources.js" />
+                <file name="gui/GuiFactory.js"/>
+                <file name="gui/GuiContainer.js"/>
+                <file name="gui/GuiElement.js"/>
+                <file name="gui/GuiDiv.js"/>
+                <file name="gui/GuiButton.js"/>
+                <file name="gui/GuiLabel.js"/>
+                <file name="gui/GuiScroll.js"/>
+                <file name="gui/GuiSprite.js"/>
+                <file name="gui/GuiScene.js"/>
+                <file name="gui/GuiDialog.js"/>
 
-				<file name="core/EntityFactory.js" />
-				<file name="core/Entity.js" />
-				<file name="core/Account.js" />
-				<file name="core/BaseState.js" />
-				<file name="core/VisualEntity.js" />
-				<file name="core/Scene.js" />
-				<file name="core/Item.js" />
-				<file name="core/SimpleCountdown.js" />
-				<file name="core/Countdown.js" />
-				<file name="core/Inventory.js" />
-				<file name="core/BackgroundState.js" />
-				<file name="core/Physics/Physics.js" />
-				<file name="core/Physics/Explosion.js" />
-				<file name="core/Physics/ContactProcessor.js" />
-				<file name="core/Physics/ContactListener.js" />
-				<file name="core/Physics/PhysicEntity.js" />
-				<file name="core/Physics/PhysicScene.js" />
-				<file name="core/Physics/PhysicsTrigger.js" />
-				<file name="core/Effect.js" />
+                <file name="gui/canvas/GuiCanvas.js"/>
+                <file name="gui/canvas/GuiCSprite.js"/>
+            </filelist>
 
-				<file name="gui/GuiFactory.js" />
-				<file name="gui/GuiContainer.js" />
-				<file name="gui/GuiElement.js" />
-				<file name="gui/GuiDiv.js" />
-				<file name="gui/GuiButton.js" />
-				<file name="gui/GuiLabel.js" />
-				<file name="gui/GuiScroll.js" />
-				<file name="gui/GuiSprite.js" />
-				<file name="gui/GuiScene.js" />
-				<file name="gui/GuiDialog.js" />
-
-			</filelist>
-			
-		</concat>
-		<concat destfile="${dir.min}/thirdParty.js">
-			<filelist dir="${dir.engine}/${dir.scripts}">
-				<file name="thirdParty/css_browser_selector.js" />
-				<file name="thirdParty/modernizr.js" />
-				<file name="thirdParty/add2home.js" />
-				<file name="thirdParty/iscroll.js" />
-			</filelist>
-		</concat>
-		<concat destfile="${dir.min}/box2d.js">
-			<filelist dir="${dir.engine}/${dir.box2d}">
-				<file name="prototype.js" />
-				<file name="excanvas.js" />
-				<file name="draw_world.js" />
-				<file name="common/b2Settings.js" />
-				<file name="common/math/b2Vec2.js" />
-				<file name="common/math/b2Mat22.js" />
-				<file name="common/math/b2Math.js" />
-				<file name="collision/b2AABB.js" />
-				<file name="collision/b2Bound.js" />
-				<file name="collision/b2BoundValues.js" />
-				<file name="collision/b2Pair.js" />
-				<file name="collision/b2PairCallback.js" />
-				<file name="collision/b2BufferedPair.js" />
-				<file name="collision/b2PairManager.js" />
-				<file name="collision/b2BroadPhase.js" />
-				<file name="collision/b2Collision.js" />
-				<file name="collision/Features.js" />
-				<file name="collision/b2ContactID.js" />
-				<file name="collision/b2ContactPoint.js" />
-				<file name="collision/b2Distance.js" />
-				<file name="collision/b2Manifold.js" />
-				<file name="collision/b2OBB.js" />
-				<file name="collision/b2Proxy.js" />
-				<file name="collision/ClipVertex.js" />
-				<file name="collision/shapes/b2Shape.js" />
-				<file name="collision/shapes/b2ShapeDef.js" />
-				<file name="collision/shapes/b2BoxDef.js" />
-				<file name="collision/shapes/b2CircleDef.js" />
-				<file name="collision/shapes/b2CircleShape.js" />
-				<file name="collision/shapes/b2MassData.js" />
-				<file name="collision/shapes/b2PolyDef.js" />
-				<file name="collision/shapes/b2PolyShape.js" />
-				<file name="dynamics/b2Body.js" />
-				<file name="dynamics/b2BodyDef.js" />
-				<file name="dynamics/b2CollisionFilter.js" />
-				<file name="dynamics/b2Island.js" />
-				<file name="dynamics/b2TimeStep.js" />
-				<file name="dynamics/contacts/b2ContactNode.js" />
-				<file name="dynamics/contacts/b2Contact.js" />
-				<file name="dynamics/contacts/b2ContactConstraint.js" />
-				<file name="dynamics/contacts/b2ContactConstraintPoint.js" />
-				<file name="dynamics/contacts/b2ContactRegister.js" />
-				<file name="dynamics/contacts/b2ContactSolver.js" />
-				<file name="dynamics/contacts/b2CircleContact.js" />
-				<file name="dynamics/contacts/b2Conservative.js" />
-				<file name="dynamics/contacts/b2NullContact.js" />
-				<file name="dynamics/contacts/b2PolyAndCircleContact.js" />
-				<file name="dynamics/contacts/b2PolyContact.js" />
-				<file name="dynamics/b2ContactManager.js" />
-				<file name="dynamics/b2World.js" />
-				<file name="dynamics/b2WorldListener.js" />
-				<file name="dynamics/joints/b2JointNode.js" />
-				<file name="dynamics/joints/b2Joint.js" />
-				<file name="dynamics/joints/b2JointDef.js" />
-				<file name="dynamics/joints/b2DistanceJoint.js" />
-				<file name="dynamics/joints/b2DistanceJointDef.js" />
-				<file name="dynamics/joints/b2Jacobian.js" />
-				<file name="dynamics/joints/b2GearJoint.js" />
-				<file name="dynamics/joints/b2GearJointDef.js" />
-				<file name="dynamics/joints/b2MouseJoint.js" />
-				<file name="dynamics/joints/b2MouseJointDef.js" />
-				<file name="dynamics/joints/b2PrismaticJoint.js" />
-				<file name="dynamics/joints/b2PrismaticJointDef.js" />
-				<file name="dynamics/joints/b2PulleyJoint.js" />
-				<file name="dynamics/joints/b2PulleyJointDef.js" />
-				<file name="dynamics/joints/b2RevoluteJoint.js" />
-				<file name="dynamics/joints/b2RevoluteJointDef.js" />
-			</filelist>
-		</concat>
-	</target>
-	<!-- compile game scripts-->
-	<target name="compileGameScripts" depends="concatenateGameScripts">
-		<jscomp compilationLevel="${jscompiler.level}" warning="default" debug="false" output="${dir.min}/ultimateJS.js">
-			<sources dir="${dir.min}">
-				<file name="ultimateJS.js" />
-			</sources>
-		</jscomp>
-		<jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/thirdParty.js">
-			<sources dir="${dir.min}">
-				<file name="thirdParty.js" />
-			</sources>
-		</jscomp>
-		<jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/loader.js">
-					<sources dir="${dir.min}">
-						<file name="loader.js" />
-					</sources>
-		</jscomp>
-		<jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/box2d.js">
-			<sources dir="${dir.min}">
-				<file name="box2d.js" />
-			</sources>
-		</jscomp>
-	</target>
-	<!-- copy scripts-->
-	<target name="copyScripts">
-		<copy todir="${deploy.home}/${dir.debug}" flatten="true">
-			<fileset dir="${dir.min}">
-				<include name="*.js" />
-			</fileset>
-		</copy>
-		<delete file="${dir.min}/*.js" />
-	</target>
+        </concat>
+        <concat destfile="${dir.min}/thirdParty.js">
+            <filelist dir="${dir.engine}/${dir.scripts}">
+                <file name="thirdParty/css_browser_selector.js"/>
+                <file name="thirdParty/modernizr.js"/>
+                <file name="thirdParty/add2home.js"/>
+                <file name="thirdParty/iscroll.js"/>
+            </filelist>
+        </concat>
+        <concat destfile="${dir.min}/box2d.js">
+            <filelist dir="${dir.engine}/${dir.box2d}">
+                <file name="Box2dWeb-2.1.a.3.js"/>
+            </filelist>
+        </concat>
+    </target>
+    <!-- compile game scripts-->
+    <target name="compileGameScripts" depends="concatenateGameScripts">
+        <jscomp compilationLevel="${jscompiler.level}" warning="default" debug="false"
+                output="${dir.min}/ultimateJS.js">
+            <sources dir="${dir.min}">
+                <file name="ultimateJS.js"/>
+            </sources>
+        </jscomp>
+        <jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/thirdParty.js">
+            <sources dir="${dir.min}">
+                <file name="thirdParty.js"/>
+            </sources>
+        </jscomp>
+        <jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/loader.js">
+            <sources dir="${dir.min}">
+                <file name="loader.js"/>
+            </sources>
+        </jscomp>
+        <jscomp compilationLevel="simple" warning="default" debug="false" output="${dir.min}/box2d.js">
+            <sources dir="${dir.min}">
+                <file name="box2d.js"/>
+            </sources>
+        </jscomp>
+    </target>
+    <!-- copy scripts-->
+    <target name="copyScripts">
+        <copy todir="${deploy.home}/${dir.debug}" flatten="true">
+            <fileset dir="${dir.min}">
+                <include name="*.js"/>
+            </fileset>
+        </copy>
+        <delete file="${dir.min}/*.js"/>
+    </target>
 </project>

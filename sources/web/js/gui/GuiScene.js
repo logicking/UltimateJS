@@ -17,7 +17,7 @@ GuiScene.prototype.className = "GuiScene";
 
 GuiScene.prototype.createInstance = function(params) {
 	var entity = new GuiScene(params['parent'], params['style'], params['width'],
-			params['height'], null);
+			params['height'], params['canvas'], null);
 	entity.initialize(params);
 	return entity;
 };

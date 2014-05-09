@@ -25,6 +25,16 @@ GuiContainer.prototype.update = function(time) {
 	}
 };
 
+GuiContainer.prototype.render = function(ctx) {
+	for ( var i = 0; i < this.guiEntities.length; i++) {
+		if (this.guiEntities[i].render) {
+			ctx.save(); 
+			this.guiEntities[i].render(ctx);
+			ctx.restore(); 
+		}
+	}
+};
+
 GuiContainer.prototype.setUpdateInterval = function(time) {
 	var that = this;
 	this.updateIntervalTime = time;
