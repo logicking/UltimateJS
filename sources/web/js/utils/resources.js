@@ -163,10 +163,8 @@ var Resources = (function() {
 
 		// return an asset preloaded
 		getAsset : function(id) {
-			for ( var i in assets) {
-				if (i === id) {
-					return assets[i];
-				}
+			if (assets[id]) {
+				return assets[id];
 			}
 			var obj = new Image();
 			obj.src = Resources.getImage(id);
