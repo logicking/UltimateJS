@@ -97,6 +97,7 @@ VisualEntity.prototype.destroy = function(dontRemoveVisual) {
 	if (this.guiParent && !dontRemoveVisual) {
 		var that = this;
 		$['each'](this.visuals, function(id, visualInfo) {
+			visualInfo.visual.hide();
 			that.guiParent.removeGui(visualInfo.visual);
 		});
 	}

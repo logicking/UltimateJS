@@ -292,9 +292,11 @@ PhysicEntity.prototype.setPhysicsPosition = function(pos) {
  * @returns {b2Vec2}
  */
 PhysicEntity.prototype.getPosition = function() {
-    var pos = this.physics.GetPosition().Copy();
-    pos.Multiply(Physics.getB2dToGameRatio());
-    return pos;
+	if (this.physics) {
+		var pos = this.physics.GetPosition().Copy();
+	    pos.Multiply(Physics.getB2dToGameRatio());
+	    return pos;	
+	}
 };
 
 PhysicEntity.prototype.onDragBegin = function() {

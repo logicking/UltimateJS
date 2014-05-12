@@ -1,5 +1,5 @@
 var DAMAGE_DECR = 180;
-var FORCE_RATING = 100;
+var FORCE_RATING = 1/10;
 
 // Creates physics explosion without any visual presentation
 // just an explosion in physics world.
@@ -18,11 +18,13 @@ Physics.explode = function(params) { // (center, radius, force, duration,
 	var score = 0;
 	var delta = (params.delta > 0) ? params.delta : 20;
 	var time = params.duration / delta;
+	var scale = Physics.getB2dToGameRatio();
 	function tick() {
 		setTimeout(function() {
 			var body = world.m_bodyList;
 			for (; body != null; body = body['m_next']) {
-				var bodyCenter = body.GetPosition();
+				var bodyCenter = body.GetPosition().Copy();
+				bodyCenter.Multiply(Physics.getB2dToGameRatio());
 				var rVec = new b2Vec2(bodyCenter.x - params.center.x,
 						bodyCenter.y - params.center.y);
 				var dist = rVec.Length();
@@ -33,11 +35,11 @@ Physics.explode = function(params) { // (center, radius, force, duration,
 							/ Math.pow(1 + dist, decr));
 					if (body.m_userData) {
 						if (body.m_userData.params.id != "CannonBall") {
-							body.WakeUp();
+							body.SetAwake(false);
 							body
 									.ApplyImpulse(impulse, body
 											.GetPosition());
-							body.AllowSleeping(true);
+//							body.AllowSleeping(true);
 						}
 					}
 
