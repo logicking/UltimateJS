@@ -15,7 +15,7 @@ Function.prototype.inheritsFrom = function(parentClassOrObject) {
 };
 
 function popElementFromArray(item, items) {
-	for ( var i = 0; i < items.length; i++) {
+	for (var i = 0; i < items.length; i++) {
 		if (items[i] === item) {
 			items.splice(i, 1);
 			i--;
@@ -30,7 +30,7 @@ function popAllElementsFromArray(items) {
 
 function isInArray(item, items) {
 	var count = 0;
-	for ( var i = 0; i < items.length; i++) {
+	for (var i = 0; i < items.length; i++) {
 		if (items[i] === item) {
 			count++;
 		}
@@ -124,10 +124,12 @@ var uniqueId = (function() {
 })(); // Invoke the outer function after defining it.
 
 // Console hack for IE
-if(typeof console == "undefined") {
-	var console = {log : function()  {}};
+if (typeof console == "undefined") {
+	var console = {
+		log : function() {
+		}
+	};
 }
-
 
 function eLog(message, tag, level) {
 	if (!eLog.displayF)
@@ -268,7 +270,7 @@ function distance(A, B) {
 // and the last one as default
 function selectValue() {
 	var result;
-	for ( var i = 0; i < arguments.length - 1; i++) {
+	for (var i = 0; i < arguments.length - 1; i++) {
 		result = arguments[i];
 		if (result != null) {
 			return result;
@@ -278,118 +280,116 @@ function selectValue() {
 	return result;
 }
 
-var Recorder = (function(){
-	var content = [],
-		refTime = -1,
-		isRecording = false;
+var Recorder = (function() {
+	var content = [], refTime = -1, isRecording = false;
 	obj = {};
 	function recordAction(action, target, params) {
-		if(!isRecording){
+		if (!isRecording) {
 			return;
 		}
 		content.push({
 			action : action,
 			target : target,
 			params : params,
-			time : (refTime!=-1)?(Date.now()-refTime):refTime
+			time : (refTime != -1) ? (Date.now() - refTime) : refTime
 		});
-		console.log("Recorded Action: ", content[content.length-1]);
-	};
-	
-	function clearContent(){
+		console.log("Recorded Action: ", content[content.length - 1]);
+	}
+	;
+
+	function clearContent() {
 		content = [];
 		refTime = -1;
 		console.log("Cleared recorder content");
-	};
-	
-	function setRefTime(){
+	}
+	;
+
+	function setRefTime() {
 		refTime = Date.now();
 		console.log("Setting ref time to ", new Date(refTime));
-	};
-	
-	function saveToFile(){
+	}
+	;
+
+	function saveToFile() {
 		var string = "";
 		console.log("content on saveToFile: ", content);
-		for(var i=0;i<content.length;i++){
-			var temp = "" +content[i].action +
-				";" + content[i].target +
-				";" + content[i].time + ";";
-			
-			
-			if(content[i].action == "clickedAt"){
-				temp = temp + content[i].params.x +
-					","+content[i].params.y+";";
+		for (var i = 0; i < content.length; i++) {
+			var temp = "" + content[i].action + ";" + content[i].target + ";"
+					+ content[i].time + ";";
+
+			if (content[i].action == "clickedAt") {
+				temp = temp + content[i].params.x + "," + content[i].params.y
+						+ ";";
 			}
-			
-			
+
 			temp = temp + "\n";
 			string = string + temp;
 		}
-		uriContent = "data:application/octet-stream," + encodeURIComponent(string);
-		newWindow=window.open(uriContent, 'neuesDokument');
-	};
-	
-	function startRecord(){
+		uriContent = "data:application/octet-stream,"
+				+ encodeURIComponent(string);
+		newWindow = window.open(uriContent, 'neuesDokument');
+	}
+	;
+
+	function startRecord() {
 		clearContent();
 		setRefTime();
 		isRecording = true;
-	};
-	
-	function stopRecord(){
+	}
+	;
+
+	function stopRecord() {
 		isRecording = false;
 		refTime = -1;
 		saveToFile();
-	};
-	
-	
+	}
+	;
+
 	obj["recordAction"] = recordAction;
 	obj["clearContent"] = clearContent;
 	obj["setRefTime"] = setRefTime;
 	obj["saveToFile"] = saveToFile;
 	obj["startRecord"] = startRecord;
 	obj["stopRecord"] = stopRecord;
-	obj["getState"] = function(){
-		return (function(state){
+	obj["getState"] = function() {
+		return (function(state) {
 			return state;
 		})(isRecording);
 	};
 	return obj;
 })();
 
-
-function RandomNumberGenerator(seed)
-{
+function RandomNumberGenerator(seed) {
 	var keySchedule = [];
 	var keySchedule_i = 0;
 	var keySchedule_j = 0;
-	
+
 	function init(seed) {
 		for (var i = 0; i < 256; i++)
 			keySchedule[i] = i;
-		
+
 		var j = 0;
-		for (var i = 0; i < 256; i++)
-		{
+		for (var i = 0; i < 256; i++) {
 			j = (j + keySchedule[i] + seed.charCodeAt(i % seed.length)) % 256;
-			
+
 			var t = keySchedule[i];
 			keySchedule[i] = keySchedule[j];
 			keySchedule[j] = t;
 		}
 	}
 	init(seed);
-	
+
 	function getRandomByte() {
 		keySchedule_i = (keySchedule_i + 1) % 256;
 		keySchedule_j = (keySchedule_j + keySchedule[keySchedule_i]) % 256;
-		
+
 		var t = keySchedule[keySchedule_i];
 		keySchedule[keySchedule_i] = keySchedule[keySchedule_j];
 		keySchedule[keySchedule_j] = t;
-		
+
 		return keySchedule[(keySchedule[keySchedule_i] + keySchedule[keySchedule_j]) % 256];
 	}
-	
+
 	this.next = function() {
 		var number = 0;
 		var multiplier = 1;
@@ -402,42 +402,133 @@ function RandomNumberGenerator(seed)
 };
 
 function cloneObject(obj) {
-	if ( "object" === typeof obj && obj.length) {
+	if ("object" === typeof obj && obj.length) {
 		var ar = [];
 		for (var i = 0; i < obj.length; i++) {
 			ar[i] = cloneObject(obj[i]);
 		}
 		return ar;
 	}
-    if (null == obj || "object" != typeof obj) return obj;
-    var copy = {};
-    for (var smth in obj) {
-    	copy[smth] = cloneObject(obj[smth]);
-    }
-    return copy;
+	if (null == obj || "object" != typeof obj)
+		return obj;
+	var copy = {};
+	for ( var smth in obj) {
+		copy[smth] = cloneObject(obj[smth]);
+	}
+	return copy;
 }
 
 function toggleFullScreen() {
-	  if (!document.fullscreenElement &&    // alternative standard method
-	      !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
-	    if (document.documentElement.requestFullscreen) {
-	      document.documentElement.requestFullscreen();
-	    } else if (document.documentElement.msRequestFullscreen) {
-	      document.documentElement.msRequestFullscreen();
-	    } else if (document.documentElement.mozRequestFullScreen) {
-	      document.documentElement.mozRequestFullScreen();
-	    } else if (document.documentElement.webkitRequestFullscreen) {
-	      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-	    }
-	  } else {
-	    if (document.exitFullscreen) {
-	      document.exitFullscreen();
-	    } else if (document.msExitFullscreen) {
-	      document.msExitFullscreen();
-	    } else if (document.mozCancelFullScreen) {
-	      document.mozCancelFullScreen();
-	    } else if (document.webkitExitFullscreen) {
-	      document.webkitExitFullscreen();
-	    }
-	  }
+	if (!document.fullscreenElement && // alternative standard method
+	!document.mozFullScreenElement && !document.webkitFullscreenElement
+			&& !document.msFullscreenElement) { // current working methods
+		if (document.documentElement.requestFullscreen) {
+			document.documentElement.requestFullscreen();
+		} else if (document.documentElement.msRequestFullscreen) {
+			document.documentElement.msRequestFullscreen();
+		} else if (document.documentElement.mozRequestFullScreen) {
+			document.documentElement.mozRequestFullScreen();
+		} else if (document.documentElement.webkitRequestFullscreen) {
+			document.documentElement
+					.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+		}
+	} else {
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		} else if (document.msExitFullscreen) {
+			document.msExitFullscreen();
+		} else if (document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+		} else if (document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		}
 	}
+}
+
+var DEBUG_INTERFACE = {
+		active : false,
+		log : function() {
+		},
+		log2 : function() {
+		},
+		log3 : function() {
+		},
+		log4 : function() {
+		}
+};
+
+function turnOnOnScreenDebug() {
+	DEBUG_INTERFACE.toppos = 0;
+	DEBUG_INTERFACE.div = document.createElement("div");
+	DEBUG_INTERFACE.div.style.position = "fixed";
+	DEBUG_INTERFACE.div.style.zIndex = 100000000;
+	DEBUG_INTERFACE.div.style.fontSize = "12px";
+	DEBUG_INTERFACE.div.style.marginTop = 30 + "px";
+	DEBUG_INTERFACE.div.style.marginLeft = "50px";
+	DEBUG_INTERFACE.div.style.backgroundColor = "rgba(255,255,255,0.5)";
+	document.body.appendChild(DEBUG_INTERFACE.div);
+	DEBUG_INTERFACE.text1 = "";
+	DEBUG_INTERFACE.log = function(message) {
+		DEBUG_INTERFACE.text1 += message;
+		var div = DEBUG_INTERFACE.div;
+		div.innerHTML = "<p>" + DEBUG_INTERFACE.text1 + "</p>";
+		if (div.clientHeight > 500) {
+			var offset = 30 + 500 - div.clientHeight;
+			div.style.marginTop = offset + "px";
+		}
+	};
+	DEBUG_INTERFACE.div2 = document.createElement("div");
+	DEBUG_INTERFACE.div2.style.position = "fixed";
+	DEBUG_INTERFACE.div2.style.zIndex = 100000000;
+	DEBUG_INTERFACE.div2.style.marginTop = 30 + "px";
+	DEBUG_INTERFACE.div2.style.marginLeft = "200px";
+	DEBUG_INTERFACE.div2.style.backgroundColor = "white";
+	document.body.appendChild(DEBUG_INTERFACE.div2);
+
+	DEBUG_INTERFACE.log2 = function(message) {
+		var div = DEBUG_INTERFACE.div2;
+		div.innerHTML = message;
+	};
+
+	DEBUG_INTERFACE.div3 = document.createElement("div");
+	DEBUG_INTERFACE.div3.style.position = "fixed";
+	DEBUG_INTERFACE.div3.style.zIndex = 100000000;
+	DEBUG_INTERFACE.div3.style.fontSize = "12px";
+	DEBUG_INTERFACE.div3.style.marginTop = 30 + "px";
+	DEBUG_INTERFACE.div3.style.marginLeft = "400px";
+	DEBUG_INTERFACE.div3.style.backgroundColor = "rgba(255,255,255,0.5)";
+	document.body.appendChild(DEBUG_INTERFACE.div3);
+	DEBUG_INTERFACE.text = "";
+	DEBUG_INTERFACE.log3 = function(message) {
+		var div = DEBUG_INTERFACE.div3;
+		DEBUG_INTERFACE.text += message;
+		div.innerHTML = "<p>" + DEBUG_INTERFACE.text + "</p>";
+		if (div.clientHeight > 500) {
+			var offset = 30 + 500 - div.clientHeight;
+			div.style.marginTop = offset + "px";
+		}
+	};
+
+	DEBUG_INTERFACE.div4 = document.createElement("div");
+	DEBUG_INTERFACE.div4.style.position = "fixed";
+	DEBUG_INTERFACE.div4.style.zIndex = 100000000;
+	DEBUG_INTERFACE.div4.style.fontSize = "12px";
+	DEBUG_INTERFACE.div4.style.marginTop = 30 + "px";
+	DEBUG_INTERFACE.div4.style.marginLeft = "900px";
+	DEBUG_INTERFACE.div4.style.backgroundColor = "rgba(255,255,255,0.5)";
+	document.body.appendChild(DEBUG_INTERFACE.div4);
+	DEBUG_INTERFACE.text3 = "";
+	DEBUG_INTERFACE.log4 = function(message) {
+		var div = DEBUG_INTERFACE.div4;
+		DEBUG_INTERFACE.text3 += message;
+		div.innerHTML = "<p>" + DEBUG_INTERFACE.text3 + "</p>";
+		if (div.clientHeight > 500) {
+			var offset = 30 + 500 - div.clientHeight;
+			div.style.marginTop = offset + "px";
+		}
+	};
+	
+	DEBUG_INTERFACE.active = true;
+	
+	return DEBUG_INTERFACE;
+}

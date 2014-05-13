@@ -48,6 +48,11 @@ Account.prototype.init = function(params) {
 	assert(Account.instance == null,
 			"Only one account object at time are allowed");
 	Account.instance = this;
+	
+//	this.debuggerInstance = turnOnOnScreenDebug();
+//	this.debuggerInstance.fps = {};
+//	this.debuggerInstance.fps.total = 0;
+//	this.debuggerInstance.fps.calls = 0;
 };
 
 Account.prototype.addEntity = function(newEntity) {
@@ -156,8 +161,12 @@ Account.prototype.render = function() {
 	var that = this;
 //	var dt = Date.now() - this.lastRenderTime;
 //	if(dt != 0){
+	
+	var canvas = null;
 		$['each'](this.renderEntities, function(id, entity) {
 			if (entity && entity.isVisible && entity.isVisible()) {
+				if (!canvas)
+					canvas = entity;
 				entity.render();
 			}
 		});
@@ -166,7 +175,7 @@ Account.prototype.render = function() {
 //	this.lastRenderTime = Date.now();
 	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
 		that.render();
-	});
+	}, canvas);
 };
 
 // Regular scheduled update for registered enities
@@ -175,6 +184,16 @@ Account.prototype.update = function(dt) {
 	var date = Date.now();
 	if(date - this.prevUpdateTime >= this.globalUpdateInterval){
 		dt = date - this.prevUpdateTime;
+//		if (this.debuggerInstance) {
+//			this.debuggerInstance.fps.total += dt;
+//			this.debuggerInstance.fps.calls++;
+//			if (this.debuggerInstance.fps.total > 1000) {
+//				this.debuggerInstance.log2(this.debuggerInstance.fps.calls);
+//				
+//				this.debuggerInstance.fps.total = 0;
+//				this.debuggerInstance.fps.calls = 0;
+//			}
+//		}
 //		dt = this.globalUpdateInterval;
 		this.prevUpdateTime = Date.now();
 		$['each'](this.scheduledEntities, function(id, entity) {

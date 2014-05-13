@@ -84,6 +84,8 @@ GuiCanvas.prototype.initialize = function(params) {
 	this.setSize(Screen.macro(params['width']), Screen.macro(params['height']), true);
 	this.setOffset(Screen.macro(params['offsetX']), Screen
 			.macro(params['offsetY']));
+	this.setGuiOffset(Screen.macro(params['guiOffsetX']), Screen
+			.macro(params['guiOffsetY']));
 	this.setPosition(Screen.macro(params['x']), Screen.macro(params['y']), true);
 	
 	// Check whether element with such id is already in scene
@@ -158,6 +160,11 @@ GuiCanvas.prototype.setOffset = function(offsetX, offsetY) {
 	
 	if (this.baseDiv)
 		this.baseDiv.setOffset(offsetX, offsetY);
+};
+
+GuiCanvas.prototype.setGuiOffset = function(offsetX, offsetY) {
+	this.guiOffsetX = offsetX?offsetX:0;
+	this.guiOffsetY = offsetY?offsetY:0;
 };
 
 /**

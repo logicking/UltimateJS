@@ -78,11 +78,19 @@ GuiDiv.prototype.initialize = function(params) {
 	}
 	
 	if (params['canvas']) {
-		this.canvas = guiFactory.createObject("GuiCanvas", {
-			"parent" : this,
-			"width" : params['canvas'].width?params['canvas'].width:this.width,
-			"height" : params['canvas'].height?params['canvas'].height:this.height
+		var cParams = params['canvas'];
+		$['extend'](cParams, {
+			"parent" : this
 		});
+
+		cParams["width"] = params['canvas'].width?params['canvas'].width:this.width;
+		cParams["height"] = params['canvas'].height?params['canvas'].height:this.height;
+		cParams["x"] = params['canvas'].x?params['canvas'].x:this.x;
+		cParams["y"] = params['canvas'].y?params['canvas'].y:this.y;
+		cParams["offsetX"] = params['canvas'].offsetX?params['canvas'].offsetX:this.offsetX;
+		cParams["offsetY"] = params['canvas'].offsetY?params['canvas'].offsetY:this.offsetY;
+		
+		this.canvas = guiFactory.createObject("GuiCanvas", cParams);
 	}
 };
 

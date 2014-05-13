@@ -50,7 +50,7 @@ GuiCSprite.prototype.initialize = function(params) {
 	this.width = params.width;
 	this.height = params.height;
 	
-	this.parent = params.parent;
+	this.parent = params.parent.canvas?params.parent.canvas:params.parent;
 	this.id = this.parent.generateId.call(this);
 	
 	this.total = {
@@ -401,9 +401,11 @@ GuiCSprite.prototype.render = function(ctx) {
 			x : Screen.widthRatio(),
 			y : Screen.heightRatio()
 	};
-	
-	var x = Math.round((this.calcPercentageWidth(this.x) + this.offsetX)*scrnRatio.x);
-    var y =  Math.round((this.calcPercentageHeight(this.y) + this.offsetY)*scrnRatio.y);
+
+	var x = Math.round((this.calcPercentageWidth(this.x) + this.calcPercentageWidth(this.parent.guiOffsetX?this.parent.guiOffsetX:0) + this.offsetX)*scrnRatio.x);
+    var y =  Math.round((this.calcPercentageHeight(this.y) + this.calcPercentageWidth(this.parent.guiOffsetY?this.parent.guiOffsetY:0) + this.offsetY)*scrnRatio.y);
+//	var x = Math.round((this.calcPercentageWidth(this.x)  + this.offsetX)*scrnRatio.x);
+//    var y =  Math.round((this.calcPercentageHeight(this.y) + this.offsetY)*scrnRatio.y);
     var w = Math.round(this.width*scrnRatio.x);//this.imageWidth;//
     var h =  Math.round(this.height*scrnRatio.y);//this.imageHeight;//
 	var bx = Math.round(this.backgroundPosition.x);
