@@ -164,8 +164,8 @@ var Screen = (function() {
 			h = fixedHeight;
 		}
 		
-		oldW = null;
-		oldH = null;
+//		oldW = null;
+//		oldH = null;
 		orientationFlag = null;
 		
 		if (!Screen.isCorrectOrientation()) {
@@ -177,7 +177,7 @@ var Screen = (function() {
 			}
 		} else {
 			// absorb nearly simultaneous calls to resize
-			if (!orientationFlag || (oldW != w || oldH != h)) {
+			if (Screen.orientationChanged() || (oldW != w || oldH != h)) {
 				oldW = w;
 				oldH = h;
 				
@@ -351,6 +351,13 @@ var Screen = (function() {
 			// + window.innerHeight + ", " + window.orientation);
 			return (isLandscapeDefault == null)
 					|| (isLandscapeDefault === !isPortrait);
+		},
+		orientationChanged : function() {
+			if (isLandscapeDefault == null) {
+				return true;
+			} else {
+				return !orientationFlag;
+			}
 		},
 		isLandscape : function() {
 			return viewporter.isLandscape();

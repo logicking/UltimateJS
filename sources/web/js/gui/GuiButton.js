@@ -193,6 +193,7 @@ GuiButton.prototype.initialize = function(params) {
 	} else {
 		if (params['hover']) {
 			var result = prepareButtonState(params['hover']);
+			that.label['hover'] = result.label;
 			that.imageActive = result.image;
 			that.activeState = result.callback;
 		}
