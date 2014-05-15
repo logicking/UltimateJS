@@ -39,6 +39,8 @@ GuiLabel.prototype.initialize = function(params) {
 	if (params['color']) {
 		this.setColor(params['color']);
 	}
+	
+	this.setLineHeight(params['lineHeight']?params['lineHeight']:1);
 };
 
 GuiLabel.prototype.generate = function(src) {
@@ -109,6 +111,10 @@ GuiLabel.prototype.resize = function() {
 
 GuiLabel.prototype.setColor = function(color) {
 	this.jObject['css']("color", color);
+};
+
+GuiLabel.prototype.setLineHeight = function(lineHeight) {
+	this.jObject['css']("line-height", lineHeight);
 };
 
 GuiLabel.prototype.align = function(alignH, alignV) {
