@@ -205,9 +205,6 @@ GuiButton.prototype.initialize = function(params) {
 		that.label['passive'] = resultPassive.label;
 		that.imagePassive = resultPassive.image;
 		that.passiveState = function() {
-			if (that.id == "GuiButton798" || that.id == "GuiButton780" || that.id == "GuiButton786" || that.id == "GuiButton792"){
-				alert("passive " + that.id);
-			}
 			resultPassive.callback.call(that);
 			that.clickAllowed = false;
 		};
