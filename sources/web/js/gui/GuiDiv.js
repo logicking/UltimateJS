@@ -116,31 +116,35 @@ GuiDiv.prototype.applyBackground = function(params) {
 	}
 };
 
-GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX,
-		backY, repeat, frameX, frameY, idx) {
-	if (idx == "begin") {
-		this.backgrounds.unshift({});
-		idx = 0;
-	} else if (idx == "end") {
-		idx = this.backgrounds.length;
-	}
+GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX, backY, repeat, frameX, frameY, idx) {
+    if (idx == "begin") {
+        this.backgrounds.unshift({});
+        idx = 0;
+    } else if (idx == "end") {
+        idx = this.backgrounds.length;
+    }
 
-	idx = idx ? idx : 0;
+    idx = idx ? idx : 0;
+    frameX = frameX ? frameX : (this.backgrounds[idx] && this.backgrounds[idx].frameX ? this.backgrounds[idx].frameX : 0);
+    frameY = frameY ? frameY : (this.backgrounds[idx] && this.backgrounds[idx].frameY ? this.backgrounds[idx].frameY : 0);
+    backWidth = backWidth ? backWidth : (this.backgrounds[idx] && this.backgrounds[idx].width ? this.backgrounds[idx].width : this.width);
+    backHeight = backHeight ? backHeight : (this.backgrounds[idx] && this.backgrounds[idx].height ? this.backgrounds[idx].height : this.height);
 
-	this.backgrounds[idx] = {
-		url : src,
-		width : backWidth ? backWidth : this.width,
-		height : backHeight ? backHeight : this.height,
-		left : backX ? backX : 0,
-		top : backY ? backY : 0,
-        frameX : frameX ? frameX : 0,
-        frameY : frameY ? frameY : 0,
-		repeat : (repeat ? repeat : "no-repeat")
-	};
+    this.backgrounds[idx] = {
+        url : src,
+        width : backWidth,
+        height : backHeight,
+        left : backX ? backX : 0,
+        top : backY ? backY : 0,
+        frameX : frameX,
+        frameY : frameY,
+        repeat : (repeat ? repeat : "no-repeat")
+    };
 
-	this.showBackground();
+    this.showBackground();
 //	this.resizeBackground();
 };
+
 GuiDiv.prototype.setBackgroundFromParams = function(param, j) {
 	var x = param['x'] ? Screen.macro(param['x']) : 0;
 	var y = param['y'] ? Screen.macro(param['y']) : 0;
