@@ -54,6 +54,7 @@ Effect.prototype.play = function(position, callback) {
 		$['each'](gui.animations, function(id, anim) {
 			gui.playAnimation(id, that.params.lifeTime, false, true);		
 			that.setTimeout(function() {
+				gui.hide();
 				gui.remove();
 				if (callback) callback();
 			}, that.params.lifeTime);		
