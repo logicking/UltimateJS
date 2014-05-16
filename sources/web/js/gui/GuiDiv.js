@@ -117,8 +117,7 @@ GuiDiv.prototype.applyBackground = function(params) {
 };
 
 GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX,
-		backY, repeat, idx) {
-
+		backY, repeat, frameX, frameY, idx) {
 	if (idx == "begin") {
 		this.backgrounds.unshift({});
 		idx = 0;
@@ -134,6 +133,8 @@ GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX,
 		height : backHeight ? backHeight : this.height,
 		left : backX ? backX : 0,
 		top : backY ? backY : 0,
+        frameX : frameX ? frameX : 0,
+        frameY : frameY ? frameY : 0,
 		repeat : (repeat ? repeat : "no-repeat")
 	};
 
@@ -145,8 +146,10 @@ GuiDiv.prototype.setBackgroundFromParams = function(param, j) {
 	var y = param['y'] ? Screen.macro(param['y']) : 0;
 	var w = param['width'] ? Screen.macro(param['width']) : this.width;
 	var h = param['height'] ? Screen.macro(param['height']) : this.height;
+    var frameX = param['frameX'] ? Screen.macro(param['frameX']) : 0;
+    var frameY = param['frameY'] ? Screen.macro(param['frameY']) : 0;
 	var r = param['repeat'] ? param['repeat'] : null;
-	this.setBackground(param['image'], w, h, x, y, r, j);
+	this.setBackground(param['image'], w, h, x, y, r, frameX, frameY, j);
 };
 GuiDiv.prototype.setBackgroundPosition = function(backX, backY, idx) {
 	idx = idx ? idx : 0;
@@ -172,25 +175,24 @@ GuiDiv.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 };
 
 GuiDiv.prototype.resizeBackground = function() {
-	var positions = " ";
-	var sizes = " ";
-	var that = this;
-	$['each'](this.backgrounds, function(i, back) {
-		if (!back)
-			return;
+    var positions = " ";
+    var sizes = " ";
+    var that = this;
+    $['each'](this.backgrounds, function(i, back) {
+        if (!back)
+            return;
+        var pos = Screen.calcRealSize(back.left + back.frameX, back.top + back.frameY);
+        positions += pos.x + "px " + pos.y + "px,";
 
-		var pos = Screen.calcRealSize(back.left, back.top);
-		positions += pos.x + "px " + pos.y + "px,";
-
-		w = that.calcPercentageWidth(back.width);
-		h = that.calcPercentageHeight(back.height);
-		var size = Screen.calcRealSize(w, h);
-		sizes += size.x + "px " + size.y + "px,";
-	});
-	sizes = sizes.substr(0, sizes.length - 1);
-	positions = positions.substr(0, positions.length - 1);
-	this.jObject['css']("background-size", sizes);
-	this.jObject['css']("background-position", positions);
+        var w = that.calcPercentageWidth(back.width);
+        var h = that.calcPercentageHeight(back.height);
+        var size = Screen.calcRealSize(w, h);
+        sizes += size.x + "px " + size.y + "px,";
+    });
+    sizes = sizes.substr(0, sizes.length - 1);
+    positions = positions.substr(0, positions.length - 1);
+    this.jObject['css']("background-size", sizes);
+    this.jObject['css']("background-position", positions);
 };
 
 GuiDiv.prototype.setPosition = function(x, y) {
@@ -316,16 +318,27 @@ GuiDiv.prototype.hideBackground = function() {
 GuiDiv.prototype.showBackground = function() {
 	var urls = " ";
 	var repeats = " ";
+	var positions = " ";
 
 	$['each'](this.backgrounds, function(i, back) {
 		if (!back)
 			return;
 		if (back.url) urls += "url('" + back.url + "'),";
+
+        // TODO: test it
+        if (back.frameX && back.frameY) {
+            var pos = Screen.calcRealSize(back.frameX, back.frameY);
+            positions += pos.x + "px " + pos.y + "px,";
+        }
+
 		repeats += back.repeat + ",";
 	});
+
 	urls = urls.substr(0, urls.length - 1);
 	repeats = repeats.substr(0, repeats.length - 1);
+    positions = positions.substr(0, positions.length - 1);
 	this.jObject['css']("background-image", urls);
+	this.jObject['css']("background-position", positions);
 	this.jObject['css']("background-repeat", repeats);
 };
 
@@ -518,4 +531,27 @@ GuiDiv.prototype.remove = function() {
 		this.canvas.remove();
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
+};
+
+/**
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {number} idx background index. default 0
+ */
+GuiDiv.prototype.setSize = function (width, height, idx) {
+    // using for frames from sprite sheet
+    if (this.width != null) {
+        var background = this.backgrounds[idx ? idx : 0];
+        if (background && (background.frameX || background.frameY)) {
+            var scaleX = width / this.width;
+            var scaleY = height / this.height;
+            background.width *= scaleX;
+            background.height *= scaleY;
+            background.frameX *= scaleX;
+            background.frameY *= scaleY;
+        }
+    }
+
+    GuiDiv.parent.setSize.call(this, width, height);
 };
