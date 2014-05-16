@@ -532,3 +532,26 @@ GuiDiv.prototype.remove = function() {
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
 };
+
+/**
+ *
+ * @param {number} width
+ * @param {number} height
+ * @param {number} idx background index. default 0
+ */
+GuiDiv.prototype.setSize = function (width, height, idx) {
+    // using for frames from sprite sheet
+    if (this.width != null) {
+        var background = this.backgrounds[idx ? idx : 0];
+        if (background && (background.frameX || background.frameY)) {
+            var scaleX = width / this.width;
+            var scaleY = height / this.height;
+            background.width *= scaleX;
+            background.height *= scaleY;
+            background.frameX *= scaleX;
+            background.frameY *= scaleY;
+        }
+    }
+
+    GuiDiv.parent.setSize.call(this, width, height);
+};

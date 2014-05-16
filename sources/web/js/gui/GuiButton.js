@@ -11,6 +11,39 @@ function GuiButton() {
 GuiButton.inheritsFrom(GuiDiv);
 GuiButton.prototype.className = "GuiButton";
 
+/**
+ *
+ * @param params
+ * "class": "GuiButton",
+ "params": {
+            "parent": "menuContainer",
+            "normal": {
+                "background": {
+                    "image": "FinalArt/countriesSheet.png",
+                    "width": 689,
+                    "height": 738,
+                    "frameX": -477,
+                    "frameY": -41
+                }
+            },
+            "hover": {
+                "background": {
+                    "image": "FinalArt/countriesSheet.png",
+                    "width": 689,
+                    "height": 738,
+                    "frameX": -477,
+                    "frameY": -41
+                },
+                "scale": 120
+            },
+            "style": "gameButton",
+            "width": 48,
+            "height": 36,
+            "x": 320,
+            "y": 227
+        }
+ * @return {GuiButton}
+ */
 GuiButton.prototype.createInstance = function(params) {
 	var entity = new GuiButton();
 	entity.initialize(params);
@@ -47,19 +80,16 @@ GuiButton.prototype.initialize = function(params) {
 
 	var labelParams;
 	var normalParams = {};
-	// this.$()['css']("border", "solid");
-	// this.$()['css']("border-color", "red");
 
 	var prepareButtonState = function(params) {
-
-		params['image'] = Resources.getImage(params['image']);
 		var image = GuiDiv.prototype.createInstance({
 			parent : that,
 			style : params['imageStyle'] ? params['imageStyle'] : "buttonImage",
 			width : that.width,
 			height : that.height,
 			x : params['x'] ? params['x'] : "50%",
-			y : params['y'] ? params['y'] : "50%"
+			y : params['y'] ? params['y'] : "50%",
+            "background": params['background']
 		});
 
 		that.children.addGui(image);
@@ -76,9 +106,8 @@ GuiButton.prototype.initialize = function(params) {
 		var offsetY = -Math.round(h / 2);
 
 		image.setOffset(offsetX, offsetY);
-		if (params['background']) {
-			image.applyBackground(params['background']);
-		} else {
+		if (!params['background']) {
+            params['image'] = Resources.getImage(params['image']);
 			image.setBackground(params['image'], w, h, 0, 0);
 		}
 		image.setSize(w, h);
