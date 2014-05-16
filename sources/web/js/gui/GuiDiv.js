@@ -182,8 +182,8 @@ GuiDiv.prototype.resizeBackground = function() {
 		var pos = Screen.calcRealSize(back.left, back.top);
 		positions += pos.x + "px " + pos.y + "px,";
 
-		w = that.calcPercentageWidth(back.width);
-		h = that.calcPercentageHeight(back.height);
+		var w = that.calcPercentageWidth(back.width);
+		var h = that.calcPercentageHeight(back.height);
 		var size = Screen.calcRealSize(w, h);
 		sizes += size.x + "px " + size.y + "px,";
 	});
