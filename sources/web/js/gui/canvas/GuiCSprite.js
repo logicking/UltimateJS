@@ -391,7 +391,6 @@ GuiCSprite.prototype.show = function() {
 };
 
 GuiCSprite.prototype.clampByParentViewport = function() {
-	this.visible = true;
 };
 
 GuiCSprite.prototype.render = function(ctx) {
