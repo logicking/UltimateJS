@@ -119,6 +119,7 @@ function recolorImage(img, changingColorPairs) {
     } catch (e) {
         console.error("recolorImage: " + e);
     }
+    c = null;
     return url;
 }
 
@@ -170,5 +171,6 @@ function recolorFullImage(img, changingColorPair) {
     } catch (e) {
         console.error("recolorFullImage: " + e);
     }
+    c = null;
     return url;
 }
