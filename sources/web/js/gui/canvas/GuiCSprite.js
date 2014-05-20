@@ -122,6 +122,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	}
 	
 	this.show();
+	this.setEnabled(true);
+	Account.instance.addScheduledEntity(this);
 };
 
 
@@ -143,27 +145,40 @@ GuiCSprite.prototype.addAnimation = function(animationName, frames, row,
 	};
 };
 
-GuiSprite.prototype.update = function(dt) {
-	if (this.currentAnimation == null && this.spatialAnimation == null) {
-		return;
-	}
+//GuiCSprite.prototype.update = function(dt) {
+//	if (this.currentAnimation == null && this.spatialAnimation == null) {
+//		return;
+//	}
+//
+//	var curTime = (new Date()).getTime();
+//	if (!dt) {
+//		dt = curTime - this.lastUpdateTime;
+//	}
+//	this.lastUpdateTime = curTime;
+//	this.currentFrameTime += dt;
+//
+//	if (this.spatialAnimation !== null) {
+//		this.updateSpatialAnimation(dt);
+//	}
+//	while (this.currentFrameTime >= this.currentFrameLength) {
+//		var stopped = this.updateAnimation();
+//		if (stopped == true) {
+//			return;
+//		}
+//		this.currentFrameTime -= this.currentFrameLength;
+//	}
+//};
 
-	var curTime = (new Date()).getTime();
-	if (!dt) {
-		dt = curTime - this.lastUpdateTime;
-	}
-	this.lastUpdateTime = curTime;
-	this.currentFrameTime += dt;
 
-	if (this.spatialAnimation !== null) {
-		this.updateSpatialAnimation(dt);
-	}
-	while (this.currentFrameTime >= this.currentFrameLength) {
-		var stopped = this.updateAnimation();
-		if (stopped == true) {
-			return;
-		}
-		this.currentFrameTime -= this.currentFrameLength;
+GuiCSprite.prototype.isEnabled = function() {
+	return this.enabled;
+};
+
+GuiCSprite.prototype.setEnabled = function(on) {
+	if (on) {
+		this.enabled = true;
+	} else {
+		this.enabled = true;
 	}
 };
 
@@ -405,7 +420,7 @@ GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibili
 	fadeAnimation.dO = fadeAnimation.end - fadeAnimation.start;
 
 	fadeAnimation.time = time>0?time:500;
-	fadeAnimation.speed = fadeAnimation.time/fadeAnimation.dO;
+	fadeAnimation.speed = Math.abs(fadeAnimation.dO/fadeAnimation.time);
 
 	fadeAnimation.callback = callback;
 	fadeAnimation.changeVisibility = changeVisibility;
@@ -421,10 +436,10 @@ GuiCSprite.prototype.fade = function(dt) {
 	
 	var step = this.fadeAnimation.speed * dt * this.fadeAnimation.norm;
 	var next = this.opacity + step;
-	if ((this.opacity - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
+	if ((this.fadeAnimation.end - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
 		this.setOpacity(next);
 	} else {
-		this.fading = true;
+		this.fading = false;
 		this.setOpacity(this.fadeAnimation.end);
 		if (this.fadeAnimation.callback)
 			this.fadeAnimation.callback();
@@ -436,7 +451,13 @@ GuiCSprite.prototype.fade = function(dt) {
 
 GuiCSprite.prototype.update = function(dt) {
 	if (this.fading) {
-		this.fade();
+		this.fade(dt);
+	}
+};
+
+GuiCSprite.prototype.setOpacity = function(opacity) {
+	if (opacity>=0 || opacity<=1) {
+		this.opacity = opacity;
 	}
 };
 
