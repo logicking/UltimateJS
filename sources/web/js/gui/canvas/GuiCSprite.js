@@ -47,6 +47,7 @@ GuiCSprite.prototype.initialize = function(params) {
 
 	this.z = params.z||0;
 
+	this.opacity = params.opacity?params.opacity:1;
 	this.width = params.width;
 	this.height = params.height;
 	
@@ -393,6 +394,52 @@ GuiCSprite.prototype.show = function() {
 GuiCSprite.prototype.clampByParentViewport = function() {
 };
 
+GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibility) {
+//	var that = this;
+
+	var fadeAnimation = {};
+
+	fadeAnimation.start = this.opacity;
+	fadeAnimation.end = fadeValue>0?(fadeValue<1?fadeValue:1):0;
+	
+	fadeAnimation.dO = fadeAnimation.end - fadeAnimation.start;
+
+	fadeAnimation.time = time>0?time:500;
+	fadeAnimation.speed = fadeAnimation.time/fadeAnimation.dO;
+
+	fadeAnimation.callback = callback;
+	fadeAnimation.changeVisibility = changeVisibility;
+	
+	fadeAnimation.norm = fadeAnimation.dO/Math.abs(fadeAnimation.dO);
+	
+	this.fadeAnimation = fadeAnimation;
+	
+	this.fading = true;
+};
+
+GuiCSprite.prototype.fade = function(dt) {
+	
+	var step = this.fadeAnimation.speed * dt * this.fadeAnimation.norm;
+	var next = this.opacity + step;
+	if ((this.opacity - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
+		this.setOpacity(next);
+	} else {
+		this.fading = true;
+		this.setOpacity(this.fadeAnimation.end);
+		if (this.fadeAnimation.callback)
+			this.fadeAnimation.callback();
+		if (this.fadeAnimation.changeVisibility)
+			this.hide();
+	}
+	
+};
+
+GuiCSprite.prototype.update = function(dt) {
+	if (this.fading) {
+		this.fade();
+	}
+};
+
 GuiCSprite.prototype.render = function(ctx) {
 	if (!this.visible) 
 		return;
@@ -417,6 +464,7 @@ GuiCSprite.prototype.render = function(ctx) {
 	
 	ctx.translate(parseInt((x+w*ratio.x)), parseInt((y+h*ratio.y)));
 	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
+	ctx.globalAlpha = this.opacity;
 //	ctx.scale(this.scale.x, this.scale.y); 
 
 	try {

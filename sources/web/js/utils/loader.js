@@ -5,6 +5,7 @@ var Loader = (function() {
 	var currentLoadingStatePercentage = 0;
 	var firstTimeHide = true;
 	var isShowed = true;
+	var finishing = false;
 	var loadingStateText;
 	var loadingStateStroke = null;
 	var loadingMsg = document['getElementById']("loadingMsg");
@@ -59,6 +60,22 @@ var Loader = (function() {
 			if (loadingMsg.length > 0) {
 				loadingMsg.show();
 			}
+		},
+		finishLoading : function(callback) {
+			console.log("finishLoading");
+			this.updateLoadingState(100);
+			finishing = true;
+			setTimeout(function() {
+				Screen.windowOnResize();
+				setTimeout(function() {
+					if (callback)
+						callback();
+				},100);
+			},100);
+		},
+		
+		readyForResize : function() {
+			return finishing;
 		},
 		hideLoadingMessage : function() {
 			if (!isShowed)
