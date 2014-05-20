@@ -78,8 +78,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	};
 //	this.imageHeight = parseInt(this.img.height / parseInt(this.total.height / this.height));
 //	this.imageWidth = parseInt(this.img.width / parseInt(this.total.width / this.width));
-	that.imageHeight = Math.round(that.img.height / Math.round(that.total.height / that.height));
-	that.imageWidth = Math.round(that.img.width / Math.round(that.total.width / that.width));
+	this.imageHeight = this.height;
+	this.imageWidth = this.width;
 	that.scale = {
 			x : that.width / that.imageWidth,
 			y : that.height / that.imageHeight
@@ -178,7 +178,7 @@ GuiCSprite.prototype.setEnabled = function(on) {
 	if (on) {
 		this.enabled = true;
 	} else {
-		this.enabled = false;
+		this.enabled = true;
 	}
 };
 
@@ -420,7 +420,7 @@ GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibili
 	fadeAnimation.dO = fadeAnimation.end - fadeAnimation.start;
 
 	fadeAnimation.time = time>0?time:500;
-	fadeAnimation.speed = Math.abs(fadeAnimation.dO/fadeAnimation.time);
+	fadeAnimation.speed = Math.abs(fadeAnimation.time/fadeAnimation.dO);
 
 	fadeAnimation.callback = callback;
 	fadeAnimation.changeVisibility = changeVisibility;
@@ -434,12 +434,12 @@ GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibili
 
 GuiCSprite.prototype.fade = function(dt) {
 	
-	var step = this.fadeAnimation.speed * dt * this.fadeAnimation.norm;
+	var step = this.fadeAnimation.speed * dt/1000 * this.fadeAnimation.norm;
 	var next = this.opacity + step;
-	if ((this.fadeAnimation.end - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
+	if ((this.opacity - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
 		this.setOpacity(next);
 	} else {
-		this.fading = false;
+		this.fading = true;
 		this.setOpacity(this.fadeAnimation.end);
 		if (this.fadeAnimation.callback)
 			this.fadeAnimation.callback();
@@ -486,12 +486,12 @@ GuiCSprite.prototype.render = function(ctx) {
 	ctx.translate(parseInt((x+w*ratio.x)), parseInt((y+h*ratio.y)));
 	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
 	ctx.globalAlpha = this.opacity;
-	ctx.scale(this.scale.x, this.scale.y); 
+//	ctx.scale(this.scale.x, this.scale.y); 
 
 	try {
     ctx.drawImage(this.img,
 		    bx, by,
-		    this.width, this.height,
+		    this.width*scrnRatio.x, this.height*scrnRatio.y,
             -parseInt(w*ratio.x), -parseInt(h*ratio.y),
             w, h);
 	}

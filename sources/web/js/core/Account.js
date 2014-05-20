@@ -14,6 +14,7 @@ function Account(parent) {
 Account.inheritsFrom(BaseState);
 
 Account.prototype.init = function(params) {
+	var that = this;
 	params = params ? params : {};
 	Account.parent.init.call(this, params);
 	// associative array of all active entities
@@ -46,26 +47,26 @@ Account.prototype.init = function(params) {
 			"Only one account object at time are allowed");
 	Account.instance = this;
 	
-//	 this.debuggerInstance = turnOnOnScreenDebug();
+	 this.debuggerInstance = turnOnOnScreenDebug();
 //	 this.debuggerInstance.fps = {};
 //	 this.debuggerInstance.fps.total = 0;
 //	 this.debuggerInstance.fps.calls = 0;
 
 	
 	
-//	this.tapActive = true;
-//	$(window).blur(function(e) {
+	this.tapActive = true;
+	$(window).blur(function(e) {
 //		that.debuggerInstance.log("Blur");
-//	});
-//	$(window).focus(function(e) {
-//		that.debuggerInstance.log("Focus");
-////		that.tabActive = true;
-////		that.activateUpdateAndRender();
-////		alert("focus!");
-//
-//	});
-//
-//	alert("INIT!");
+	});
+	$(window).focus(function(e) {
+		that.debuggerInstance.log(" Focus");
+//		that.tabActive = true;
+		that.activateUpdateAndRender();
+		that.debuggerInstance.log(" ++Done");
+
+	});
+
+	alert("INIT7!");
 };
 
 Account.prototype.addEntity = function(newEntity) {
@@ -100,6 +101,50 @@ Account.prototype.removeAllEntities = function(id, dontDestroy) {
 		}
 	});
 };
+
+
+
+/*
+ * restart for update and render with reqAnimFrame
+ */
+Account.prototype.activateUpdateAndRender = function() {
+	var that = this;
+	
+	this.cancelUpdate = true;
+	
+	setTimeout(function() {
+		that.cancelUpdate = false;
+		that.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
+			that.update(100);
+		});
+		that.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+			that.render();
+		});
+	}, 500);
+};
+
+//Account.prototype.activateUpdateAndRender = function() {
+//	var that = this;
+//
+//	that.debuggerInstance.log(" activateUpdateAndRender");
+//	clearTimeout(this.globalUpdateIntervalHandle);
+//	clearTimeout(this.globalRenderFrameHandle);
+//
+//	that.debuggerInstance.log(" clear");
+//	window.cancelAnimationFrame(this.globalUpdateIntervalHandle);
+//	window.cancelAnimationFrame(this.globalRenderFrameHandle);
+//
+//	that.debuggerInstance.log(" cancel");
+//	setTimeout(function() {
+//		that.debuggerInstance.log(" timeout");
+//		that.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
+//			that.update(100);
+//		});
+//		that.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+//			that.render();
+//		});
+//	}, 500);
+//};
 
 /*
  * Scheduling for children entities
@@ -186,9 +231,12 @@ Account.prototype.render = function() {
 //	}
 //	var that = this;
 //	this.lastRenderTime = Date.now();
-	this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
-		that.render();
-	}, canvas);
+		
+	if (!this.cancelUpdate) {
+		this.globalRenderFrameHandle = window.requestAnimationFrame(function() {
+			that.render();
+		}, canvas);
+	}
 };
 
 // Regular scheduled update for registered enities
@@ -222,9 +270,12 @@ Account.prototype.update = function(dt) {
 	}else{
 		dt += date - this.prevUpdateTime;
 	}
-	window.requestAnimationFrame(function() {
-		that.update(dt);
-	});
+	
+	if (!this.cancelUpdate) {
+		this.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
+			that.update(dt);
+		});
+	}
 };
 Account.prototype.setEnable = function(isTrue) {
 
