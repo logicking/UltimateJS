@@ -1,8 +1,5 @@
 var GUI_BAR_NAME = "GuiProgressBar";
 
-GuiProgressBar.prototype = new GuiDiv();
-GuiProgressBar.prototype.constructor = GuiProgressBar;
-
 /**
  * @constructor
  */

@@ -1,12 +1,10 @@
-/*
+/**
  *  Making actor purr when it's being stroked    
  */
 
 /**
  * @constructor
  */
-
-
 function ActionPurr() {
 	ActionPurr.parent.constructor.call(this);
 };

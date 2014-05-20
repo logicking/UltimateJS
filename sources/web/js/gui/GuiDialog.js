@@ -3,8 +3,6 @@
  * background image
  */
 
-GuiDialog.prototype = new GuiDiv();
-GuiDialog.prototype.constructor = GuiDialog;
 /**
  * @constructor
  */

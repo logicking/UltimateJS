@@ -1,12 +1,9 @@
-/*
+/**
  * GuiSkeleton - container for animated objects, consists of:
- * - array of bones or bodyparts 
+ * - array of bones or bodyparts
  * - keyframes
  * - animations
  */
-
-GuiSkeleton.prototype = new GuiElement();
-GuiSkeleton.prototype.constructor = GuiSkeleton;
 
 /**
  * @constructor

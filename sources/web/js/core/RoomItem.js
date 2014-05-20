@@ -3,9 +3,6 @@
  * scene.
  */
 
-RoomItem.prototype = new Item();
-RoomItem.prototype.constructor = RoomItem;
-
 /**
  * @constructor
  */

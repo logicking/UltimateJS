@@ -1,8 +1,6 @@
 /**
  * Countdown - VisualEntity with countdown label inside it.
  */
-Countdown.prototype = new VisualEntity();
-Countdown.prototype.constructor = Countdown;
 
 /**
  * @constructor

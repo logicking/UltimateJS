@@ -1,8 +1,6 @@
-/*
+/**
  * viewport and dragn drop functions 
  */
-GuiDiv.prototype = new GuiElement();
-GuiDiv.prototype.constructor = GuiDiv;
 
 VIEWPORT_KILLER = false;
 

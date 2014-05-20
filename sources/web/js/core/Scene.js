@@ -2,9 +2,6 @@
  * Scene - Container for VisualEntities
  */
 
-Scene.prototype = new VisualEntity();
-Scene.prototype.constructor = Scene;
-
 function Scene() {
 	Scene.parent.constructor.call(this);
 };

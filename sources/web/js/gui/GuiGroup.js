@@ -1,10 +1,6 @@
-/*
+/**
  * GuiGroup - grouping buttons
  */
-
-
-GuiGroup.prototype = new GuiDiv();
-GuiGroup.prototype.constructor = GuiGroup;
 
 /**
  * @constructor

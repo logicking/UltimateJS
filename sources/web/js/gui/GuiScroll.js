@@ -1,9 +1,6 @@
-/*
+/**
  * Scrolling group of elements
  */
-
-GuiScroll.prototype = new GuiElement();
-GuiScroll.prototype.constructor = GuiScroll;
 
 /**
  * @constructor

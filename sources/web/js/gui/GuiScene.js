@@ -2,9 +2,6 @@
  * Scene to operate Sprites
  */
 
-GuiScene.prototype = new GuiDiv();
-GuiScene.prototype.constructor = GuiScene;
-
 /**
  * @constructor
  */

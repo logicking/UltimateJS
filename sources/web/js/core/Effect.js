@@ -2,9 +2,6 @@
  * Effect represents visual, sound etc effects
  */
 
-Effect.prototype = new VisualEntity();
-Effect.prototype.constructor = Effect;
-
 /**
  * @constructor
  */

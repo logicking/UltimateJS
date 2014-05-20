@@ -1,8 +1,5 @@
 var GUI_MB_NAME = "GuiMessageBox";
 
-GuiMessageBox.prototype = new GuiDialog();
-GuiMessageBox.prototype.constructor = GuiMessageBox;
-
 function GuiMessageBox() {
 	GuiMessageBox.parent.constructor.call(this);
 };
