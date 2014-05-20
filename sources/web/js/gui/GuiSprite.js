@@ -1,11 +1,8 @@
-/*
+/**
  * GuiSprite - sprite of GuiScene
  */
 
 var GUISPRITE_HACK_ON = false;
-
-GuiSprite.prototype = new GuiDiv();
-GuiSprite.prototype.constructor = GuiSprite;
 
 /**
  * @constructor

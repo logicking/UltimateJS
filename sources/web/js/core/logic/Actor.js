@@ -14,11 +14,6 @@
  * hasMovePoint, hasItemToUse, nothingToDo - function, evaluated priority of the action
  */
 
-
-Actor.prototype = new VisualEntity();
-Actor.prototype.constructor = Actor;
-
-
 /**
  * @constructor
  */

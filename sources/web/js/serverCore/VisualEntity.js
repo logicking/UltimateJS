@@ -2,9 +2,6 @@
  * VisualEntity - Entity with visual representation
  */
 
-VisualEntity.prototype = new Entity();
-VisualEntity.prototype.constructor = VisualEntity;
-
 /**
  * @constructor
  */

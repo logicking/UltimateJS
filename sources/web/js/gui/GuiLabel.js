@@ -1,9 +1,6 @@
-/*
+/**
  * Label with text that can be aligned vertically and horizontally
  */
-
-GuiLabel.prototype = new GuiElement();
-GuiLabel.prototype.constructor = GuiLabel;
 
 /**
  * @constructor

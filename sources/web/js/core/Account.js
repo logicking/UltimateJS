@@ -1,9 +1,6 @@
-/*
+/**
  * Account - root entity that is parent to all active entities
  */
-
-Account.prototype = new BaseState();
-Account.prototype.constructor = Account;
 
 var GLOBAL_UPDATE_INTERVAL = 50;
 

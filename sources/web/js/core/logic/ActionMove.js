@@ -1,14 +1,13 @@
-/*
- *  Moving actor to target position with predefined velocity
- */
-
 /**
- * @constructor
+ *  Moving actor to target position with predefined velocity
  */
 
 var KITTY_RUN_DIST = 500;
 var ACTION_MOVE_PRECISION = 3;
 
+/**
+ * @constructor
+ */
 function ActionMove() {
 	ActionMove.parent.constructor.call(this);
 };

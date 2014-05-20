@@ -4,9 +4,6 @@
 
 var ANIM_DELAY = 400;
 
-PhysicEntity.prototype = new VisualEntity();
-PhysicEntity.prototype.constructor = PhysicEntity;
-
 /**
  * @constructor
  */

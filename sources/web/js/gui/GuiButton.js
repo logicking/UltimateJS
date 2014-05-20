@@ -1,6 +1,3 @@
-GuiButton.prototype = new GuiDiv();
-GuiButton.prototype.constructor = GuiButton;
-
 /**
  * @constructor
  */

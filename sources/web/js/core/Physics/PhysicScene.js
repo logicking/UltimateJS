@@ -3,10 +3,6 @@
  * PhysicEntity`s container
  */
 
-// var FLOOR_LEVEL = 352;
-PhysicScene.prototype = new Scene();
-PhysicScene.prototype.constructor = PhysicScene;
-
 /**
  * @constructor
  */
@@ -48,7 +44,6 @@ PhysicScene.prototype.createVisual = function() {
 		that.setTimeout(updateWorld, 15);
 	}
 	updateWorld();
-//	Physics.pause(true);
 };
 
 PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {
@@ -63,10 +58,6 @@ PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {
 PhysicScene.prototype.attachChildVisual = function(child) {
 	PhysicScene.parent.attachChildVisual.call(this, child);
 };
-
-// PhysicScene.prototype.move = function(dx, dy) {
-//
-// };
 
 PhysicScene.prototype.destroy = function() {
 	PhysicScene.parent.destroy.call(this);

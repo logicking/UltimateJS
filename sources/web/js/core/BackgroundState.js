@@ -1,13 +1,9 @@
-////////////////////////////////////////////////////
 /**
  * BackgroundState set of useful functions, operating div that permanently exist
  * in game
  */
 
 var LEVEL_FADE_TIME = 500;
-
-BackgroundState.prototype = new BaseState();
-BackgroundState.prototype.constructor = BaseState;
 
 /**
  * @constructor

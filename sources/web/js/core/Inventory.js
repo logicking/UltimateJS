@@ -2,9 +2,6 @@
  * Inventory
  */
 
-Inventory.prototype = new Entity();
-Inventory.prototype.constructor = Inventory;
-
 /**
  * @constructor
  */

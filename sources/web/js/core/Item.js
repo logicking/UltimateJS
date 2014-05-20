@@ -3,9 +3,6 @@
  */
 var ITEM_NAME = "Item";
 
-Item.prototype = new VisualEntity();
-Item.prototype.constructor = Item;
-
 /**
  * @constructor
  */

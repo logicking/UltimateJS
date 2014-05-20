@@ -1,11 +1,8 @@
-/*
+/**
  * BaseState - abstract class - current state of the game.
  * Loads GUI preset and operate with GUI elements.
  * Preloads any required resources
  */
-
-BaseState.prototype = new Entity();
-BaseState.prototype.constructor = BaseState;
 
 /**
  * @constructor

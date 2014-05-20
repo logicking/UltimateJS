@@ -8,9 +8,6 @@
  * Scene to operate Sprites
  */
 
-GuiFrame.prototype = new GuiElement();
-GuiFrame.prototype.constructor = GuiFrame;
-
 /**
  * @constructor
  */
