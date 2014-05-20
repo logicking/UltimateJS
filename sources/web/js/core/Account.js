@@ -46,10 +46,26 @@ Account.prototype.init = function(params) {
 			"Only one account object at time are allowed");
 	Account.instance = this;
 	
-//	this.debuggerInstance = turnOnOnScreenDebug();
-//	this.debuggerInstance.fps = {};
-//	this.debuggerInstance.fps.total = 0;
-//	this.debuggerInstance.fps.calls = 0;
+	 this.debuggerInstance = turnOnOnScreenDebug();
+//	 this.debuggerInstance.fps = {};
+//	 this.debuggerInstance.fps.total = 0;
+//	 this.debuggerInstance.fps.calls = 0;
+
+	
+	
+	this.tapActive = true;
+	$(window).blur(function(e) {
+		that.debuggerInstance.log("Blur");
+	});
+	$(window).focus(function(e) {
+		that.debuggerInstance.log("Focus");
+//		that.tabActive = true;
+//		that.activateUpdateAndRender();
+//		alert("focus!");
+
+	});
+
+	alert("INIT!");
 };
 
 Account.prototype.addEntity = function(newEntity) {

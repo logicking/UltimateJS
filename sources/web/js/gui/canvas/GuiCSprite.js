@@ -178,7 +178,7 @@ GuiCSprite.prototype.setEnabled = function(on) {
 	if (on) {
 		this.enabled = true;
 	} else {
-		this.enabled = true;
+		this.enabled = false;
 	}
 };
 
