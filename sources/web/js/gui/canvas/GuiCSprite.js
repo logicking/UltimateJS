@@ -78,8 +78,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	};
 //	this.imageHeight = parseInt(this.img.height / parseInt(this.total.height / this.height));
 //	this.imageWidth = parseInt(this.img.width / parseInt(this.total.width / this.width));
-	this.imageHeight = this.height;
-	this.imageWidth = this.width;
+	that.imageHeight = Math.round(that.img.height / Math.round(that.total.height / that.height));
+	that.imageWidth = Math.round(that.img.width / Math.round(that.total.width / that.width));
 	that.scale = {
 			x : that.width / that.imageWidth,
 			y : that.height / that.imageHeight
@@ -486,7 +486,7 @@ GuiCSprite.prototype.render = function(ctx) {
 	ctx.translate(parseInt((x+w*ratio.x)), parseInt((y+h*ratio.y)));
 	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
 	ctx.globalAlpha = this.opacity;
-//	ctx.scale(this.scale.x, this.scale.y); 
+	ctx.scale(this.scale.x, this.scale.y); 
 
 	try {
     ctx.drawImage(this.img,
