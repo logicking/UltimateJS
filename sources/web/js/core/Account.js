@@ -65,8 +65,6 @@ Account.prototype.init = function(params) {
 		that.debuggerInstance.log(" ++Done");
 
 	});
-
-	alert("INIT7!");
 };
 
 Account.prototype.addEntity = function(newEntity) {
