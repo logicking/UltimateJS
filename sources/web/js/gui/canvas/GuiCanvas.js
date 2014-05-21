@@ -697,5 +697,4 @@ GuiCanvas.prototype.render = function() {
 	}
 
 	this.children.render(this.contex);
-	this.contex.restore();
 };
