@@ -47,26 +47,22 @@ Account.prototype.init = function(params) {
 			"Only one account object at time are allowed");
 	Account.instance = this;
 	
-	 this.debuggerInstance = turnOnOnScreenDebug();
+//	 this.debuggerInstance = turnOnOnScreenDebug();
 //	 this.debuggerInstance.fps = {};
 //	 this.debuggerInstance.fps.total = 0;
 //	 this.debuggerInstance.fps.calls = 0;
 
 	
 	
-	this.tapActive = true;
+	this.tabActive = true;
 	$(window).blur(function(e) {
-//		that.debuggerInstance.log("Blur");
+		that.tabActive = false;
 	});
 	$(window).focus(function(e) {
-		that.debuggerInstance.log(" Focus");
-//		that.tabActive = true;
+		that.tabActive = true;
 		that.activateUpdateAndRender();
-		that.debuggerInstance.log(" ++Done");
 
 	});
-
-	alert("INIT7!");
 };
 
 Account.prototype.addEntity = function(newEntity) {
@@ -109,10 +105,11 @@ Account.prototype.removeAllEntities = function(id, dontDestroy) {
  */
 Account.prototype.activateUpdateAndRender = function() {
 	var that = this;
-	
+
 	this.cancelUpdate = true;
-	
+
 	setTimeout(function() {
+		that.prevUpdateTime = Date.now();
 		that.cancelUpdate = false;
 		that.globalUpdateIntervalHandle = window.requestAnimationFrame(function() {
 			that.update(100);

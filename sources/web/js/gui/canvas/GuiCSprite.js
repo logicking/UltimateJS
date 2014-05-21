@@ -66,23 +66,26 @@ GuiCSprite.prototype.initialize = function(params) {
 	
 	this.img = Resources.getAsset(this.total.image);
 	
+	var oldFunc = this.img.onload;
 	this.img.onload = function() {
-		that.imageHeight = Math.round(that.img.height / Math.round(that.total.height / that.height));
-		that.imageWidth = Math.round(that.img.width / Math.round(that.total.width / that.width));
+		that.imageHeight = Math.round(Math.round(that.img.height / Math.round(that.total.height / that.height)));
+		that.imageWidth = Math.round(Math.round(that.img.width / Math.round(that.total.width / that.width)));
 //		that.img.setAttribute("height", that.height);
 //		that.img.setAttribute("width", that.width);
 		that.scale = {
-				x : that.width / that.imageWidth,
-				y : that.height / that.imageHeight
+				x : Math.round((that.width / that.imageWidth) * 100) / 100,
+				y : Math.round((that.height / that.imageHeight) * 100) / 100
 		};
+		if (oldFunc)
+			oldFunc();
 	};
-//	this.imageHeight = parseInt(this.img.height / parseInt(this.total.height / this.height));
-//	this.imageWidth = parseInt(this.img.width / parseInt(this.total.width / this.width));
-	this.imageHeight = this.height;
-	this.imageWidth = this.width;
+//	this.imageHeight = Math.round(this.img.height / Math.round(this.total.height / this.height));
+//	this.imageWidth = Math.round(this.img.width / Math.round(this.total.width / this.width));
+	that.imageHeight = Math.round(Math.round(that.img.height / Math.round(that.total.height / that.height)));
+	that.imageWidth = Math.round(Math.round(that.img.width / Math.round(that.total.width / that.width)));
 	that.scale = {
-			x : that.width / that.imageWidth,
-			y : that.height / that.imageHeight
+			x : Math.round((that.width / that.imageWidth) * 100) / 100,
+			y : Math.round((that.height / that.imageHeight) * 100) / 100
 	};
 	
 	this.backgroundPosition = {
@@ -178,7 +181,7 @@ GuiCSprite.prototype.setEnabled = function(on) {
 	if (on) {
 		this.enabled = true;
 	} else {
-		this.enabled = true;
+		this.enabled = false;
 	}
 };
 
@@ -229,7 +232,7 @@ GuiCSprite.prototype.updateAnimation = function() {
 		var row = this.animations[this.currentAnimation].row + q;
 		frame = remainder;
 
-		this.changeBackgroundPosition(frame * this.width, row * this.height);
+		this.changeBackgroundPosition(frame, row);
 		this.frame = frame;
 		this.row = row;
 	}
@@ -366,7 +369,7 @@ GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 	}
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);
-	this.changeBackgroundPosition(-frame * this.width, row * this.height);
+	this.changeBackgroundPosition(-frame, row);
 };
 
 GuiCSprite.prototype.resizeBackground = function() {
@@ -420,7 +423,7 @@ GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibili
 	fadeAnimation.dO = fadeAnimation.end - fadeAnimation.start;
 
 	fadeAnimation.time = time>0?time:500;
-	fadeAnimation.speed = Math.abs(fadeAnimation.time/fadeAnimation.dO);
+	fadeAnimation.speed = Math.abs(fadeAnimation.dO/fadeAnimation.time);
 
 	fadeAnimation.callback = callback;
 	fadeAnimation.changeVisibility = changeVisibility;
@@ -434,12 +437,12 @@ GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibili
 
 GuiCSprite.prototype.fade = function(dt) {
 	
-	var step = this.fadeAnimation.speed * dt/1000 * this.fadeAnimation.norm;
+	var step = this.fadeAnimation.speed * dt * this.fadeAnimation.norm;
 	var next = this.opacity + step;
-	if ((this.opacity - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
+	if ((this.fadeAnimation.end - next)*this.fadeAnimation.norm/Math.abs(this.fadeAnimation.norm) > 0) {
 		this.setOpacity(next);
 	} else {
-		this.fading = true;
+		this.fading = false;
 		this.setOpacity(this.fadeAnimation.end);
 		if (this.fadeAnimation.callback)
 			this.fadeAnimation.callback();
@@ -473,28 +476,28 @@ GuiCSprite.prototype.render = function(ctx) {
     var y =  Math.round((this.calcPercentageHeight(this.y) + this.calcPercentageWidth(this.parent.guiOffsetY?this.parent.guiOffsetY:0) + this.offsetY)*scrnRatio.y);
 //	var x = Math.round((this.calcPercentageWidth(this.x)  + this.offsetX)*scrnRatio.x);
 //    var y =  Math.round((this.calcPercentageHeight(this.y) + this.offsetY)*scrnRatio.y);
-    var w = Math.round(this.width*scrnRatio.x);//this.imageWidth;//
-    var h =  Math.round(this.height*scrnRatio.y);//this.imageHeight;//
-	var bx = Math.round(this.backgroundPosition.x);
-	var by = Math.round(this.backgroundPosition.y * this.height);
+    var w = Math.ceil(this.width*scrnRatio.x);//this.imageWidth;//
+    var h =  Math.ceil(this.height*scrnRatio.y);//this.imageHeight;//
+	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
+	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
 
 	var ratio = {
-		x : this.transformOrigin?this.transformOrigin.x:0.5,
-		y : this.transformOrigin?this.transformOrigin.y:0.5
+		x : this.transformOrigin?(Math.round(this.transformOrigin.x * 100) / 100):0.5,
+		y : this.transformOrigin?(Math.round((this.transformOrigin.y) * 100) / 100):0.5
 	};
 	
-	ctx.translate(parseInt((x+w*ratio.x)), parseInt((y+h*ratio.y)));
-	ctx.rotate(MathUtils.toRad(parseInt(this.angle))); 
+	ctx.translate(Math.round((x+w*ratio.x)), Math.round((y+h*ratio.y)));
+	ctx.rotate(MathUtils.toRad(Math.round(this.angle))); 
 	ctx.globalAlpha = this.opacity;
-//	ctx.scale(this.scale.x, this.scale.y); 
+	
+//	ctx.scale(this.scale.x, this.scale.y);
 
 	try {
-    ctx.drawImage(this.img,
-		    bx, by,
-		    this.width*scrnRatio.x, this.height*scrnRatio.y,
-            -parseInt(w*ratio.x), -parseInt(h*ratio.y),
-            w, h);
-	}
-	catch (e) {
+	    ctx.drawImage(this.img,
+			    bx, by,
+			    Math.ceil(this.imageWidth), Math.ceil(this.imageHeight),
+	            -Math.ceil(w*ratio.x), -Math.ceil(h*ratio.y),
+	            w, h);
+	} catch (e) {
 	}
 };
