@@ -202,6 +202,56 @@ var Sound = (function() {
 			}
 			catch (e) {console.log(e);}
 		},
+        playWithVolume : function(id, volume, priority, loop) {
+            try {
+                var that = this;
+                var callback = null;
+                var ch = this.getChannel("default");
+                ch.volume = volume != null ? volume : 1;
+                var sound = this.soundBuffers[id];
+                if (typeof loop === 'function') {
+                    callback = loop;
+                    loop = false;
+                }
+                var sndInstance = {
+                    id : id,
+                    priority : priority ? priority : sound.priority,
+                    loop : loop ? true : false,
+                    offset : sound.offset,
+                    volume : ch.muted ? 0 : ch.volume,
+                    duration : sound.duration,
+                    spriteName : sound.spriteName,
+                    buffer : this.sprites[sound.spriteName] ? this.sprites[sound.spriteName] : this.sprite
+                };
+                if (ch.playing != null) {
+                    var num = this.channelCount++;
+                    var chName = "channel" + num;
+                    this.channels[chName] = {
+                        playing : null,
+                        volume : 1
+                    };
+                    ch = this.channels[chName];
+                    ch.playing = sndInstance;
+                    this.instance.play(sndInstance, function() {
+                        if (callback) {
+                            callback();
+                        }
+                        ch.playing = null;
+                        that.channels[chName] = null;
+                        delete that.channels[chName];
+                    });
+                } else {
+                    ch.playing = sndInstance;
+                    this.instance.play(sndInstance, function() {
+                        if (callback) {
+                            callback();
+                        }
+                        ch.playing = null;
+                    });
+                }
+            }
+            catch (e) {console.error(e);}
+        },
 		init : function(name, forceSprite, callback, createChannels) {
 			// createChannels is using only in jSound
 			var that = this;
