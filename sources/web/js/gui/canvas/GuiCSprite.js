@@ -63,7 +63,9 @@ GuiCSprite.prototype.initialize = function(params) {
 
 	this.offsetX = params.offsetX||0;
 	this.offsetY = params.offsetY||0;
-	
+
+    this.transformOrigin = params.transformOrigin || {x: 0.5, y: 0.5};
+
 	this.img = Resources.getAsset(this.total.image);
 	
 	var oldFunc = this.img.onload;
@@ -481,10 +483,10 @@ GuiCSprite.prototype.render = function(ctx) {
 	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
 	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
 
-	var ratio = {
-		x : this.transformOrigin?(Math.round(this.transformOrigin.x * 100) / 100):0.5,
-		y : this.transformOrigin?(Math.round((this.transformOrigin.y) * 100) / 100):0.5
-	};
+    var ratio = {
+        x : this.transformOrigin?(Math.round(this.transformOrigin.x * 100) / 100):0.5,
+        y : this.transformOrigin?(Math.round((this.transformOrigin.y) * 100) / 100):0.5
+    };
 	
 	ctx.translate(Math.round((x+w*ratio.x)), Math.round((y+h*ratio.y)));
 	ctx.rotate(MathUtils.toRad(Math.round(this.angle))); 
