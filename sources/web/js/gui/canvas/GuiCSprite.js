@@ -42,8 +42,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	
 	this.params = params;
 
-	this.x = params.x||0;
-	this.y = params.y||0;
+	this.x = this.calcPercentageWidth(params.x||0);
+	this.y = this.calcPercentageHeight(params.y||0);
 
 	this.z = params.z||0;
 
@@ -61,10 +61,9 @@ GuiCSprite.prototype.initialize = function(params) {
 		tile : params.totalTile
 	};
 
-	this.offsetX = params.offsetX||0;
-	this.offsetY = params.offsetY||0;
+	this.setOffset(params.offsetX, params.offsetY);
 
-    this.transformOrigin = params.transformOrigin || {x: 0.5, y: 0.5};
+	this.setTransformOrigin(params.transformOrigin);
 
 	this.img = Resources.getAsset(this.total.image);
 	
@@ -250,6 +249,7 @@ GuiCSprite.prototype.updateAnimation = function() {
 GuiCSprite.prototype.move = function(dx, dy) {
 	this.x += dx;
 	this.y += dy;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.stopAnimation = function(dontCallCallback) {
@@ -269,6 +269,7 @@ GuiCSprite.prototype.stopAnimation = function(dontCallCallback) {
 GuiCSprite.prototype.changeBackgroundPosition = function(x, y) {
 	this.backgroundPosition.x = x;
 	this.backgroundPosition.y = y;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.setFrameCallback = function(frameCallback) {
@@ -320,6 +321,7 @@ GuiCSprite.prototype.isPlayingAnimation = function(animationName) {
 
 GuiCSprite.prototype.flip = function(needToBeFlipped) {
 	this.flipped = needToBeFlipped;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.transform = function(transfromations) {
@@ -336,19 +338,32 @@ GuiCSprite.prototype.transform = function(transfromations) {
 	var scaleY = selectValue(this.scale, 1);
 	var scaleX = scaleY;
 	scaleX *= (this.flipped ? -1 : 1);
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.rotate = function(angle) {
 	this.angle = angle;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
-	this.transformOrigin = transformOrigin;
+	this.transformOrigin = {
+            x : transformOrigin?(Math.round(transformOrigin.x * 100) / 100):0.5,
+            y : transformOrigin?(Math.round(transformOrigin.y * 100) / 100):0.5
+        };
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.setPosition = function(x, y) {
-	this.x = x;
-	this.y = y;
+	this.x = this.calcPercentageWidth(x);
+	this.y = this.calcPercentageHeight(y);
+	this.parent.setAwake(true);
+};
+
+GuiCSprite.prototype.setOffset = function(x, y) {
+	this.offsetX = this.calcPercentageWidth(x||0);
+	this.offsetY = this.calcPercentageHeight(y||0);
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.setRealPosition = function(x, y) {
@@ -374,6 +389,7 @@ GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);
 	this.changeBackgroundPosition(-frame, row);
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.resizeBackground = function() {
@@ -407,10 +423,12 @@ GuiCSprite.prototype.remove = function() {
 
 GuiCSprite.prototype.hide = function() {
 	this.visible = false;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.show = function() {
 	this.visible = true;
+	this.parent.setAwake(true);
 };
 
 GuiCSprite.prototype.clampByParentViewport = function() {
@@ -476,18 +494,16 @@ GuiCSprite.prototype.render = function(ctx) {
 			y : Screen.heightRatio()
 	};
 
-	var x = Math.round((this.calcPercentageWidth(this.x) + this.calcPercentageWidth(this.parent.guiOffsetX?this.parent.guiOffsetX:0) + this.offsetX)*scrnRatio.x);
-    var y =  Math.round((this.calcPercentageHeight(this.y) + this.calcPercentageWidth(this.parent.guiOffsetY?this.parent.guiOffsetY:0) + this.offsetY)*scrnRatio.y);
-//	var x = Math.round((this.calcPercentageWidth(this.x)  + this.offsetX)*scrnRatio.x);
-//    var y =  Math.round((this.calcPercentageHeight(this.y) + this.offsetY)*scrnRatio.y);
+	var x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*scrnRatio.x);
+    var y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*scrnRatio.y);
     var w = Math.ceil(this.width*scrnRatio.x);//this.imageWidth;//
     var h =  Math.ceil(this.height*scrnRatio.y);//this.imageHeight;//
 	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
 	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
 
     var ratio = {
-        x : this.transformOrigin?(Math.round(this.transformOrigin.x * 100) / 100):0.5,
-        y : this.transformOrigin?(Math.round((this.transformOrigin.y) * 100) / 100):0.5
+        x : this.transformOrigin.x,
+        y : this.transformOrigin.y
     };
 	
 	ctx.translate(Math.round((x+w*ratio.x)), Math.round((y+h*ratio.y)));
@@ -496,12 +512,12 @@ GuiCSprite.prototype.render = function(ctx) {
 	
 //	ctx.scale(this.scale.x, this.scale.y);
 
-	try {
+//	try {
 	    ctx.drawImage(this.img,
 			    bx, by,
 			    Math.ceil(this.imageWidth), Math.ceil(this.imageHeight),
 	            -Math.ceil(w*ratio.x), -Math.ceil(h*ratio.y),
 	            w, h);
-	} catch (e) {
-	}
+//	} catch (e) {
+//	}
 };

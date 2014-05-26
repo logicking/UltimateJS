@@ -38,6 +38,8 @@ GuiCanvas.prototype.create = function(src) {
 	this.contex.webkitImageSmoothingEnabled = false;
 	this.contex.mozImageSmoothingEnabled = false;
 	
+	this.setAwake(true);
+	
 	canvas.id = this.id;	
 	canvas.width = this.width;	
 	canvas.height = this.height;
@@ -163,8 +165,9 @@ GuiCanvas.prototype.setOffset = function(offsetX, offsetY) {
 };
 
 GuiCanvas.prototype.setGuiOffset = function(offsetX, offsetY) {
-	this.guiOffsetX = offsetX?offsetX:0;
-	this.guiOffsetY = offsetY?offsetY:0;
+	this.guiOffsetX = this.calcPercentageWidth(offsetX?offsetX:0);
+	this.guiOffsetY = this.calcPercentageHeight(offsetY?offsetY:0);
+	this.setAwake(true);
 };
 
 /**
@@ -209,6 +212,8 @@ GuiCanvas.prototype.setPosition = function(x, y, noResize) {
 
 	if (!noResize)
 		this.resize();
+	else 
+		this.setAwake(true);
 };
 
 /**
@@ -404,6 +409,8 @@ GuiCanvas.prototype.setSize = function(width, height, noResize) {
 
 	if (!noResize)
 		this.resize();
+	else 
+		this.setAwake(true);
 };
 
 /**
@@ -415,6 +422,7 @@ GuiCanvas.prototype.setRealSize = function(width, height) {
 	var size = Screen.calcRealSize(width, height);
 	this.contex.canvas.width = size.x;
 	this.contex.canvas.height = size.y;
+	this.setAwake(true);
 //	this.jObject['css']("width", size.x);
 //	this.jObject['css']("height", size.y);
 };
@@ -428,6 +436,7 @@ GuiCanvas.prototype.setRealPosition = function(x, y) {
 	var pos = Screen.calcRealSize(x, y);
 	this.jObject['css']("left", pos.x);
 	this.jObject['css']("top", pos.y);
+	this.setAwake(true);
 };
 
 /**
@@ -459,6 +468,7 @@ GuiCanvas.prototype.resize = function() {
 	}
 
 	this.children.resize();
+	this.setAwake(true);
 };
 
 /**
@@ -575,6 +585,7 @@ GuiCanvas.prototype.detach = function() {
  */
 GuiCanvas.prototype.addGui = function(entity, name) {
 	this.children.addGui(entity, name);
+	this.setAwake(true);
 };
 
 /**
@@ -583,6 +594,7 @@ GuiCanvas.prototype.addGui = function(entity, name) {
  */
 GuiCanvas.prototype.removeGui = function(entity) {
 	this.children.removeGui(entity);
+	this.setAwake(true);
 };
 
 /**
@@ -670,9 +682,9 @@ GuiCanvas.prototype.getEventPosition = function(e) {
  * Scheduled function to call continuosly, used to call render if enabled
  */
 GuiCanvas.prototype.update = function() {
-	if (this.isEnabled()) {
-		this.render();
-	}
+//	if (this.isEnabled()) {
+//		this.render();
+//	}
 };
 
 /**
@@ -683,10 +695,25 @@ GuiCanvas.prototype.isEnabled = function() {
 	return this.enabled;
 };
 
+GuiCanvas.prototype.setAwake = function(awake) {
+	var that = this; 
+	
+	this.awake = true;
+	if (this.awakeTimeout)
+		clearTimeout(this.awakeTimeout);
+	
+	this.awakeTimeout = setTimeout(function() {
+		that.awake = false;
+	}, 500);
+};
+
 /**
  * Render of the canvas. draw the background and render children
  */
 GuiCanvas.prototype.render = function() {
+	if (!this.awake)
+		return;
+	
 	var w = this.width*Screen.widthRatio();
 	var h = this.height*Screen.heightRatio();
 	if (this.terrainPattern) {
