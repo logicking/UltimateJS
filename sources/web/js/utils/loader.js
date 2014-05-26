@@ -52,6 +52,14 @@ var Loader = (function() {
 				innerStroke.style.left = 10 + ((pecentage/100)*580);
 			}
 		},
+		setLoadingState : function(pecentage) {
+			if (loadingStateText) {
+				loadingStateText['removeChild'](loadingStateText.firstChild);
+				loadingStateText
+						.appendChild(loadingStateText.ownerDocument
+								.createTextNode(pecentage));
+			}
+		},
 		showLoadingMessage : function() {
 			if (isShowed)
 				return;

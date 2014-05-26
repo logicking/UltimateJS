@@ -360,6 +360,8 @@ GuiCSprite.prototype.setTransform = function(matrix) {
 };
 
 GuiCSprite.prototype.resize = function() {
+	
+//	this.parent.render();
 };
 
 GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
