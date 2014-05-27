@@ -1,3 +1,5 @@
+var DOM_MODE = false;
+
 
 /**
  * GuiCSprite is a sprite for GuiCanvas (UltimateJS) based on GuiSprite.js but not inherit from

@@ -1,4 +1,4 @@
-var DOM_MODE = false;
+var DOM_MODE = true;
 
 var GUISPRITE_HACK_ON = false;
 
