@@ -129,30 +129,30 @@ var Physics = (function () {
         world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
         contactProcessor = new ContactProcessor();
         /// New contact listener version
-        contactListener = new Box2D.Dynamics.b2ContactListener;
-        contactListener.BeginContact = function(contact) {
-        	if (contactProcessor) {
-				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-				contactProcessor.processBegin(type1, type2, contact);	
-        	}
-        };
-        contactListener.EndContact = function(contact) {
-        	if (contactProcessor) {
-				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-				contactProcessor.processEnd(type1, type2, contact);	
-        	}
-    		
-        };
-        contactListener.PreSolve = function(contact, impulse) {
-        	
-        };
-        contactListener.PostSolve = function(contact, oldManifold) {
-        	
-        };
-        
-        world.SetContactListener(contactListener);
+//        contactListener = new Box2D.Dynamics.b2ContactListener;
+//        contactListener.BeginContact = function(contact) {
+//        	if (contactProcessor) {
+//				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
+//				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
+//				contactProcessor.processBegin(type1, type2, contact);	
+//        	}
+//        };
+//        contactListener.EndContact = function(contact) {
+//        	if (contactProcessor) {
+//				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
+//				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
+//				contactProcessor.processEnd(type1, type2, contact);	
+//        	}
+//    		
+//        };
+//        contactListener.PreSolve = function(contact, impulse) {
+//        	
+//        };
+//        contactListener.PostSolve = function(contact, oldManifold) {
+//        	
+//        };
+//        
+//        world.SetContactListener(contactListener);
         ///
 // Old one        
 //  contactListener = new ContactListener(contactProcessor);

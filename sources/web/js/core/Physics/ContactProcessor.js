@@ -13,6 +13,39 @@ function ContactProcessor() {
 //	Adds pair to contact events dataset 
 //
 ContactProcessor.prototype.addPair = function(type1, type2, event, action) {
+	var that = this;
+	/// New contact listener version
+    if (!Physics.getContactListener())
+	{
+    	var contactListener = Physics.getContactListener();
+    	contactListener = new Box2D.Dynamics.b2ContactListener;
+
+	    contactListener.BeginContact = function(contact) {
+	    	if (that) {
+				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
+				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
+				that.processBegin(type1, type2, contact);	
+	    	}
+	    };
+	    contactListener.EndContact = function(contact) {
+	    	if (that) {
+				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
+				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
+				that.processEnd(type1, type2, contact);	
+	    	}
+			
+	    };
+	    contactListener.PreSolve = function(contact, impulse) {
+	    	
+	    };
+	    contactListener.PostSolve = function(contact, oldManifold) {
+	    	
+	    };
+	    var world = Physics.getWorld();
+	    world.SetContactListener(contactListener);
+	}
+	
+	
 	if (type1 in this.pairs) {
 		if (this.pairs[type1][type2])
 			this.pairs[type1][type2][event] = action;
