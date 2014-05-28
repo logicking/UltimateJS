@@ -69,8 +69,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	
 	var oldFunc = this.img.onload;
 	this.img.onload = function() {
-		that.imageHeight = Math.round(Math.round(that.img.height / Math.round(that.total.height / that.height)));
-		that.imageWidth = Math.round(Math.round(that.img.width / Math.round(that.total.width / that.width)));
+		that.imageHeight = Math.round(Math.round(that.height / Math.round(that.total.height / that.img.height)));
+		that.imageWidth = Math.round(Math.round(that.width / Math.round(that.total.width / that.img.width)));
 //		that.img.setAttribute("height", that.height);
 //		that.img.setAttribute("width", that.width);
 		that.scale = {

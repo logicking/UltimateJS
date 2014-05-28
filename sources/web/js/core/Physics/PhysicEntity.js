@@ -268,7 +268,8 @@ PhysicEntity.prototype.physicsEnable = function (v) {
     // if (!this.physics['IsStatic']() || Physics.debugMode())
     // Physics.updateItemAdd(this);
     // }
-    this.physicsEnabled = v;
+    this.physicsEnabled = !!v;
+    this.physics.SetActive(this.physicsEnabled);
 };
 
 // PhysicEntity update function
