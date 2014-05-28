@@ -10,3 +10,9 @@ function assert(exp, message) {
 // console
 console.log = function() {
 };
+
+console.warn = function() {
+};
+
+console.error = function() {
+};
