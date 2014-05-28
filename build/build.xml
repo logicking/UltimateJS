@@ -49,7 +49,6 @@
                 <file name="core/Physics/Physics.js"/>
                 <file name="core/Physics/Explosion.js"/>
                 <file name="core/Physics/ContactProcessor.js"/>
-                <file name="core/Physics/ContactListener.js"/>
                 <file name="core/Physics/PhysicEntity.js"/>
                 <file name="core/Physics/PhysicScene.js"/>
                 <file name="core/Physics/PhysicsTrigger.js"/>

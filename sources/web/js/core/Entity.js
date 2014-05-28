@@ -46,11 +46,18 @@ Entity.prototype.log = function(msg) {
 };
 
 Entity.prototype.destroy = function() {
-	try {
-		this.clearTimeouts();
+		//TODO WTF is happening?
+		if (this.clearTimeouts)
+			this.clearTimeouts();
+		else
+			console.warn("Very suspicious accident! Some shit happened!");
 		var child;
 		if (this.parent) {
-			this.parent.removeChild(this);
+			//TODO WTF is happening?
+			if (this.parent.removeChild)
+				this.parent.removeChild(this);
+			else
+				console.warn("Very suspicious accident! Yep, shit happens...");
 		}
 		if (this.children) {
 			for ( var i = 0; i < this.children.length; i++) {
@@ -61,8 +68,6 @@ Entity.prototype.destroy = function() {
 				i--;
 			}
 		}
-	}
-	catch (e) {console.log(e);}
 };
 
 Entity.prototype.addChild = function(child) {

@@ -1,6 +1,4 @@
-/**
- * GuiSprite - sprite of GuiScene
- */
+var DOM_MODE = false;
 
 var GUISPRITE_HACK_ON = false;
 
