@@ -166,11 +166,26 @@ var Resources = (function() {
 			if (assets[id]) {
 				return assets[id];
 			}
+			return false;
+		},
+		
+		getImageAsset : function(id, callback) {
+			if (assets[id]) {
+				if (callback)
+					callback(assets[id]);
+				return assets[id];
+			}
 			var obj = new Image();
 			obj.src = Resources.getImage(id);
-			assets[id] = obj;
+			var oldFunc = obj.onload;
+			obj.onload = function() {
+				if (callback)
+					callback(obj);
+				assets[id] = obj;
+				oldFunc.call(this);
+			};
 			return obj;
-		},
+		},		
 		// return an array of registered images filenames,
 		// used for preloading
 		getUsedImages : function() {
