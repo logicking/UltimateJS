@@ -2,7 +2,9 @@ var DOM_MODE = false;
 
 
 /**
- * GuiCSprite is a sprite for GuiCanvas (UltimateJS) based on GuiSprite.js but not inherit from
+ * GuiCSprite is a sprite for GuiCanvas (UltimateJS) based on GuiSprite.js but
+ * not inherit from
+ * 
  * @author Glukozavr
  * @date April-May 2014
  * @constructor
@@ -22,22 +24,11 @@ guiFactory.addClass(GuiCSprite);
 
 /**
  * Initial function to save and use incoming params
- * @param params may contain:
- * - parent
- * - width
- * - height
- * - image
- * - offsetX
- * - offsetY
- * - x
- * - y
- * - z
- * - hide
- * - opacity
- * - totalImage,
- * - totalImageWidth,
- * - totalImageHeight,
- * - totalTile
+ * 
+ * @param params
+ *            may contain: - parent - width - height - image - offsetX - offsetY -
+ *            x - y - z - hide - opacity - totalImage, - totalImageWidth, -
+ *            totalImageHeight, - totalTile
  */
 GuiCSprite.prototype.initialize = function(params) {
 	var that = this;
@@ -67,25 +58,40 @@ GuiCSprite.prototype.initialize = function(params) {
 
 	this.setTransformOrigin(params.transformOrigin);
 
-	this.img = Resources.getAsset(this.total.image);
-	
-	var oldFunc = this.img.onload;
-	this.img.onload = function() {
-		that.imageHeight = Math.round(Math.round(that.img.height / Math.round(that.total.height / that.height)));
-		that.imageWidth = Math.round(Math.round(that.img.width / Math.round(that.total.width / that.width)));
-//		that.img.setAttribute("height", that.height);
-//		that.img.setAttribute("width", that.width);
+	this.img = Resources.getImageAsset(this.total.image, function(image) {
+		init.call(that, image);
+	});
+
+
+	function init(image) {	
+		that.imageHeight = Math.round(that.height * image.height / that.total.height);
+		that.imageWidth = Math.round(that.width * image.width / that.total.width);
 		that.scale = {
 				x : Math.round((that.width / that.imageWidth) * 100) / 100,
 				y : Math.round((that.height / that.imageHeight) * 100) / 100
 		};
-		if (oldFunc)
-			oldFunc();
-	};
-//	this.imageHeight = Math.round(this.img.height / Math.round(this.total.height / this.height));
-//	this.imageWidth = Math.round(this.img.width / Math.round(this.total.width / this.width));
-	that.imageHeight = Math.round(Math.round(that.img.height / Math.round(that.total.height / that.height)));
-	that.imageWidth = Math.round(Math.round(that.img.width / Math.round(that.total.width / that.width)));
+		
+		that.backgroundPosition = {
+			x : 0,
+			y : 0
+		};
+	
+		that.backgroundSize = {
+				w : that.total.width,
+				h : that.total.height
+		};
+		
+		that.rotate(0);
+		
+		that.resizeBackground();
+		
+		that.show();
+		that.setEnabled(true);
+		Account.instance.addScheduledEntity(that);
+	}
+	that.imageHeight = Math.round(that.height * that.img.height / that.total.height);
+	that.imageWidth = Math.round(that.width * that.img.width / that.total.width);
+	
 	that.scale = {
 			x : Math.round((that.width / that.imageWidth) * 100) / 100,
 			y : Math.round((that.height / that.imageHeight) * 100) / 100
@@ -100,10 +106,6 @@ GuiCSprite.prototype.initialize = function(params) {
 			w : this.total.width,
 			h : this.total.height
 	};
-	
-	this.rotate(0);
-	
-	this.resizeBackground();
 	
 	this.currentAnimation = null;
 	this.spatialAnimation = null;
@@ -126,10 +128,6 @@ GuiCSprite.prototype.initialize = function(params) {
 	} else {
 		this.parent.addGui(this);
 	}
-	
-	this.show();
-	this.setEnabled(true);
-	Account.instance.addScheduledEntity(this);
 };
 
 
@@ -151,29 +149,29 @@ GuiCSprite.prototype.addAnimation = function(animationName, frames, row,
 	};
 };
 
-//GuiCSprite.prototype.update = function(dt) {
-//	if (this.currentAnimation == null && this.spatialAnimation == null) {
-//		return;
-//	}
+// GuiCSprite.prototype.update = function(dt) {
+// if (this.currentAnimation == null && this.spatialAnimation == null) {
+// return;
+// }
 //
-//	var curTime = (new Date()).getTime();
-//	if (!dt) {
-//		dt = curTime - this.lastUpdateTime;
-//	}
-//	this.lastUpdateTime = curTime;
-//	this.currentFrameTime += dt;
+// var curTime = (new Date()).getTime();
+// if (!dt) {
+// dt = curTime - this.lastUpdateTime;
+// }
+// this.lastUpdateTime = curTime;
+// this.currentFrameTime += dt;
 //
-//	if (this.spatialAnimation !== null) {
-//		this.updateSpatialAnimation(dt);
-//	}
-//	while (this.currentFrameTime >= this.currentFrameLength) {
-//		var stopped = this.updateAnimation();
-//		if (stopped == true) {
-//			return;
-//		}
-//		this.currentFrameTime -= this.currentFrameLength;
-//	}
-//};
+// if (this.spatialAnimation !== null) {
+// this.updateSpatialAnimation(dt);
+// }
+// while (this.currentFrameTime >= this.currentFrameLength) {
+// var stopped = this.updateAnimation();
+// if (stopped == true) {
+// return;
+// }
+// this.currentFrameTime -= this.currentFrameLength;
+// }
+// };
 
 
 GuiCSprite.prototype.isEnabled = function() {
@@ -372,13 +370,13 @@ GuiCSprite.prototype.setRealPosition = function(x, y) {
 };
 
 GuiCSprite.prototype.setTransform = function(matrix) {
-//	this.angle = angle;
+// this.angle = angle;
 	this.matrix = matrix;
 };
 
 GuiCSprite.prototype.resize = function() {
 	
-//	this.parent.render();
+// this.parent.render();
 };
 
 GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
@@ -437,7 +435,7 @@ GuiCSprite.prototype.clampByParentViewport = function() {
 };
 
 GuiCSprite.prototype.fadeTo = function(fadeValue, time, callback, changeVisibility) {
-//	var that = this;
+// var that = this;
 
 	var fadeAnimation = {};
 
@@ -498,8 +496,8 @@ GuiCSprite.prototype.render = function(ctx) {
 
 	var x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*scrnRatio.x);
     var y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*scrnRatio.y);
-    var w = Math.ceil(this.width*scrnRatio.x);//this.imageWidth;//
-    var h =  Math.ceil(this.height*scrnRatio.y);//this.imageHeight;//
+    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
+    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
 	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
 	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
 
@@ -512,14 +510,14 @@ GuiCSprite.prototype.render = function(ctx) {
 	ctx.rotate(MathUtils.toRad(Math.round(this.angle))); 
 	ctx.globalAlpha = this.opacity;
 	
-//	ctx.scale(this.scale.x, this.scale.y);
+// ctx.scale(this.scale.x, this.scale.y);
 
-//	try {
+// try {
 	    ctx.drawImage(this.img,
 			    bx, by,
 			    Math.ceil(this.imageWidth), Math.ceil(this.imageHeight),
 	            -Math.ceil(w*ratio.x), -Math.ceil(h*ratio.y),
 	            w, h);
-//	} catch (e) {
-//	}
+// } catch (e) {
+// }
 };

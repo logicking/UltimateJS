@@ -103,12 +103,16 @@ PhysicEntity.prototype.createPhysics = function () {
             var fixDef = new b2FixtureDef();
             fixDef.shape = new b2PolygonShape();
             // apply offset
-            $.each(physicParams.vertices, function (id, vertex) {
+            var vertices = cloneObject(physicParams.vertices);
+            $.each(vertices, function (id, vertex) {
                 vertex.x = (vertex.x + physicParams.x) / Physics.getB2dToGameRatio();
                 vertex.y = (vertex.y + physicParams.y) / Physics.getB2dToGameRatio();
             });
 
-            fixDef.shape.SetAsArray(physicParams.vertices, physicParams.vertices.count);
+            fixDef.shape.SetAsArray(vertices, vertices.length);
+            setShapeParams(fixDef, physicParams);
+            fixtureDefList.push(fixDef);
+            break;
         }
         // TODO: implement Triangle etc.
         /*
@@ -173,7 +177,7 @@ PhysicEntity.prototype.createPhysics = function () {
                             vertex.y = (vertex.y + fixtureData.y) / Physics.getB2dToGameRatio();
                         });
 
-                        fixDef.shape.SetAsArray(fixtureData.vertices, fixtureData.vertices.count);
+                        fixDef.shape.SetAsArray(fixtureData.vertices, fixtureData.vertices.length);
                         break;
                     }
                     case "Triangle":
@@ -263,7 +267,8 @@ PhysicEntity.prototype.physicsEnable = function (v) {
     // if (!this.physics['IsStatic']() || Physics.debugMode())
     // Physics.updateItemAdd(this);
     // }
-    this.physicsEnabled = v;
+    this.physicsEnabled = !!v;
+    this.physics.SetActive(this.physicsEnabled);
 };
 
 // PhysicEntity update function
