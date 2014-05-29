@@ -110,6 +110,7 @@ div {
 	display: block;
 	z-index: 6;
 	-webkit-transform: scale3d(1, 1, 1);
+	overflow: visible;
 }
 
 .sprite {

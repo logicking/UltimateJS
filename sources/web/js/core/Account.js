@@ -55,14 +55,14 @@ Account.prototype.init = function(params) {
 	
 	
 	this.tabActive = true;
-	$(window).blur(function(e) {
-		that.tabActive = false;
-	});
-	$(window).focus(function(e) {
-		that.tabActive = true;
-		that.activateUpdateAndRender();
-
-	});
+//	$(window).blur(function(e) {
+//		that.tabActive = false;
+//	});
+//	$(window).focus(function(e) {
+//		that.tabActive = true;
+//		that.activateUpdateAndRender();
+//
+//	});
 };
 
 Account.prototype.addEntity = function(newEntity) {

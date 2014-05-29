@@ -177,12 +177,10 @@ var Resources = (function() {
 			}
 			var obj = new Image();
 			obj.src = Resources.getImage(id);
-			var oldFunc = obj.onload;
 			obj.onload = function() {
 				if (callback)
 					callback(obj);
 				assets[id] = obj;
-				oldFunc.call(this);
 			};
 			return obj;
 		},		
