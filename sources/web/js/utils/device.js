@@ -297,9 +297,15 @@ var Device = (function() {
 		touchEndY : function() {
 			return touchEndY;
 		},
+		isWP: function () {
+		    var regExp = new RegExp("Windows Phone", "i");
+		    return navigator.userAgent.match(regExp);
+		},
 
 		// becnmark test for slow devices
 		isSlow : function() {
+			if (Device.isWP())
+				return false;
 			if (Device.isIpodDevice()) {
 				return true;
 			}
