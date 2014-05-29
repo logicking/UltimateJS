@@ -3,6 +3,7 @@
  */
 
 var GLOBAL_UPDATE_INTERVAL = 50;
+var DOM_MODE = false;
 
 /**
  * @constructor
