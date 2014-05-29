@@ -1,4 +1,4 @@
-var DOM_MODE = false;
+DOM_MODE = false;
 
 
 /**
