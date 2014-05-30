@@ -1,3 +1,6 @@
+var DEFAULT_B2WORLD_RATIO = 1;
+
+
 b2Math = Box2D.Common.Math.b2Math;
 b2Vec2 = Box2D.Common.Math.b2Vec2;
 b2BodyDef = Box2D.Dynamics.b2BodyDef;
@@ -91,7 +94,7 @@ function DebugCanvas() {
 
 var Physics = (function () {
     var world = null;
-    var b2dToGameRatio = 1; // Box2d to Ultimate.js coordinates //TODO: implement
+    var b2dToGameRatio = DEFAULT_B2WORLD_RATIO; // Box2d to Ultimate.js coordinates //TODO: implement
     var worldBorder = null;
     var timeout = null;
     var pause = false;
@@ -125,7 +128,7 @@ var Physics = (function () {
         if (world != null) {
             return;
         }
-        b2dToGameRatio = ratio != null ? ratio : 1;
+        b2dToGameRatio = ratio != null ? ratio : DEFAULT_B2WORLD_RATIO;
         world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
         contactProcessor = new ContactProcessor();
         /// New contact listener version

@@ -350,8 +350,8 @@ GuiCSprite.prototype.rotate = function(angle) {
 
 GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
 	this.transformOrigin = {
-            x : transformOrigin?(Math.round(transformOrigin.x * 100) / 100):0.5,
-            y : transformOrigin?(Math.round(transformOrigin.y * 100) / 100):0.5
+            x : (transformOrigin && !isNaN(transformOrigin.x))?(Math.round(transformOrigin.x * 100) / 100):0.5,
+            y : (transformOrigin && !isNaN(transformOrigin.x))?(Math.round(transformOrigin.y * 100) / 100):0.5
         };
 	this.parent.setAwake(true);
 };
@@ -526,6 +526,7 @@ GuiCSprite.prototype.render = function(ctx) {
 	var offsetY = -Math.ceil(h*ratio.y);
 	
 // try {
+	
 	if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
 	    ctx.drawImage(this.img,
 			    bx, by,
