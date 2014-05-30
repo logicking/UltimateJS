@@ -531,7 +531,7 @@ GuiCSprite.prototype.render = function(ctx) {
 			    bx, by,
 			    sizeX, sizeY,
 	            offsetX, offsetY,
-	            w, h)
+	            w, h);
 	else 
 		console.warn('Shit is happining. Again. Source rect is out of image bounds');
 
