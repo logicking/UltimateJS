@@ -17,6 +17,7 @@ var Device = (function() {
 	var isIeBrowser = null;
 	var isWebkitBrowser = null;
 
+
 	var userAgent = null;
 
 	// result of a benchmark test
@@ -28,6 +29,8 @@ var Device = (function() {
 	var nativeRender = (USE_NATIVE_RENDER && window.NativeRender) ? window.NativeRender
 			: null;
 
+	var isNative = typeof(Native) != 'undefined' && Native.Screen ;
+	
 	function parseUserAgent() {
 		if (userAgentParsed)
 			return;
@@ -204,6 +207,10 @@ var Device = (function() {
 		
 		isMobile : function() {
 			return Device.isTouch();
+		},
+		
+		isNative : function() {
+			return isNative;
 		},
 
 		supports3dTransfrom : function() {
