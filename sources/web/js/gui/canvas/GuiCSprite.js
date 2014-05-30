@@ -85,7 +85,9 @@ GuiCSprite.prototype.initialize = function(params) {
 		
 		that.resizeBackground();
 		
-		that.show();
+		if (!that.params.hide)
+			that.show();
+		
 		that.setEnabled(true);
 		Account.instance.addScheduledEntity(that);
 	}
@@ -500,24 +502,39 @@ GuiCSprite.prototype.render = function(ctx) {
     var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
 	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
 	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
-
+	
     var ratio = {
         x : this.transformOrigin.x,
         y : this.transformOrigin.y
     };
 	
-	ctx.translate(Math.round((x+w*ratio.x)), Math.round((y+h*ratio.y)));
-	ctx.rotate(MathUtils.toRad(Math.round(this.angle))); 
+    var translate = {
+    		x: Math.round((x+w*ratio.x)),
+    		y: Math.round((y+h*ratio.y))
+    };
+    var rot = MathUtils.toRad(Math.round(this.angle));
+    rot = rot.toFixed(3)*1;
+	ctx.translate(translate.x, translate.y);
+	ctx.rotate(rot); 
 	ctx.globalAlpha = this.opacity;
 	
 // ctx.scale(this.scale.x, this.scale.y);
 
-// try {
+	var sizeX = Math.ceil(this.imageWidth);
+	var sizeY = Math.ceil(this.imageHeight);
+	var offsetX = -Math.ceil(w*ratio.x);
+	var offsetY = -Math.ceil(h*ratio.y);
+	
+ try {
 	    ctx.drawImage(this.img,
 			    bx, by,
-			    Math.ceil(this.imageWidth), Math.ceil(this.imageHeight),
-	            -Math.ceil(w*ratio.x), -Math.ceil(h*ratio.y),
+			    sizeX, sizeY,
+	            offsetX, offsetY,
 	            w, h);
-// } catch (e) {
+
+ } catch (e) {
+//	 alert(this.img.src + "; " +translate.x + "; " + translate.y + "; " + rot  + "; " + bx + "; " + by + "; " + sizeX + "; " + sizeY + "; " + offsetX + "; " + offsetY + "; " + w + "; " + h);
+ };
+//	 alert("this.imageWidth = " + this.imageWidth + " this.imageHeight = " + this.imageHeight + " ratio.x = " + ratio.x + " ratio.y = " + ratio.y );
 // }
 };

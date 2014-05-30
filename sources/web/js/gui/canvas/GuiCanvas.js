@@ -713,15 +713,19 @@ GuiCanvas.prototype.setAwake = function(awake) {
 GuiCanvas.prototype.render = function() {
 	if (!this.awake)
 		return;
-	
-	var w = this.width*Screen.widthRatio();
-	var h = this.height*Screen.heightRatio();
-	if (this.terrainPattern) {
-	    this.contex.fillStyle = this.terrainPattern;
-	    this.contex.fillRect(0, 0, w, h);
-	} else {
-		this.contex.clearRect(0, 0, w, h);
-	}
+//	try {
+		var w = this.width*Screen.widthRatio();
+		var h = this.height*Screen.heightRatio();
+		if (this.terrainPattern) {
+		    this.contex.fillStyle = this.terrainPattern;
+		    this.contex.fillRect(0, 0, w, h);
+		} else {
+			this.contex.clearRect(0, 0, w, h);
+		}
 
-	this.children.render(this.contex);
+		this.children.render(this.contex);
+//	} catch(e) {
+//		alert(e);
+//	}
+
 };

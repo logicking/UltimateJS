@@ -44,7 +44,7 @@ Physics.explode = function(params) { // (center, radius, force, duration,
 					}
 
 					if ((body.m_userData) && (body.m_userData.destructable)) {
-						var damage = impulse.Length() / DAMAGE_DECR;
+						var damage = impulse.Length() / (DAMAGE_DECR!==0?DAMAGE_DECR:(params.damageDecr?params.damageDecr:1));
 						body.m_userData.onDamage(damage);
 						score += damage;
 					}
