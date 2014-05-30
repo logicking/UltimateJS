@@ -421,6 +421,7 @@ GuiCSprite.prototype.setZ = function(z) {
 };
 
 GuiCSprite.prototype.remove = function() {
+	Account.instance.removeScheduledEntity(this);
 };
 
 GuiCSprite.prototype.hide = function() {

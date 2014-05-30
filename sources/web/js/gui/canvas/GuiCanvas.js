@@ -565,6 +565,7 @@ GuiCanvas.prototype.setParent = function(newParent, saveGlobalPosition) {
 GuiCanvas.prototype.remove = function() {
 
 	Account.instance.removeRenderEntity(this);
+	Account.instance.removeScheduledEntity(this);
 	// console.log("Removing item with id %s, classname = %s", this.id,
 	// this.className);
 	if(this.tooltip){
