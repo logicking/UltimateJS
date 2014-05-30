@@ -525,16 +525,20 @@ GuiCSprite.prototype.render = function(ctx) {
 	var offsetX = -Math.ceil(w*ratio.x);
 	var offsetY = -Math.ceil(h*ratio.y);
 	
- try {
+// try {
+	if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
 	    ctx.drawImage(this.img,
 			    bx, by,
 			    sizeX, sizeY,
 	            offsetX, offsetY,
-	            w, h);
+	            w, h)
+	else 
+		console.warn('Shit is happining. Again. Source rect is out of image bounds');
 
- } catch (e) {
-//	 alert(this.img.src + "; " +translate.x + "; " + translate.y + "; " + rot  + "; " + bx + "; " + by + "; " + sizeX + "; " + sizeY + "; " + offsetX + "; " + offsetY + "; " + w + "; " + h);
- };
+// } catch (e) {
+////	 alert(this.img.src + "; " +translate.x + "; " + translate.y + "; " + rot  + "; " + bx + "; " + by + "; " + sizeX + "; " + sizeY + "; " + offsetX + "; " + offsetY + "; " + w + "; " + h);
+//	 alert((bx+sizeX)*1 + ':' + this.img.width + '; ' + (by+sizeY)*1 + ':' + this.img.height + '; ');
+// };
 //	 alert("this.imageWidth = " + this.imageWidth + " this.imageHeight = " + this.imageHeight + " ratio.x = " + ratio.x + " ratio.y = " + ratio.y );
 // }
 };
