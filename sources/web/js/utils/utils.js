@@ -65,6 +65,16 @@ function getCursorPositionXY(e) {
 // Performs crossbrowser transfrom via JQuery
 function cssTransform(obj, matrix, rotate, scaleX, scaleY, translate) {
 
+	if (Device.isNative()) {
+	    var transform = {
+	            "matrix": matrix,
+	            "translate": [translate.x, translate.y],
+	            "rotate": rotate
+	        };
+	    obj['css']("transform", transform);
+	    return;
+	}
+	
 	var transform = "";
 
 	if (matrix != null) {

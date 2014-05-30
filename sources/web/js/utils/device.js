@@ -166,6 +166,21 @@ var Device = (function() {
             isSupportsToDataURL = supportsToDataURL();
 		},
 		setStorageItem : function(key, val) {
+			if (Device.isNative()) {
+				if (typeof(val) == "undefined" || typeof(val) == "function")
+	        		return;
+	        	switch(typeof(val)) {
+	        		case "string":
+	        			break;
+	        		case "number":
+	        			break;
+	        		case "object":
+	        			val = JSON.stringify(val);
+	        			break;
+	        	};
+				Native.Storage.SaveToIsolatedStorage(key, val);
+				return;
+			}
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
 				storage.setItem(key, val);
@@ -174,6 +189,20 @@ var Device = (function() {
 			}
 		},
 		getStorageItem : function(key, defaultVal) {
+			if (Device.isNative()){
+	        	var answer = Native.Storage.GetFromIsolatedStorage(key);
+	        	if (answer == null || answer == "" || answer == "null")
+	        		answer = defaultVal;
+	        	else if (!isNaN(answer))
+	        		answer *= 1;
+	        	else if (answer == "true")
+	        		answer = true;
+	        	else if (answer == "false")
+	        		answer = false;
+//	        	else if (answer.indexOf("{") == 0)
+//	        		answer = JSON.parse(answer);
+				return answer;
+			}
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
 				var val = storage.getItem(key);
@@ -186,6 +215,10 @@ var Device = (function() {
 		},
 
 		removeStorageItem : function(key) {
+			if (Device.isNative()) {
+				///TODO Implement Storage item removal for native
+				return;
+			}
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
 				storage.removeItem(key);
@@ -196,29 +229,57 @@ var Device = (function() {
 		},
 
 		is : function(deviceName) {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return (userAgent.indexOf(deviceName) > -1);
 		},
 		isAndroid : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return androidOsVersion != null;
 		},
 
 		androidVersion : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return androidOsVersion;
 		},
 
 		isWebkit : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return isWebkitBrowser;
 		},
 
 		isAppleMobile : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return isAppleMobileOs;
 		},
 
 		isIpodDevice : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return isIpod;
 		},
 		
 		isMobile : function() {
+			if (Device.isNative()) {
+				///TODO Implement
+				return "Not implemented";
+			}
 			return Device.isTouch();
 		},
 		
@@ -230,6 +291,10 @@ var Device = (function() {
 			return false;//Modernizr.csstransforms3d;
 		},
 		nativeRender : function() {
+			if (Device.isNative()) {
+				///TODO Not implemented
+				return null;
+			}
 			return nativeRender;
 		},
 
@@ -239,6 +304,10 @@ var Device = (function() {
 		 */
 
 		isTouch : function() {
+			if (Device.isNative()) {
+				///TODO Not implemented
+				return false;
+			}
 			return 'ontouchstart' in document.documentElement;
 		},
 		getPositionFromEvent : function(e) {
@@ -317,14 +386,14 @@ var Device = (function() {
 		touchEndY : function() {
 			return touchEndY;
 		},
-		isWP: function () {
+		isWindowsPhone: function () {
 		    var regExp = new RegExp("Windows Phone", "i");
 		    return navigator.userAgent.match(regExp);
 		},
 
 		// becnmark test for slow devices
 		isSlow : function() {
-			if (Device.isWP())
+			if (Device.isNative() || Device.isWindowsPhone())
 				return false;
 			if (Device.isIpodDevice()) {
 				return true;
