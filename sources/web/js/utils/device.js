@@ -18,6 +18,7 @@ var Device = (function() {
 	var isWebkitBrowser = null;
 
 	var userAgent = null;
+    var isSupportsToDataURL;
 
 	// result of a benchmark test
 	// currently set as percentage of IPhone 4
@@ -148,6 +149,18 @@ var Device = (function() {
 
 			defaultTouchEvents();
 			runBenchmark();
+
+            /**
+             *
+             * @return {boolean} support context.GetImageData()
+             */
+            function supportsToDataURL() {
+                var c = document.createElement("canvas");
+                var data = c.toDataURL("image/png");
+                return (data.indexOf("data:image/png") == 0);
+            }
+
+            isSupportsToDataURL = supportsToDataURL();
 		},
 		setStorageItem : function(key, val) {
 			if (supportsHtml5Storage()) {
@@ -317,7 +330,9 @@ var Device = (function() {
 				return false;
 			}
 		},
-
+        isSupportsToDataURL: function () {
+            return isSupportsToDataURL;
+        },
 		/*
 		 * Miscellaneous functions
 		 */
