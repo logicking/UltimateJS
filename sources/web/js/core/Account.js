@@ -178,14 +178,21 @@ Account.prototype.removeScheduledEntity = function(entity) {
 /*
  * Rendering for children entities
  */
-var oldWindowRequestAnimationFrame = window.requestAnimationFrame;
-window.requestAnimationFrame = (function() {
-	return oldWindowRequestAnimationFrame || window.webkitRequestAnimationFrame
-			|| window.mozRequestAnimationFrame || window.oRequestAnimationFrame
-			|| window.msRequestAnimationFrame
-			|| function( /* function */callback, /* DOMElement */element) {
-				window.setTimeout(callback, 1000 / 50);
-			};
+// Если ничего нет - возвращаем обычный таймер
+window.requestAnimationFrame = (function () {
+    return  window.requestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        /**
+         *
+         * @param {function} callback
+         * @param element DOM element
+         */
+            function (callback, element) {
+            window.setTimeout(callback, 1000 / 50);
+        };
 })();
 
 Account.prototype.addRenderEntity = function(newEntity) {
