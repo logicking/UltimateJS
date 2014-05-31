@@ -15,6 +15,11 @@ var ENHANCED_BASE_MARGIN_HEIGHT = 70;
 
 var DO_NOT_RESIZE = false;
 
+// Used for Native
+var BASE_MARGIN_WIDTH = 0;
+var BASE_MARGIN_HEIGHT = 0;
+//
+
 var Screen = (function() {
 	var screenConsts = {};
 
@@ -58,8 +63,17 @@ var Screen = (function() {
 		right : 0,
 		bottom : 0
 	};
+	
+	if (typeof(Native) != "undefined"){
+	    fullRect.right = Native.ScreenWidth;
+    	fullRect.bottom = Native.ScreenHeight;
+	}
 
 	function windowScrollDown() {
+		if (typeof(Native) != "undefined") {
+			/// TODO Implement
+			return;
+		}
 		setTimeout(function() {
 			window['scrollTo'](0, 1);
 		}, 10);
@@ -76,7 +90,8 @@ var Screen = (function() {
 
 			// recalculate all field parameters
 			var sizeChanged = resizeField(w, h);
-			if (sizeChanged) {
+			
+			if (typeof(Native) == "undefined" && sizeChanged) {
 				appInstance.resize();
 			}
 		}
