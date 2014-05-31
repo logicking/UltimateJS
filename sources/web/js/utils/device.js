@@ -158,6 +158,11 @@ var Device = (function() {
              * @return {boolean} support context.GetImageData()
              */
             function supportsToDataURL() {
+            	// TODO Implement
+            	if (Device.isNative()) {
+            		console.log("supportsToDataURL is not implemented")
+            		return false;
+            	}
                 var c = document.createElement("canvas");
                 var data = c.toDataURL("image/png");
                 return (data.indexOf("data:image/png") == 0);

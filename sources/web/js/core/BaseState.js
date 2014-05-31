@@ -51,19 +51,38 @@ BaseState.prototype.activate = function(params) {
 	}
 };
 
+BaseState.prototype.hide = function (setEnable) {
+    this.getGui("enhancedScene").hide();
+    if (!setEnable) {
+        this.guiContainer.resetUpdateInterval();
+        this.setEnable(false);
+    }
+};
+
+BaseState.prototype.show = function (setEnable) {
+    if (typeof (setEnable) == "undefined")
+        setEnable = true;
+    this.getGui("enhancedScene").show();
+    if (setEnable) {
+        this.guiContainer.setUpdateInterval(GLOBAL_UPDATE_INTERVAL);
+        this.setEnable(true);
+    }
+};
+
 // Preloading of static resources - resources that
 // should be upload before the use of the state
 BaseState.prototype.preload = function() {
 	// Loading JSONs first
 	var totalToLoad = 0;
 	var that = this;
-	if (!this.resources)
+	if (!this.resources) {
 		this.preloadComplete();
-
+		return;
+	}
 	
 	if (this.resources.json) {
+		totalToLoad = countProperties(that.resources.json);
 		$['each'](this.resources.json, function(key, val) {
-			totalToLoad++;
 			$['getJSON'](key, function(data) {
 				that.resources.json[key] = data;
 			}).error(function() {
