@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="UltimateJS" default="copy" basedir=".">
+    <!-- Some settings we need for the build -->
+    <property file="build.properties"/>
+    <target name="copy" depends="concatenateGameScripts"/>
+    <!-- clean up resources-->
+    <target name="cleanUp">
+    </target>
+    <!-- compile scripts-->
+    <taskdef name="jscomp" classname="com.google.javascript.jscomp.ant.CompileTask" classpath="${jscompiler.jar}"/>
+    <!-- prepare to copy resources-->
+    <target name="prepare" depends="cleanUp">
+        <!--delete dir="${deploy.home}" /-->
+        <mkdir dir="${deploy.home}"/>
+    </target>
+    <!-- compile scripts-->
+    <target name="concatenateGameScripts">
+        <concat destfile="${dir.min}/ultimateJS.js">
+            <filelist dir="${dir.engine}/${dir.scripts}">
+              <!--  <file name="thirdParty/viewporter.js"/> -->
+                <file name="utils/utils.js"/>
+             <!--   <file name="utils/color.js"/> -->
+                <file name="utils/assert.js"/>
+                <file name="utils/sound.js"/>
+                <file name="utils/screen.js"/>
+                <file name="utils/touch.js"/>
+                <file name="utils/transform.js"/>
+                <file name="utils/device.js"/>
+                <file name="utils/dragDropManager.js"/>
+                <file name="utils/factory.js"/>
+                <file name="utils/resources.js"/>
+                <file name="core/EntityFactory.js"/>
+                <file name="core/Entity.js"/>
+                <file name="core/Account.js"/>
+                <file name="core/BaseState.js"/>
+                <file name="core/VisualEntity.js"/>
+                <file name="core/Scene.js"/>
+                <file name="core/Item.js"/>
+                <file name="core/SimpleCountdown.js"/>
+                <file name="core/Countdown.js"/>
+                <file name="core/Inventory.js"/>
+                <file name="core/BackgroundState.js"/>
+                <file name="core/Physics/Physics.js"/>
+                <file name="core/Physics/Explosion.js"/>
+                <file name="core/Physics/ContactProcessor.js"/>
+                <file name="core/Physics/PhysicEntity.js"/>
+                <file name="core/Physics/PhysicScene.js"/>
+                <file name="core/Physics/PhysicsTrigger.js"/>
+                <file name="core/Effect.js"/>
+
+                <file name="gui/GuiFactory.js"/>
+                <file name="gui/GuiContainer.js"/>
+                <file name="gui/GuiElement.js"/>
+                <file name="gui/GuiDiv.js"/>
+                <file name="gui/GuiButton.js"/>
+                <file name="gui/GuiLabel.js"/>
+                <file name="gui/GuiScroll.js"/>
+                <file name="gui/GuiSprite.js"/>
+                <file name="gui/GuiScene.js"/>
+                <file name="gui/GuiDialog.js"/>
+
+              <!--  <file name="gui/canvas/GuiCanvas.js"/>
+                <file name="gui/canvas/GuiCSprite.js"/> -->
+            </filelist>
+
+        </concat>
+    </target>
+    <!-- compile game scripts-->
+</project>

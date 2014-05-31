@@ -137,6 +137,10 @@ var uniqueId = (function() {
 if (typeof console == "undefined") {
 	var console = {
 		log : function() {
+		},
+		warn : function() {
+		},
+		error : function() {
 		}
 	};
 }
