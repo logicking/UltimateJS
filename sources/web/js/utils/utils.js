@@ -566,3 +566,8 @@ function isImageOk(img) {
     // No other way of checking: assume it’s ok.
     return true;
 }
+
+
+function countProperties(obj) {
+    return Object.keys(obj).length;
+}
