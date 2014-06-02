@@ -336,7 +336,8 @@ Account.prototype.readGlobalUpdate = function(data) {
 				// console.log("New entity '" + entity.id + "' of class "
 				// + element["class"] + " with parent '"
 				// + (entity.parent ? entity.parent.id : "no parent") + "'");
-			}
+			} else
+				console.error("Can`t find parent with id = " + element['parent']+"  for entity = " + id);
 		}
 	});
 };
