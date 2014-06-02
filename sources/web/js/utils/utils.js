@@ -571,3 +571,14 @@ function isImageOk(img) {
 function countProperties(obj) {
     return Object.keys(obj).length;
 }
+
+var mathSin = Math.sin;
+Math.sin = function(a){
+    if (a === 0) return 0;
+    else return mathSin(a);
+};
+var mathCos = Math.cos;
+Math.cos = function(a){
+    if (a === 0) return 1;
+    else return mathCos(a);
+};
