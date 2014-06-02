@@ -403,3 +403,12 @@ PhysicEntity.prototype.onDamage = function (damage) {
         });
     }
 };
+
+PhysicEntity.prototype.setMaterial = function (material) {
+    if (typeof (material) == "string" && material != "")
+        this.material = material;
+};
+
+PhysicEntity.prototype.getMaterial = function () {
+    return this.material;
+};

@@ -86,6 +86,17 @@ Entity.prototype.removeChild = function(child) {
 	popElementFromArray(child, this.children);
 };
 
+Entity.prototype.getChild = function(childId) {
+	assert(this.children, "no children been assigned");
+	var child;
+	$.each(this.children, function(id, val) {
+		if (val.id == childId)
+			child = val;
+	});
+	assert(child, "No child with id = " + childId + " has been assigned");
+	return child;
+};
+
 Entity.prototype.initChildren = function(params) {
 	if (params && params['children']) {
 		Account.instance.readGlobalUpdate(params['children']);
