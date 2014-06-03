@@ -10,7 +10,7 @@ GuiContainer.prototype.init = function() {
 	this.guiEntitiesMap = new Object();
 };
 GuiContainer.prototype.resize = function() {
-	for ( var i = 0; i < this.guiEntities.length; i++) {
+	for (var i = 0; i < this.guiEntities.length; i++) {
 		if (this.guiEntities[i].resize) {
 			this.guiEntities[i].resize();
 		}
@@ -18,7 +18,7 @@ GuiContainer.prototype.resize = function() {
 };
 
 GuiContainer.prototype.update = function(time) {
-	for ( var i = 0; i < this.guiEntities.length; i++) {
+	for (var i = 0; i < this.guiEntities.length; i++) {
 		if (this.guiEntities[i].update) {
 			this.guiEntities[i].update(time);
 		}
@@ -26,11 +26,13 @@ GuiContainer.prototype.update = function(time) {
 };
 
 GuiContainer.prototype.render = function(ctx) {
-	for ( var i = 0; i < this.guiEntities.length; i++) {
-		if (this.guiEntities[i].render) {
-			ctx.save(); 
-			this.guiEntities[i].render(ctx);
-			ctx.restore(); 
+	if (ctx) {
+		for (var i = 0; i < this.guiEntities.length; i++) {
+			if (this.guiEntities[i].render) {
+				ctx.save();
+				this.guiEntities[i].render(ctx);
+				ctx.restore();
+			}
 		}
 	}
 };
@@ -54,7 +56,7 @@ GuiContainer.prototype.resetUpdateInterval = function() {
 GuiContainer.prototype.clear = function() {
 	// console.log("Clear GuiContainer, there is %d entities",
 	// this.guiEntities.length);
-	for ( var i = 0; i < this.guiEntities.length; i++) {
+	for (var i = 0; i < this.guiEntities.length; i++) {
 		if (this.guiEntities[i].remove) {
 			// console.log("Remove entity %s", this.guiEntities[i].src);
 			this.guiEntities[i].remove();

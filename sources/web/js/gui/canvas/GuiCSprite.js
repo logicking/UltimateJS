@@ -63,7 +63,12 @@ GuiCSprite.prototype.initialize = function(params) {
 	});
 
 
-	function init(image) {	
+	function init(image) {
+//		if (_PIXIJS) {
+//			that.pixiSprite = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture (image), new PIXI.Rectangle(0, 0, that.width, that.height)), that.width, that.height);
+//			that.parent.stage.addChild(that.pixiSprite);
+//		}
+		
 		that.imageHeight = Math.round(that.height * image.height / that.total.height);
 		that.imageWidth = Math.round(that.width * image.width / that.total.width);
 		that.scale = {
@@ -478,6 +483,8 @@ GuiCSprite.prototype.fade = function(dt) {
 };
 
 GuiCSprite.prototype.update = function(dt) {
+//	this.convertToPixi();
+	
 	if (this.fading) {
 		this.fade(dt);
 	}
@@ -489,58 +496,71 @@ GuiCSprite.prototype.setOpacity = function(opacity) {
 	}
 };
 
+GuiCSprite.prototype.convertToPixi = function() {
+	if (_PIXIJS) {
+		this.pixiSprite.alpha = this.opacity;
+		this.pixiSprite.visible = this.visible; 
+		this.pixiSprite.x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*Screen.widthRatio());
+		this.pixiSprite.y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*Screen.heightRatio()); 
+		this.pixiSprite.rotation = MathUtils.toRad(Math.round(this.angle));
+		this.pixiSprite.width = this.width;// * Screen.widthRatio(); 
+		this.pixiSprite.height = this.height;// * Screen.heightRatio(); 
+		this.pixiSprite.tilePosition  = new PIXI.Point(this.transformOrigin.x, this.transformOrigin.y);
+		this.pixiSprite.scale = new PIXI.Point(Screen.widthRatio() * this.scale.x, Screen.heightRatio() * this.scale.y);
+//		this.pixiSprite.tileScale = new PIXI.Point(this.scale.x, this.scale.y); 
+		this.pixiSprite.tilePosition = new PIXI.Point(this.backgroundPosition.x /** Screen.widthRatio()*/ * this.width, this.backgroundPosition.y * this.height);// * Screen.heightRatio()); 
+	}
+};
+
+
 GuiCSprite.prototype.render = function(ctx) {
-	if (!this.visible) 
-		return;
-	var scrnRatio = {
-			x : Screen.widthRatio(),
-			y : Screen.heightRatio()
-	};
+//	if (_PIXIJS) {
+			
+//	} else {
+		if (!this.visible) 
+			return;
+		var scrnRatio = {
+				x : Screen.widthRatio(),
+				y : Screen.heightRatio()
+		};
 
-	var x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*scrnRatio.x);
-    var y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*scrnRatio.y);
-    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
-    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
-	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
-	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
-	
-    var ratio = {
-        x : this.transformOrigin.x,
-        y : this.transformOrigin.y
-    };
-	
-    var translate = {
-    		x: Math.round((x+w*ratio.x)),
-    		y: Math.round((y+h*ratio.y))
-    };
-    var rot = MathUtils.toRad(Math.round(this.angle));
-    rot = rot.toFixed(3)*1;
-	ctx.translate(translate.x, translate.y);
-	ctx.rotate(rot); 
-	ctx.globalAlpha = this.opacity;
-	
-// ctx.scale(this.scale.x, this.scale.y);
+		var x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*scrnRatio.x);
+	    var y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*scrnRatio.y);
+	    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
+	    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
+		var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
+		var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
+		
+	    var ratio = {
+	        x : this.transformOrigin.x,
+	        y : this.transformOrigin.y
+	    };
+		
+	    var translate = {
+	    		x: Math.round((x+w*ratio.x)),
+	    		y: Math.round((y+h*ratio.y))
+	    };
+	    var rot = MathUtils.toRad(Math.round(this.angle));
+	    rot = rot.toFixed(3)*1;
+		ctx.translate(translate.x, translate.y);
+		ctx.rotate(rot); 
+		ctx.globalAlpha = this.opacity;
+		
+	// ctx.scale(this.scale.x, this.scale.y);
 
-	var sizeX = Math.ceil(this.imageWidth);
-	var sizeY = Math.ceil(this.imageHeight);
-	var offsetX = -Math.ceil(w*ratio.x);
-	var offsetY = -Math.ceil(h*ratio.y);
+		var sizeX = Math.ceil(this.imageWidth);
+		var sizeY = Math.ceil(this.imageHeight);
+		var offsetX = -Math.ceil(w*ratio.x);
+		var offsetY = -Math.ceil(h*ratio.y);
+		
+		if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
+		    ctx.drawImage(this.img,
+				    bx, by,
+				    sizeX, sizeY,
+		            offsetX, offsetY,
+		            w, h);
+		else 
+			console.warn('Shit is happining. Again. Source rect is out of image bounds');
+//	}
 	
-// try {
-	
-	if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
-	    ctx.drawImage(this.img,
-			    bx, by,
-			    sizeX, sizeY,
-	            offsetX, offsetY,
-	            w, h);
-	else 
-		console.warn('Shit is happining. Again. Source rect is out of image bounds');
-
-// } catch (e) {
-////	 alert(this.img.src + "; " +translate.x + "; " + translate.y + "; " + rot  + "; " + bx + "; " + by + "; " + sizeX + "; " + sizeY + "; " + offsetX + "; " + offsetY + "; " + w + "; " + h);
-//	 alert((bx+sizeX)*1 + ':' + this.img.width + '; ' + (by+sizeY)*1 + ':' + this.img.height + '; ');
-// };
-//	 alert("this.imageWidth = " + this.imageWidth + " this.imageHeight = " + this.imageHeight + " ratio.x = " + ratio.x + " ratio.y = " + ratio.y );
-// }
 };

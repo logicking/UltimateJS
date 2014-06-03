@@ -1,6 +1,9 @@
+var _PIXIJS = false;//window._PIXIJS ? window._PIXIJS : false;
 
 /**
- * This is canvas class for UltimateJS based on GuiElement.js but not inherit from
+ * This is canvas class for UltimateJS based on GuiElement.js but not inherit
+ * from
+ * 
  * @author Glukozavr
  * @date April-May 2014
  * @constructor
@@ -20,6 +23,7 @@ guiFactory.addClass(GuiCanvas);
 
 /**
  * Creates id for GuiCanvas
+ * 
  * @returns {String} unique id for children of this canvas
  */
 GuiCanvas.prototype.generateId = function() {
@@ -27,8 +31,9 @@ GuiCanvas.prototype.generateId = function() {
 };
 
 /**
- * Method to create canvas element and get the 2d contex to this.contex
- * Append to body, if there is parent - to the parent.
+ * Method to create canvas element and get the 2d contex to this.contex Append
+ * to body, if there is parent - to the parent.
+ * 
  * @param src
  */
 GuiCanvas.prototype.create = function(src) {
@@ -37,41 +42,40 @@ GuiCanvas.prototype.create = function(src) {
 	this.contex.imageSmoothingEnabled = false;
 	this.contex.webkitImageSmoothingEnabled = false;
 	this.contex.mozImageSmoothingEnabled = false;
-	
-	this.setAwake(true);
-	
-	canvas.id = this.id;	
-	canvas.width = this.width;	
+
+	canvas.id = this.id;
+	canvas.width = this.width;
 	canvas.height = this.height;
 	canvas.style.position = "absolute";
-	document.body.appendChild(canvas);	
-	
+	document.body.appendChild(canvas);
+
 	// remember jQuery object
 	this.jObject = $("#" + this.id);
-	
+
+	this.setAwake(true);
+
+//	if (_PIXIJS) {
+//		this.renderer = new PIXI.CanvasRenderer(this.width, this.height, canvas);
+//		this.renderer.transparent = true;
+//		this.stage = new PIXI.Stage("0xFFFFFF");
+////		this.stage = 0; 
+//	}
+
 	if (!this.setParent(this.parent)) {
 		// if no parent provided assigning to the body object
 		console.warn("No parent was provided for object id = " + this.id);
 	}
-	
+
 	assert(this.jObject.length > 0, "Object id ='" + this.id
 			+ "' was not properly created");
 };
 
 /**
  * Initial function to save and use incoming params
- * @param params may contain:
- * - parent
- * - width
- * - height
- * - image
- * - offsetX
- * - offsetY
- * - x
- * - y
- * - z
- * - hide
- * - opacity
+ * 
+ * @param params
+ *            may contain: - parent - width - height - image - offsetX - offsetY -
+ *            x - y - z - hide - opacity
  */
 GuiCanvas.prototype.initialize = function(params) {
 	this.params = params;
@@ -80,51 +84,54 @@ GuiCanvas.prototype.initialize = function(params) {
 
 	// generate ID
 	this.id = this.generateId();
-	
-	
+
 	// Setting position and size variables
-	this.setSize(Screen.macro(params['width']), Screen.macro(params['height']), true);
+	this.setSize(Screen.macro(params['width']), Screen.macro(params['height']),
+			true);
 	this.setOffset(Screen.macro(params['offsetX']), Screen
 			.macro(params['offsetY']));
 	this.setGuiOffset(Screen.macro(params['guiOffsetX']), Screen
 			.macro(params['guiOffsetY']));
-	this.setPosition(Screen.macro(params['x']), Screen.macro(params['y']), true);
-	
+	this
+			.setPosition(Screen.macro(params['x']), Screen.macro(params['y']),
+					true);
+
 	// Check whether element with such id is already in scene
 	if ($("#" + this.id).length > 0) {
 		console.error(" GuiCanvas with  id = '" + this.id
 				+ "' is already exists.");
 	}
-	
+
 	// Container for children
 	this.children = new GuiContainer();
 	this.children.init();
 
 	// Creating of the canvas element
 	this.create();
-	
-	// Creating background pattern for the canvas if image is exist in tha params.
+
+	// Creating background pattern for the canvas if image is exist in tha
+	// params.
 	this.terrainPattern = null;
 	if (params.image) {
 		var img = Resources.getAsset(params.image);
 		this.terrainPattern = this.contex.createPattern(img, 'repeat');
 	}
-	
+
 	// attach 'this' as data to the element, so we can reference to it by
 	// element id
 	this.jObject['data']("GuiCanvas", this);
 
-	// Creating baseDiv for div elements attach to if needed. 
-//	this.baseDiv = guiFactory.createObject("GuiDiv", {
-//		"parent" : this.parent,
-//		"width" : this.width,
-//		"height" : this.parent,
-//		"x" : this.x,
-//		"y" : this.y,
-//		"offsetX" : this.offsetX,
-//		"offsetY" : this.offsetY
-//	});
-	
+	// Creating baseDiv for div elements attach to if needed.
+	// this.baseDiv = guiFactory.createObject("GuiDiv", {
+	// "parent" : this.parent,
+	// "width" : this.width,
+	// "height" : this.parent,
+	// "x" : this.x,
+	// "y" : this.y,
+	// "offsetX" : this.offsetX,
+	// "offsetY" : this.offsetY
+	// });
+
 	if (typeof params['z'] == "number") {
 		this.setZ(params['z']);
 	}
@@ -145,34 +152,39 @@ GuiCanvas.prototype.initialize = function(params) {
 
 	// Position and size the element once in the end of initialize
 	this.resize();
-	
+
 	// Adding GuiCanvas for update
-//	Account.instance.addScheduledEntity(this);
+	// Account.instance.addScheduledEntity(this);
 	Account.instance.addRenderEntity(this);
 };
 
 /**
  * Creating shift which is considered while positioning element
- * @param offsetX shift on x coordinate
- * @param offsetY shift on y coordinate
+ * 
+ * @param offsetX
+ *            shift on x coordinate
+ * @param offsetY
+ *            shift on y coordinate
  */
 GuiCanvas.prototype.setOffset = function(offsetX, offsetY) {
 	this.offsetX = offsetX;
 	this.offsetY = offsetY;
-	
+
 	if (this.baseDiv)
 		this.baseDiv.setOffset(offsetX, offsetY);
 };
 
 GuiCanvas.prototype.setGuiOffset = function(offsetX, offsetY) {
-	this.guiOffsetX = this.calcPercentageWidth(offsetX?offsetX:0);
-	this.guiOffsetY = this.calcPercentageHeight(offsetY?offsetY:0);
+	this.guiOffsetX = this.calcPercentageWidth(offsetX ? offsetX : 0);
+	this.guiOffsetY = this.calcPercentageHeight(offsetY ? offsetY : 0);
 	this.setAwake(true);
 };
 
 /**
  * Converting percents to number for width
- * @param val a string or number value
+ * 
+ * @param val
+ *            a string or number value
  * @returns {Number} a calculated percent, or the val itself
  */
 GuiCanvas.prototype.calcPercentageWidth = function(val) {
@@ -187,7 +199,9 @@ GuiCanvas.prototype.calcPercentageWidth = function(val) {
 
 /**
  * Converting percents to number for height
- * @param val a string or number value
+ * 
+ * @param val
+ *            a string or number value
  * @returns {Number} a calculated percent, or the val itself
  */
 GuiCanvas.prototype.calcPercentageHeight = function(val) {
@@ -202,9 +216,13 @@ GuiCanvas.prototype.calcPercentageHeight = function(val) {
 
 /**
  * Function to position the canvas element
- * @param x a number or percent value
- * @param y a number or percent value
- * @param noResize {Boolean} to disable resize in this function call
+ * 
+ * @param x
+ *            a number or percent value
+ * @param y
+ *            a number or percent value
+ * @param noResize
+ *            {Boolean} to disable resize in this function call
  */
 GuiCanvas.prototype.setPosition = function(x, y, noResize) {
 	this.x = x;
@@ -212,14 +230,17 @@ GuiCanvas.prototype.setPosition = function(x, y, noResize) {
 
 	if (!noResize)
 		this.resize();
-	else 
+	else
 		this.setAwake(true);
 };
 
 /**
  * Function to move canvas element
- * @param dx number
- * @param dy number
+ * 
+ * @param dx
+ *            number
+ * @param dy
+ *            number
  */
 GuiCanvas.prototype.move = function(dx, dy) {
 	this.x += dx;
@@ -228,7 +249,8 @@ GuiCanvas.prototype.move = function(dx, dy) {
 };
 
 /**
- * Get "left" and "right" style attr of the canvas element 
+ * Get "left" and "right" style attr of the canvas element
+ * 
  * @returns object { x, y }
  */
 GuiCanvas.prototype.getRealPosition = function() {
@@ -240,6 +262,7 @@ GuiCanvas.prototype.getRealPosition = function() {
 
 /**
  * Get x and y values of GuiCanvas
+ * 
  * @returns { x, y }
  */
 GuiCanvas.prototype.getPosition = function() {
@@ -251,7 +274,9 @@ GuiCanvas.prototype.getPosition = function() {
 
 /**
  * Sets z-index of the canvas element
- * @param z number
+ * 
+ * @param z
+ *            number
  */
 GuiCanvas.prototype.setZ = function(z) {
 	this.jObject['css']("z-index", z);
@@ -277,7 +302,9 @@ GuiCanvas.prototype.hide = function() {
 
 /**
  * Set the opacity css attr
- * @param opacity number >= 0 and <= 1
+ * 
+ * @param opacity
+ *            number >= 0 and <= 1
  */
 GuiCanvas.prototype.setOpacity = function(opacity) {
 	this.jObject['css']("opacity", opacity);
@@ -324,7 +351,7 @@ GuiCanvas.prototype.playJqueryAnimation = function(name, callback) {
 		// || that.height);
 	};
 
-	for ( var i = 0; i < desc.length; i++) {
+	for (var i = 0; i < desc.length; i++) {
 		var actionDesc = desc[i];
 		var action;
 		if (action = actionDesc["animate"]) {
@@ -391,6 +418,7 @@ GuiCanvas.prototype.stopJqueryAnimation = function() {
 
 /**
  * Return true if canvas elemnt is nit hiden
+ * 
  * @returns {Boolean}
  */
 GuiCanvas.prototype.isVisible = function() {
@@ -399,9 +427,13 @@ GuiCanvas.prototype.isVisible = function() {
 
 /**
  * Sets size of canvas element
- * @param width number or String percent
- * @param height number or String percent
- * @param noResize {Boolean} to disable resize in this function call
+ * 
+ * @param width
+ *            number or String percent
+ * @param height
+ *            number or String percent
+ * @param noResize
+ *            {Boolean} to disable resize in this function call
  */
 GuiCanvas.prototype.setSize = function(width, height, noResize) {
 	this.width = width;
@@ -409,28 +441,34 @@ GuiCanvas.prototype.setSize = function(width, height, noResize) {
 
 	if (!noResize)
 		this.resize();
-	else 
+	else
 		this.setAwake(true);
 };
 
 /**
  * Changing width and height attr of canvas element
- * @param width {number}
- * @param height {number}
+ * 
+ * @param width
+ *            {number}
+ * @param height
+ *            {number}
  */
 GuiCanvas.prototype.setRealSize = function(width, height) {
 	var size = Screen.calcRealSize(width, height);
 	this.contex.canvas.width = size.x;
 	this.contex.canvas.height = size.y;
 	this.setAwake(true);
-//	this.jObject['css']("width", size.x);
-//	this.jObject['css']("height", size.y);
+	// this.jObject['css']("width", size.x);
+	// this.jObject['css']("height", size.y);
 };
 
 /**
  * Changing left and top attr of canvas element
- * @param x {number}
- * @param y {number}
+ * 
+ * @param x
+ *            {number}
+ * @param y
+ *            {number}
  */
 GuiCanvas.prototype.setRealPosition = function(x, y) {
 	var pos = Screen.calcRealSize(x, y);
@@ -446,7 +484,7 @@ GuiCanvas.prototype.resize = function() {
 	w = this.calcPercentageWidth(this.width);
 	h = this.calcPercentageHeight(this.height);
 	this.setRealSize(w, h);
-	
+
 	var offsetX = 0, offsetY = 0;
 	if (typeof (this.offsetX) == "number") {
 		offsetX = this.offsetX;
@@ -473,7 +511,9 @@ GuiCanvas.prototype.resize = function() {
 
 /**
  * Disable resize with the chance to turn it on again
- * @param isTrue {Boolean}
+ * 
+ * @param isTrue
+ *            {Boolean}
  */
 GuiCanvas.prototype.disableResize = function(isTrue) {
 	if (this.originalResize == null) {
@@ -498,9 +538,12 @@ GuiCanvas.prototype.globalOffset = function() {
 };
 
 /**
- * Sets a new parent for the canvas element with the avaibility to save position on the screen
+ * Sets a new parent for the canvas element with the avaibility to save position
+ * on the screen
+ * 
  * @param newParent
- * @param saveGlobalPosition {Boolean}
+ * @param saveGlobalPosition
+ *            {Boolean}
  * @returns {Boolean}
  */
 GuiCanvas.prototype.setParent = function(newParent, saveGlobalPosition) {
@@ -568,7 +611,7 @@ GuiCanvas.prototype.remove = function() {
 	Account.instance.removeScheduledEntity(this);
 	// console.log("Removing item with id %s, classname = %s", this.id,
 	// this.className);
-	if(this.tooltip){
+	if (this.tooltip) {
 		this.tooltip.remove();
 	}
 	this.children.remove();
@@ -581,6 +624,7 @@ GuiCanvas.prototype.detach = function() {
 
 /**
  * Adds entity to children of this GuiCanvas
+ * 
  * @param entity
  * @param name
  */
@@ -591,6 +635,7 @@ GuiCanvas.prototype.addGui = function(entity, name) {
 
 /**
  * Removes entity from children of this GuiCanvas
+ * 
  * @param entity
  */
 GuiCanvas.prototype.removeGui = function(entity) {
@@ -600,12 +645,12 @@ GuiCanvas.prototype.removeGui = function(entity) {
 
 /**
  * Returns entity with name if exists in children of this GuiCanvas
+ * 
  * @param name
  */
 GuiCanvas.prototype.getGui = function(name) {
 	return this.children.getGui(name);
 };
-
 
 GuiCanvas.prototype.enableTouchEvents = function(push) {
 	if (Device.isTouch()) {
@@ -647,8 +692,11 @@ GuiCanvas.prototype.enableTouchEvents = function(push) {
 
 /**
  * checks whether (x, y) in real global coords is inside element's bounds
- * @param x {number}
- * @param y {number}
+ * 
+ * @param x
+ *            {number}
+ * @param y
+ *            {number}
  * @returns {Boolean}
  */
 GuiCanvas.prototype.isPointInsideReal = function(x, y) {
@@ -664,7 +712,8 @@ GuiCanvas.prototype.isPointInsideReal = function(x, y) {
 };
 
 /**
- * Returns position of the event relatively this element 
+ * Returns position of the event relatively this element
+ * 
  * @param e
  * @returns Object { x, y }
  */
@@ -678,18 +727,18 @@ GuiCanvas.prototype.getEventPosition = function(e) {
 	return result;
 };
 
-
 /**
  * Scheduled function to call continuosly, used to call render if enabled
  */
 GuiCanvas.prototype.update = function() {
-//	if (this.isEnabled()) {
-//		this.render();
-//	}
+	// if (this.isEnabled()) {
+	// this.render();
+	// }
 };
 
 /**
  * Returns true if enabled
+ * 
  * @returns {Boolean}
  */
 GuiCanvas.prototype.isEnabled = function() {
@@ -697,12 +746,12 @@ GuiCanvas.prototype.isEnabled = function() {
 };
 
 GuiCanvas.prototype.setAwake = function(awake) {
-	var that = this; 
-	
+	var that = this;
+
 	this.awake = true;
 	if (this.awakeTimeout)
 		clearTimeout(this.awakeTimeout);
-	
+
 	this.awakeTimeout = setTimeout(function() {
 		that.awake = false;
 	}, 500);
@@ -712,21 +761,20 @@ GuiCanvas.prototype.setAwake = function(awake) {
  * Render of the canvas. draw the background and render children
  */
 GuiCanvas.prototype.render = function() {
-	if (!this.awake)
-		return;
-//	try {
-		var w = this.width*Screen.widthRatio();
-		var h = this.height*Screen.heightRatio();
+//	if (_PIXIJS) {
+//		this.renderer.render(this.stage);
+//	} else {
+		if (!this.awake)
+			return;
+		var w = this.width * Screen.widthRatio();
+		var h = this.height * Screen.heightRatio();
 		if (this.terrainPattern) {
-		    this.contex.fillStyle = this.terrainPattern;
-		    this.contex.fillRect(0, 0, w, h);
+			this.contex.fillStyle = this.terrainPattern;
+			this.contex.fillRect(0, 0, w, h);
 		} else {
 			this.contex.clearRect(0, 0, w, h);
 		}
 
 		this.children.render(this.contex);
-//	} catch(e) {
-//		alert(e);
 //	}
-
 };
