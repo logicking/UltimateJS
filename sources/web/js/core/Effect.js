@@ -43,7 +43,7 @@ Effect.prototype.play = function(position, callback) {
 
 	$['each'](that.params.visuals, function(id, value) {
 		value.parent = that.guiParent;
-
+		value.canvas = that.params.canvas;
 		var gui = guiFactory.createObject(value['class'], $['extend'](
 				value, position));
 		gui.clampByParentViewport();

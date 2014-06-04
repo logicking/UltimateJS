@@ -281,7 +281,7 @@ var Physics = (function () {
             world.ClearForces();
             for (var i = 0; i < updateItems.length; ++i) {
                 updateItems[i].updatePhysics();
-                if (DOM_MODE && updateItems[i].initialPosRequiered) {
+                if (Screen.isDOMForced() && updateItems[i].initialPosRequiered) {
                 	updateItems[i].initialPosRequiered = null;
             		updateItems[i].physics.SetAwake(false);
                 }

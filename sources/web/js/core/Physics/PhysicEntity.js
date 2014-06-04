@@ -29,7 +29,7 @@ PhysicEntity.prototype.init = function (params) {
     var description = {};
     this.physicsEnabled = true;
     
-    if (DOM_MODE)
+    if (Screen.isDOMForced())
     	this.initialPosRequiered = true;
     	
 
@@ -236,11 +236,11 @@ PhysicEntity.prototype.createVisual = function () {
 PhysicEntity.prototype.updatePositionFromPhysics = function () {
     var that = this;
 
-    if (that.physics == null || (DOM_MODE && !that.physics.IsAwake()))
+    if (that.physics == null || (Screen.isDOMForced() && !that.physics.IsAwake()))
         return;
     
     var pos = this.getPosition();
-    if (!DOM_MODE || that.initialPosRequiered || !Device.isMobile() || !this.pos || Math.abs(pos.x - this.pos.x) > 1 || Math.abs(pos.y - this.pos.y) > 1) {
+    if (!Screen.isDOMForced() || that.initialPosRequiered || !Device.isMobile() || !this.pos || Math.abs(pos.x - this.pos.x) > 1 || Math.abs(pos.y - this.pos.y) > 1) {
 	    this.pos = this.getPosition();
 	    that.setPosition(pos.x - that.params.physics.x - that.params.physics.width / 2, pos.y - that.params.physics.y -
 	        that.params.physics.height / 2);
@@ -248,7 +248,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function () {
 
     if (that.params.physics.type != "Circle") {
     	var angleInDeg = that.getPhysicsRotation().toFixed(3);
-    	if (!DOM_MODE || that.initialPosRequiered || !Device.isMobile() || !that.angleInDeg || Math.abs(angleInDeg - that.angleInDeg) > 0.02) {
+    	if (!Screen.isDOMForced() || that.initialPosRequiered || !Device.isMobile() || !that.angleInDeg || Math.abs(angleInDeg - that.angleInDeg) > 0.02) {
 	    	that.angleInDeg = that.getPhysicsRotation().toFixed(3);
 	    	angleInDeg = MathUtils.toDeg(angleInDeg);
 	        $['each'](this.visuals, function (id, visualInfo) {
@@ -291,11 +291,11 @@ PhysicEntity.prototype.getPhysicsRotation = function () {
 PhysicEntity.prototype.setPhysicsPosition = function (pos) {
     var pos = new b2Vec2(pos.x, pos.y);
     pos.Multiply(1 / Physics.getB2dToGameRatio());
-    if (DOM_MODE)
+    if (Screen.isDOMForced())
     	this.physics.SetAwake(true);
     this.physics.SetPosition(pos);
     this.updatePositionFromPhysics();
-    if (DOM_MODE)
+    if (Screen.isDOMForced())
     	this.physics.SetAwake(false);
 };
 
@@ -345,12 +345,12 @@ PhysicEntity.prototype.rotate = function (angleInRad) {
     var position = this.physics.GetPosition();
     var oldAngle = this.physics.GetAngle();
     var newAngle = oldAngle + angleInRad;
-    if (DOM_MODE)
+    if (Screen.isDOMForced())
     	this.physics.SetAwake(true);
     this.physics.SetPositionAndAngle(position, newAngle / 2);
 
     this.updatePositionFromPhysics();
-    if (DOM_MODE)
+    if (Screen.isDOMForced())
     	this.physics.SetAwake(false);
 };
 

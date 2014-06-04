@@ -325,7 +325,8 @@ Account.prototype.readGlobalUpdate = function(data) {
 			}
 			return;
 		} else {
-			var parentEntity = Account.instance.getEntity(element['parent']);
+			var parentEntity = typeof(element['parent']) == "object" ? element['parent'] :
+				Account.instance.getEntity(element['parent']);
 			if (parentEntity) {
 				// create new entity
 				element["id"] = id;

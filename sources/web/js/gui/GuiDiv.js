@@ -74,22 +74,6 @@ GuiDiv.prototype.initialize = function(params) {
 	if (this.innerScene) {
 		this.clampByParentViewport();
 	}
-	
-	if (params['canvas']) {
-		var cParams = params['canvas'];
-		$['extend'](cParams, {
-			"parent" : this
-		});
-
-		cParams["width"] = params['canvas'].width?params['canvas'].width:this.width;
-		cParams["height"] = params['canvas'].height?params['canvas'].height:this.height;
-		cParams["x"] = params['canvas'].x?params['canvas'].x:this.x;
-		cParams["y"] = params['canvas'].y?params['canvas'].y:this.y;
-		cParams["offsetX"] = params['canvas'].offsetX?params['canvas'].offsetX:this.offsetX;
-		cParams["offsetY"] = params['canvas'].offsetY?params['canvas'].offsetY:this.offsetY;
-		
-		this.canvas = guiFactory.createObject("GuiCanvas", cParams);
-	}
 };
 
 GuiDiv.prototype.generate = function(src) {
@@ -228,10 +212,6 @@ GuiDiv.prototype.resize = function() {
 	// Consider removing this from GuiDiv
 	if (this.viewport) {
 		this.clampByViewport();
-	}
-	
-	if (this.canvas) {
-		this.canvas.resize(this.width, this.height);
 	}
 };
 
@@ -529,8 +509,6 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 
 
 GuiDiv.prototype.remove = function() {
-	if (this.canvas)
-		this.canvas.remove();
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
 };

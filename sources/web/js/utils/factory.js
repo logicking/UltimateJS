@@ -22,7 +22,11 @@ function AbstractFactory() {
 	};
 
 	this.createObject = function(classId, args) {
-		var createFunc = objectLibrary[classId];
+		var createFunc;
+		if (!Screen.isDOMForced() && classId == "GuiSprite" && args['canvas'] && objectLibrary["GuiCSprite"])
+			createFunc = objectLibrary["GuiCSprite"];
+		else
+			createFunc = objectLibrary[classId];
 		assert(typeof (createFunc) == "function", "classId: " + classId + " was not properly registered.");
 		var obj = null;
 		if (typeof (args) == "array") {
