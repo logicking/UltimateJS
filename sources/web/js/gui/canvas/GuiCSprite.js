@@ -1,6 +1,3 @@
-DOM_MODE = false;
-
-
 /**
  * GuiCSprite is a sprite for GuiCanvas (UltimateJS) based on GuiSprite.js but
  * not inherit from
@@ -10,7 +7,10 @@ DOM_MODE = false;
  * @constructor
  */
 function GuiCSprite() {
+	GuiCSprite.parent.constructor.call(this);
 }
+
+GuiCSprite.inheritsFrom(GuiSprite);
 
 GuiCSprite.prototype.className = "GuiCSprite";
 
@@ -19,6 +19,10 @@ GuiCSprite.prototype.createInstance = function(params) {
 	entity.initialize(params);
 	return entity;
 };
+
+//GuiCSprite.prototype.generateId = function() {
+//	return this.className + uniqueId();
+//};
 
 guiFactory.addClass(GuiCSprite);
 
@@ -33,7 +37,13 @@ guiFactory.addClass(GuiCSprite);
 GuiCSprite.prototype.initialize = function(params) {
 	var that = this;
 	
+	this.canvasToParentOffset = {
+		'left' : 0,
+		'top': 0
+	};
+	
 	this.params = params;
+	this.canvas = params['canvas'];
 
 	this.x = this.calcPercentageWidth(params.x||0);
 	this.y = this.calcPercentageHeight(params.y||0);
@@ -44,8 +54,8 @@ GuiCSprite.prototype.initialize = function(params) {
 	this.width = params.width;
 	this.height = params.height;
 	
-	this.parent = params.parent.canvas?params.parent.canvas:params.parent;
-	this.id = this.parent.generateId.call(this);
+	this.parent = params.parent;//.canvas?params.parent.canvas:params.parent;
+	this.id = this.generateId();
 	
 	this.total = {
 		image :	params.totalImage,
@@ -53,6 +63,8 @@ GuiCSprite.prototype.initialize = function(params) {
 		height : params.totalImageHeight,
 		tile : params.totalTile
 	};
+	
+	this.totalWidth = this.total.width;
 
 	this.setOffset(params.offsetX, params.offsetY);
 
@@ -93,7 +105,7 @@ GuiCSprite.prototype.initialize = function(params) {
 		if (!that.params.hide)
 			that.show();
 		
-		that.setEnabled(true);
+		that.setEnable(true);
 		Account.instance.addScheduledEntity(that);
 	}
 	that.imageHeight = Math.round(that.height * that.img.height / that.total.height);
@@ -129,228 +141,59 @@ GuiCSprite.prototype.initialize = function(params) {
 	if(params['frames']){
 		this.frames = params['frames']; 
 	}
-
-	if (this.parent.canvas) {
-		this.parent.canvas.addGui(this);
-	} else {
-		this.parent.addGui(this);
-	}
+	
+	this.resize();
+	
+	this.parent.addGui(this);
 };
 
-
-GuiCSprite.prototype.addSpriteAnimation = function(name, description) {
-	this.animations[name] = {
-		frames : description['frames'],
-		row : description['row'],
-		frameDuration : description['frameDuration'],
-		spatial : description['spatial']
-	};
-};
-
-GuiCSprite.prototype.addAnimation = function(animationName, frames, row,
-		frameDuration) {
-	this.animations[animationName] = {
-		frames : frames,
-		row : row,
-		frameDuration : frameDuration
-	};
-};
-
-// GuiCSprite.prototype.update = function(dt) {
-// if (this.currentAnimation == null && this.spatialAnimation == null) {
-// return;
-// }
-//
-// var curTime = (new Date()).getTime();
-// if (!dt) {
-// dt = curTime - this.lastUpdateTime;
-// }
-// this.lastUpdateTime = curTime;
-// this.currentFrameTime += dt;
-//
-// if (this.spatialAnimation !== null) {
-// this.updateSpatialAnimation(dt);
-// }
-// while (this.currentFrameTime >= this.currentFrameLength) {
-// var stopped = this.updateAnimation();
-// if (stopped == true) {
-// return;
-// }
-// this.currentFrameTime -= this.currentFrameLength;
-// }
-// };
-
-
-GuiCSprite.prototype.isEnabled = function() {
-	return this.enabled;
-};
-
-GuiCSprite.prototype.setEnabled = function(on) {
-	if (on) {
-		this.enabled = true;
-	} else {
-		this.enabled = false;
-	}
-};
 
 GuiCSprite.prototype.updateSpatialAnimation = function(dt) {
-	if (this.spatialAnimation == null) {
-		return;
-	}
-	var part = dt / this.spatialAnimation.duration;
-	if (this.spatialAnimation.timeLeft > dt) {
-		this.move(this.spatialAnimation.dx * part, this.spatialAnimation.dy
-				* part);
-	} else {
-		part = this.spatialAnimation.timeLeft / this.spatialAnimation.duration;
-		this.move(this.spatialAnimation.dx * part, this.spatialAnimation.dy
-				* part);
-		if (this.spatialAnimation.callback) {
-			this.spatialAnimation.callback();
-		}
-		this.spatialAnimation = null;
-	}
-	if (this.spatialAnimation) {
-		this.spatialAnimation.timeLeft -= dt;
-	}
+	GuiCSprite.parent.updateSpatialAnimation.call(this, dt, true);
 };
 
-GuiCSprite.prototype.updateAnimation = function() {
-	if (this.currentAnimation == null)
-		return;
-	if (this.currentFrame >= this.animations[this.currentAnimation].frames.length) {
-		this.currentFrame = 0;
-		if (!this.looped) {
-			this.stopAnimation();
-			return true;
-		}
-	}
-	
-	
-
-	var rowFramesLength = Math.round(this.total.width / this.width);
-	var frame = this.animations[this.currentAnimation].frames[this.currentFrame];
-	
-	if(this.frames[frame]){
-		var frm = this.frames[frame]; 
-		this.changeBackgroundPosition(frm.x, frm.y);
-	}else{
-		var remainder = frame % rowFramesLength;
-		var q = (frame - remainder) / rowFramesLength;
-		var row = this.animations[this.currentAnimation].row + q;
-		frame = remainder;
-
-		this.changeBackgroundPosition(frame, row);
-		this.frame = frame;
-		this.row = row;
-	}
-	
-	if (this.frameCallback != null) {
-		if (this.frameCallback[this.currentAnimation]) {
-			this.frameCallback[this.currentAnimation](this.currentFrame);
-		}
-	}
-	this.currentFrame++;
-};
 
 GuiCSprite.prototype.move = function(dx, dy) {
 	this.x += dx;
 	this.y += dy;
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.stopAnimation = function(dontCallCallback) {
-	clearInterval(this.updateAnimationCallback);
-	this.updateAnimationCallback = null;
-	this.currentAnimation = null;
-	// this.frameCallback = null;
-	if (!dontCallCallback && this.animationEndCallback) {
-		// trick with oldCallback is to allow to call setCallback
-		// inside callback itself
-		var oldCallback = this.animationEndCallback;
-		this.animationEndCallback = null;
-		oldCallback.call(this);
-	}
+	GuiCSprite.parent.stopAnimation.call(this, dontCallCallback, true);
 };
 
 GuiCSprite.prototype.changeBackgroundPosition = function(x, y) {
 	this.backgroundPosition.x = x;
 	this.backgroundPosition.y = y;
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
+};
+
+GuiCSprite.prototype.changeBackgroundPositionReal = function(x, y) {
+	this.changeBackgroundPosition(x,y);
+};
+
+GuiCSprite.prototype.selectFrame = function(frame, row) {
+	this.changeBackgroundPosition(frame, row);
 };
 
 GuiCSprite.prototype.setFrameCallback = function(frameCallback) {
 	this.frameCallback = frameCallback;
 };
 
-GuiCSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
-	this.animationEndCallback = animationEndCallback;
-};
-
-GuiCSprite.prototype.playAnimation = function(animationName, duration, isLooped,
-		independentUpdate) {
-
-	var animation = this.animations[animationName];
-	assert(animation, "No such animation: " + animationName);
-
-	this.stopAnimation(true);
-
-	this.currentAnimation = animationName;
-
-	this.lastAnimation = animationName;
-
-	var that = this;
-	this.currentFrame = 0;
-	this.currentFrameTime = 0;
-	this.lastUpdateTime = (new Date()).getTime();
-
-	// console.log(this.animations[this.currentAnimation].frameDuration);
-	if (duration) {
-		this.currentFrameLength = duration / animation.frames.length;
-		// console.log("frame lenght " + this.currentFrameLength + ", " +
-		// animation.frames.length);
-	} else {
-		this.currentFrameLength = this.animations[this.currentAnimation].frameDuration;
-	}
-	this.looped = isLooped;
-
-	if (independentUpdate) {
-		this.updateAnimationCallback = setInterval(function() {
-			that.updateAnimation();
-		}, this.currentFrameLength);
-	}
-	this.updateAnimation();
-};
-
-GuiCSprite.prototype.isPlayingAnimation = function(animationName) {
-	return this.currentAnimation == animationName;
-};
-
 GuiCSprite.prototype.flip = function(needToBeFlipped) {
-	this.flipped = needToBeFlipped;
-	this.parent.setAwake(true);
+	GuiCSprite.parent.flip.call(this, needToBeFlipped, true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.transform = function(transfromations) {
-	if (transfromations) {
-		if (transfromations.matrix != null)
-			this.matrix = transfromations.matrix;
-		if (transfromations.angle != null)
-			this.angle = transfromations.angle;
-		if (transfromations.scale != null)
-			this.scale = transfromations.scale;
-		if (transfromations.translate != null)
-			this.translate = transfromations.translate;
-	}
-	var scaleY = selectValue(this.scale, 1);
-	var scaleX = scaleY;
-	scaleX *= (this.flipped ? -1 : 1);
-	this.parent.setAwake(true);
+	GuiCSprite.parent.transform.call(this, transfromations, true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.rotate = function(angle) {
-	this.angle = angle;
-	this.parent.setAwake(true);
+	GuiCSprite.parent.rotate.call(this, angle, true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
@@ -358,19 +201,19 @@ GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
             x : (transformOrigin && !isNaN(transformOrigin.x))?(Math.round(transformOrigin.x * 100) / 100):0.5,
             y : (transformOrigin && !isNaN(transformOrigin.x))?(Math.round(transformOrigin.y * 100) / 100):0.5
         };
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.setPosition = function(x, y) {
 	this.x = this.calcPercentageWidth(x);
 	this.y = this.calcPercentageHeight(y);
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.setOffset = function(x, y) {
 	this.offsetX = this.calcPercentageWidth(x||0);
 	this.offsetY = this.calcPercentageHeight(y||0);
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.setRealPosition = function(x, y) {
@@ -382,61 +225,40 @@ GuiCSprite.prototype.setTransform = function(matrix) {
 };
 
 GuiCSprite.prototype.resize = function() {
-	
-// this.parent.render();
+	var offset = this.parent.jObject['offset']();
+	var canvasOffset = this.canvas.jObject['offset']();
+	this.canvasToParentOffset.left = offset.left - canvasOffset.left;
+	this.canvasToParentOffset.top = offset.top - canvasOffset.top;
 };
 
 GuiCSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
-	if (offsetY) {
-		this.offsetY1 = offsetY;
-	}
-	if (offsetX) {
-		this.offsetX1 = offsetX;
-	}
-	var frame = selectValue(this.frame, 0);
-	var row = selectValue(this.row, 0);
-	this.changeBackgroundPosition(-frame, row);
-	this.parent.setAwake(true);
+	GuiCSprite.parent.setRealBackgroundPosition.call(this, offsetX, offsetY);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.resizeBackground = function() {
 };
 
-GuiCSprite.prototype.calcPercentageWidth = function(val) {
-	if (typeof (val) == "string" && val.indexOf("%") > -1) {
-		var parentWidth = this.parent.jObject.width() / Screen.widthRatio();
-		assert(typeof (parentWidth) == "number",
-				"Wrong parent or value for % param name='" + this.name + "'");
-		val = (parseFloat(val.replace("%", "")) * parentWidth / 100.0);
-	}
-	return val;
-};
-
-GuiCSprite.prototype.calcPercentageHeight = function(val) {
-	if (typeof (val) == "string" && val.indexOf("%") > -1) {
-		var parentHeight = this.parent.jObject.height() / Screen.heightRatio();
-		assert(typeof (parentHeight) == "number",
-				"Wrong parent or value for % param name='" + this.name + "'");
-		val = (parseFloat(val.replace("%", "")) * parentHeight / 100.0);
-	}
-	return val;
-};
-
 GuiCSprite.prototype.setZ = function(z) {
 };
 
+GuiCSprite.prototype.onAdd = function() {
+	this.canvas.addToRenderQueue(this);
+};
+
 GuiCSprite.prototype.remove = function() {
+	this.canvas.removeFromRenderQueue(this);
 	Account.instance.removeScheduledEntity(this);
 };
 
 GuiCSprite.prototype.hide = function() {
 	this.visible = false;
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.show = function() {
 	this.visible = true;
-	this.parent.setAwake(true);
+	this.canvas.setAwake(true);
 };
 
 GuiCSprite.prototype.clampByParentViewport = function() {
@@ -496,71 +318,50 @@ GuiCSprite.prototype.setOpacity = function(opacity) {
 	}
 };
 
-GuiCSprite.prototype.convertToPixi = function() {
-	if (_PIXIJS) {
-		this.pixiSprite.alpha = this.opacity;
-		this.pixiSprite.visible = this.visible; 
-		this.pixiSprite.x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*Screen.widthRatio());
-		this.pixiSprite.y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*Screen.heightRatio()); 
-		this.pixiSprite.rotation = MathUtils.toRad(Math.round(this.angle));
-		this.pixiSprite.width = this.width;// * Screen.widthRatio(); 
-		this.pixiSprite.height = this.height;// * Screen.heightRatio(); 
-		this.pixiSprite.tilePosition  = new PIXI.Point(this.transformOrigin.x, this.transformOrigin.y);
-		this.pixiSprite.scale = new PIXI.Point(Screen.widthRatio() * this.scale.x, Screen.heightRatio() * this.scale.y);
-//		this.pixiSprite.tileScale = new PIXI.Point(this.scale.x, this.scale.y); 
-		this.pixiSprite.tilePosition = new PIXI.Point(this.backgroundPosition.x /** Screen.widthRatio()*/ * this.width, this.backgroundPosition.y * this.height);// * Screen.heightRatio()); 
-	}
-};
-
 
 GuiCSprite.prototype.render = function(ctx) {
-//	if (_PIXIJS) {
-			
-//	} else {
-		if (!this.visible) 
-			return;
-		var scrnRatio = {
-				x : Screen.widthRatio(),
-				y : Screen.heightRatio()
-		};
+	if (!this.visible) 
+		return;
+	var scrnRatio = {
+			x : Screen.widthRatio(),
+			y : Screen.heightRatio()
+	};
 
-		var x = Math.round((this.x + this.parent.guiOffsetX + this.offsetX)*scrnRatio.x);
-	    var y =  Math.round((this.y + this.parent.guiOffsetY + this.offsetY)*scrnRatio.y);
-	    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
-	    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
-		var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
-		var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
-		
-	    var ratio = {
-	        x : this.transformOrigin.x,
-	        y : this.transformOrigin.y
-	    };
-		
-	    var translate = {
-	    		x: Math.round((x+w*ratio.x)),
-	    		y: Math.round((y+h*ratio.y))
-	    };
-	    var rot = MathUtils.toRad(Math.round(this.angle));
-	    rot = rot.toFixed(3)*1;
-		ctx.translate(translate.x, translate.y);
-		ctx.rotate(rot); 
-		ctx.globalAlpha = this.opacity;
-		
-	// ctx.scale(this.scale.x, this.scale.y);
-
-		var sizeX = Math.ceil(this.imageWidth);
-		var sizeY = Math.ceil(this.imageHeight);
-		var offsetX = -Math.ceil(w*ratio.x);
-		var offsetY = -Math.ceil(h*ratio.y);
-		
-		if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
-		    ctx.drawImage(this.img,
-				    bx, by,
-				    sizeX, sizeY,
-		            offsetX, offsetY,
-		            w, h);
-		else 
-			console.warn('Shit is happining. Again. Source rect is out of image bounds');
-//	}
+	var x = Math.round(this.canvasToParentOffset.left + (this.x + /*this.parent.guiOffsetX*/ + this.offsetX)*scrnRatio.x);
+    var y =  Math.round(this.canvasToParentOffset.top + (this.y + /*this.parent.guiOffsetY*/ + this.offsetY)*scrnRatio.y);
+    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
+    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
+	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
+	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
 	
+    var ratio = {
+        x : this.transformOrigin.x,
+        y : this.transformOrigin.y
+    };
+	
+    var translate = {
+    		x: Math.round((x+w*ratio.x)),
+    		y: Math.round((y+h*ratio.y))
+    };
+    var rot = MathUtils.toRad(Math.round(this.angle));
+    rot = rot.toFixed(3)*1;
+	ctx.translate(translate.x, translate.y);
+	ctx.rotate(rot); 
+	ctx.globalAlpha = this.opacity;
+	
+// ctx.scale(this.scale.x, this.scale.y);
+
+	var sizeX = Math.ceil(this.imageWidth);
+	var sizeY = Math.ceil(this.imageHeight);
+	var offsetX = -Math.ceil(w*ratio.x);
+	var offsetY = -Math.ceil(h*ratio.y);
+	
+	if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
+	    ctx.drawImage(this.img,
+			    bx, by,
+			    sizeX, sizeY,
+	            offsetX, offsetY,
+	            w, h);
+	else 
+		console.warn('Shit is happining. Again. Source rect is out of image bounds');
 };

@@ -206,7 +206,6 @@ Account.prototype.addRenderEntity = function(newEntity) {
 		});
 	}
 	this.renderEntities[newEntity.id] = newEntity;
-	this.renderCanvasName = newEntity.id;
 };
 
 Account.prototype.removeRenderEntity = function(entity) {
@@ -223,8 +222,6 @@ Account.prototype.removeRenderEntity = function(entity) {
 // Regular render update for registered enities
 Account.prototype.render = function() {
 	var that = this;
-	if (!this.renderCanvasName)
-		return;
 //	var dt = Date.now() - this.lastRenderTime;
 //	if(dt != 0){
 	
@@ -236,12 +233,6 @@ Account.prototype.render = function() {
 				entity.render();
 			}
 		});
-
-//		if (this.renderEntities[this.renderCanvasName] && this.renderEntities[this.renderCanvasName].isVisible && this.renderEntities[this.renderCanvasName].isVisible()) {
-//			canvas = this.renderEntities[this.renderCanvasName];
-//			this.renderEntities[this.renderCanvasName].render();
-//		}
-
 //	}
 //	var that = this;
 //	this.lastRenderTime = Date.now();
