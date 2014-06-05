@@ -30,6 +30,10 @@ div {
     user-select: none;
 }
 
+.canvasSurface {
+	position: absolute;
+}
+
 .unselectable {
 	-webkit-user-select: none;
 	-khtml-user-select: none;

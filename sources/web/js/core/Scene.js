@@ -30,8 +30,7 @@ Scene.prototype.createVisual = function(noChildAttach) {
 		y : params['y'],
 		width : params['width'],
 		height : params['height'],
-		background : params['background'],
-		canvas : params['canvas']
+		background : params['background']
 	});
 
 	var visualInfo = {};
@@ -40,6 +39,18 @@ Scene.prototype.createVisual = function(noChildAttach) {
 
 	var that = this;
 	this.children = this.children ? this.children : new Array();
+	
+	if (!Screen.isDOMForced() && params['canvas']) {
+		this.canvas = guiFactory.createObject("GuiCanvas", {
+			"parent" : visualInfo.visual,
+			"style": "canvasSurface",
+			"z": 10
+//			,
+//			"wrap": true
+		});
+		visualInfo.visual.addGui(this.canvas, "canvasSurface");
+	}
+	
 	if(!noChildAttach){
 		$['each'](this.children, function(id, val) {
 			that.attachChildVisual(val);
@@ -68,4 +79,8 @@ Scene.prototype.move = function(dx, dy, parallaxDepth) {
 	}
 
 	visual.move(dx, dy);
+};
+
+Scene.prototype.getCanvas = function() {
+	return this.canvas;
 };

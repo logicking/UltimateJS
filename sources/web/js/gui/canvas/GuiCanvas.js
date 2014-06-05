@@ -24,7 +24,6 @@ GuiCanvas.prototype.createInstance = function(params) {
 guiFactory.addClass(GuiCanvas);
 
 GuiCanvas.prototype.generate = function(src) {
-//	this.style = ".canvas";
 	assert(this.id, "Id not defined");
 	assert(this.style, "Class for object with id = '" + this.id
 			+ "' is not defined");
@@ -64,8 +63,6 @@ GuiCanvas.prototype.initialize = function(params) {
 
 	this.setAwake(true);
 	Account.instance.addRenderEntity(this);
-	
-	
 };
 
 GuiCanvas.prototype.addToRenderQueue = function(elem) {
@@ -134,6 +131,8 @@ GuiCanvas.prototype.setRealPosition = function(x, y) {
 GuiCanvas.prototype.resize = function() {
 	if (this.params.wrap)
 		this.wrapToParentsViewport();
+	else
+		this.wrapToEnhancedScene();
 	GuiCanvas.parent.resize.call(this);
 	this.setAwake(true);
 };
@@ -144,9 +143,22 @@ GuiCanvas.prototype.wrapToParentsViewport = function() {
 		this.y = 0;
 		this.width = this.parent.viewRect.width;
 		this.height = this.parent.viewRect.height;
+	} else {
+		this.x = 0;
+		this.y = 0;
+		this.width = this.parent.width;
+		this.height = this.parent.height;
 	}
 };
 
+GuiCanvas.prototype.wrapToEnhancedScene = function() {
+	if (this.parent.parent.parent) {
+		this.x = this.parent.parent.parent.x;
+		this.y = this.parent.parent.parent.y;
+		this.width = this.parent.parent.parent.width;
+		this.height = this.parent.parent.parent.height;
+	}
+};
 
 GuiCanvas.prototype.setAwake = function(awake) {
 	var that = this; 

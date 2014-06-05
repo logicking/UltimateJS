@@ -306,7 +306,7 @@ Account.prototype.resize = function() {
  * dealing with external server
  */
 // Creates/Updates/Destroy all active entities
-Account.prototype.readGlobalUpdate = function(data) {
+Account.prototype.readGlobalUpdate = function(data, parent) {
 	var that = this;
 	$['each'](data, function(id, element) {
 		// console.log("readGlobalUpdate key is ", id, element);
@@ -327,6 +327,10 @@ Account.prototype.readGlobalUpdate = function(data) {
 		} else {
 			var parentEntity = typeof(element['parent']) == "object" ? element['parent'] :
 				Account.instance.getEntity(element['parent']);
+			if (typeof(parent) == "object") {
+				parentEntity = parent;
+				element['parent'] = parent;
+			}
 			if (parentEntity) {
 				// create new entity
 				element["id"] = id;
