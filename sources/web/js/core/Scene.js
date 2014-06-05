@@ -45,8 +45,8 @@ Scene.prototype.createVisual = function(noChildAttach) {
 			"parent" : visualInfo.visual,
 			"style": "canvasSurface",
 			"z": 10
-			,
-			"wrap": true
+//			,
+//			"wrap": true
 		});
 		visualInfo.visual.addGui(this.canvas, "canvasSurface");
 	}
