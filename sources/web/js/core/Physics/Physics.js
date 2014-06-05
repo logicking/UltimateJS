@@ -286,16 +286,7 @@ var Physics = (function () {
             }
             world.ClearForces();
             for (var i = 0; i < updateItems.length; ++i) {
-                updateItems[i].updatePhysics();
-                if (updateItems[i].physics && updateItems[i].physics.GetType()) {
-                	maxSpeed.linearX = 0;
-                	maxSpeed.linearY = 0;
-                	maxSpeed.angular = 0;
-                	maxSpeed.linearX = Math.max(maxSpeed.linearX, Math.abs(updateItems[i].physics.m_linearVelocity.x));
-                	maxSpeed.linearY = Math.max(maxSpeed.linearY, Math.abs(updateItems[i].physics.m_linearVelocity.y));
-                	maxSpeed.linear = Math.max(maxSpeed.linearX, maxSpeed.linearY);
-                	maxSpeed.angular = Math.max(maxSpeed.angular, Math.abs(updateItems[i].physics.m_angularVelocity));
-                }
+                updateItems[i].updatePositionFromPhysics();
                 if (Screen.isDOMForced() && updateItems[i].initialPosRequiered) {
                 	updateItems[i].initialPosRequiered = null;
             		updateItems[i].physics.SetAwake(false);

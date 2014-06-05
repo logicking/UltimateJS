@@ -3,6 +3,8 @@
  */
 
 var ANIM_DELAY = 400;
+var POSITION_TRESHHOLD = 1;
+var ROTATION_TRESHHOLD = 0.02;
 
 /**
  * @constructor
@@ -233,29 +235,31 @@ PhysicEntity.prototype.createVisual = function () {
 };
 
 // Update visual position from physics world
-PhysicEntity.prototype.updatePositionFromPhysics = function () {
-    var that = this;
-
-    if (that.physics == null || (Screen.isDOMForced() && !that.physics.IsAwake()))
-        return;
+PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate) {
+    if (!this.physics || !this.physicsEnabled || Physics.paused() || !this.physics.IsAwake())
+        return false;
     
-    var pos = this.getPosition();
-    if (!Screen.isDOMForced() || that.initialPosRequiered || !Device.isMobile() || !this.pos || Math.abs(pos.x - this.pos.x) > 1 || Math.abs(pos.y - this.pos.y) > 1) {
-	    this.pos = this.getPosition();
-	    that.setPosition(pos.x - that.params.physics.x - that.params.physics.width / 2, pos.y - that.params.physics.y -
-	        that.params.physics.height / 2);
+    this.positionUpdated = false;
+    this.newPosition = this.getPosition();
+    if (dontTranslate || !Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+    		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
+    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD) {
+	    this.lastUpdatedPos = this.getPosition();
+	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
+	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
+	    this.positionUpdated = true;
 	}
 
-    if (that.params.physics.type != "Circle") {
-    	var angleInDeg = that.getPhysicsRotation().toFixed(3);
-    	if (!Screen.isDOMForced() || that.initialPosRequiered || !Device.isMobile() || !that.angleInDeg || Math.abs(angleInDeg - that.angleInDeg) > 0.02) {
-	    	that.angleInDeg = that.getPhysicsRotation().toFixed(3);
-	    	angleInDeg = MathUtils.toDeg(angleInDeg);
-	        $['each'](this.visuals, function (id, visualInfo) {
-	            visualInfo.visual.rotate(angleInDeg);
-	        });
-    	}
-    }
+	this.newAngle = this.getPhysicsRotation().toFixed(3);
+	if (dontRotate || !Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) {
+		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
+		this.newAngle = MathUtils.toDeg(this.newAngle);
+        for (var name in this.visuals)
+        	this.visuals[name].visual.rotate(this.newAngle);
+        this.positionUpdated = true;
+	}
+	return this.positionUpdated;
 };
 
 // Makes entity "kinematic" or dynamic
@@ -269,14 +273,6 @@ PhysicEntity.prototype.physicsEnable = function (v) {
     // }
     this.physicsEnabled = !!v;
     this.physics.SetActive(this.physicsEnabled);
-};
-
-// PhysicEntity update function
-PhysicEntity.prototype.updatePhysics = function () {
-    if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused())) {
-        this.updatePositionFromPhysics();
-        //this.physics.SetCenterPosition(this.physics.GetCenterPosition(), this.physics.GetRotation());
-    }
 };
 
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
