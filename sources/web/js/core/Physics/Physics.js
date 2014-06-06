@@ -310,12 +310,14 @@ var Physics = (function () {
                 	maxSpeed.linear = Math.max(maxSpeed.linearX, maxSpeed.linearY);
                 	maxSpeed.angular = Math.max(maxSpeed.angular, Math.abs(updateItems[i].physics.m_angularVelocity));
                 }
-                if (Screen.isDOMForced() && updateItems[i].initialPosRequiered) {
-                	updateItems[i].initialPosRequiered = null;
-            		updateItems[i].physics.SetAwake(false);
-                }
             }
         	return maxSpeed;
+        },
+        getCalm: function () {
+        	for (var i = 0; i < updateItems.length; ++i) 
+                if (!updateItems[i].destroyed && updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake())
+                	return false;
+            return true;
         },
         destroy: function (physics) {
             if (!physics) {
