@@ -31,10 +31,12 @@ Entity.prototype.init = function(params) {
 
 	var enabled = selectValue(params['enabled'], true);
 	this.setEnable(enabled);
-
+	
 	// this.readUpdate(params);
 	this.timeouts = null;
 	this.intervals = null;
+	
+	this.initChildren(params);
 };
 
 Entity.prototype.assert = function(cond, msg) {
@@ -99,7 +101,7 @@ Entity.prototype.getChild = function(childId) {
 
 Entity.prototype.initChildren = function(params) {
 	if (params && params['children']) {
-		Account.instance.readGlobalUpdate(params['children']);
+		Account.instance.readGlobalUpdate(params['children'], this);
 	}
 };
 
