@@ -16,7 +16,7 @@ var Device = (function() {
 	var isIpod = null;
 	var isIeBrowser = null;
 	var isWebkitBrowser = null;
-
+    var isAndroidStockBrower = null;
 
 	var userAgent = null;
     var isSupportsToDataURL;
@@ -42,6 +42,9 @@ var Device = (function() {
 		isIpod = (/iphone|ipod|ipad/gi).test(navigator.platform);
 
 		isWebkitBrowser = userAgent.indexOf("webkit") > -1;
+
+        var nua = navigator.userAgent;
+        isAndroidStockBrower = (nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1);
 
 		// check android version
 		var androidStr = "android";
@@ -158,8 +161,7 @@ var Device = (function() {
              * @return {boolean} support context.GetImageData()
              */
             function supportsToDataURL() {
-            	// TODO Implement
-            	if (Device.isNative()) {
+            	if (isAndroidStockBrower || Device.isNative()) {
             		console.log("supportsToDataURL is not implemented")
             		return false;
             	}
@@ -411,9 +413,15 @@ var Device = (function() {
 				return false;
 			}
 		},
+
         isSupportsToDataURL: function () {
             return isSupportsToDataURL;
         },
+
+        isAndroidStockBrowser: function() {
+            return isAndroidStockBrower;
+        },
+
 		/*
 		 * Miscellaneous functions
 		 */
