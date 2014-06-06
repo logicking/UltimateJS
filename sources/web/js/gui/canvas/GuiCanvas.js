@@ -138,17 +138,29 @@ GuiCanvas.prototype.resize = function() {
 };
 
 GuiCanvas.prototype.wrapToParentsViewport = function() {
-	if(this.parent.viewport) {
-		this.x = 0;
-		this.y = 0;
-		this.width = this.parent.viewRect.width;
-		this.height = this.parent.viewRect.height;
-	} else {
-		this.x = 0;
-		this.y = 0;
-		this.width = this.parent.width;
-		this.height = this.parent.height;
-	}
+	var additionalOffset = {
+			x: -this.parent.width * 0.06,
+			y: 0,
+			width: this.parent.width * 1.18,
+			height: this.parent.height * 0.87 
+	};
+	this.x = additionalOffset.x;
+	this.y = additionalOffset.y;
+	this.width = additionalOffset.width;
+	this.height = additionalOffset.height;
+	
+//	if(this.parent.viewport) {
+//
+////		this.x = 0;
+////		this.y = 0;
+////		this.width = this.parent.viewRect.width;
+////		this.height = this.parent.viewRect.height;
+//	} else {
+//		this.x = 0;
+//		this.y = 0;
+//		this.width = this.parent.width;
+//		this.height = this.parent.height;
+//	}
 };
 
 GuiCanvas.prototype.wrapToEnhancedScene = function() {

@@ -65,7 +65,7 @@ PhysicEntity.prototype.createPhysics = function () {
 
     function setShapeParams(fixtureDefinition, physicParams) {
         fixtureDefinition.density = selectValue(physicParams['density'], 1);
-        fixtureDefinition.restitution = selectValue(physicParams.restitution, 1);
+        fixtureDefinition.restitution = selectValue(physicParams.restitution, 0);
         fixtureDefinition.friction = selectValue(physicParams.friction, 0);
         fixtureDefinition.isSensor = selectValue(physicParams.sensor, false);
         fixtureDefinition.userData = selectValue(physicParams.userData, false);
@@ -241,9 +241,9 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
     
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (dontTranslate || !Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+    if (!dontTranslate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
-    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD) {
+    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) {
 	    this.lastUpdatedPos = this.getPosition();
 	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
 	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
@@ -251,8 +251,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.getPhysicsRotation().toFixed(3);
-	if (dontRotate || !Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
-			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) {
+	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
 		this.newAngle = MathUtils.toDeg(this.newAngle);
         for (var name in this.visuals)

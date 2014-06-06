@@ -315,7 +315,7 @@ var Physics = (function () {
         },
         getCalm: function () {
         	for (var i = 0; i < updateItems.length; ++i) 
-                if (!updateItems[i].destroyed && updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake())
+                if (!updateItems[i].exploded && !updateItems[i].destroyed && updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake())
                 	return false;
             return true;
         },
