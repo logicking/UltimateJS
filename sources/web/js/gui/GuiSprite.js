@@ -377,15 +377,21 @@ GuiSprite.prototype.rotate = function(angle, dontCallTransform) {
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
-	this.transformOrigin = transformOrigin;
+	if (typeof transformOrigin == 'string') {
+		this.transformOrigin = transformOrigin;
+	} if (transformOrigin && transformOrigin.x && transformOrigin.y) {
+		this.transformOrigin = parseInt(transformOrigin.x*100) + "% " + parseInt(transformOrigin.y*100) + "%";
+	} else {
+		this.transformOrigin = "50% 50%";
+	}
 	// console.log("Set transform origin to %s", transformOrigin);
 	var obj = this.jObject;
-	obj['css']("-webkit-transform-origin", transformOrigin);
-	obj['css']("transform-origin", transformOrigin);
-	obj['css']("-moz-transform-origin", transformOrigin);
-	obj['css']("-o-transform-origin", transformOrigin);
-	obj['css']("transform-origin", transformOrigin);
-	obj['css']("msTransform-origin", transformOrigin);
+	obj['css']("-webkit-transform-origin", this.transformOrigin);
+	obj['css']("transform-origin", this.transformOrigin);
+	obj['css']("-moz-transform-origin", this.transformOrigin);
+	obj['css']("-o-transform-origin", this.transformOrigin);
+	obj['css']("transform-origin", this.transformOrigin);
+	obj['css']("msTransform-origin", this.transformOrigin);
 };
 
 GuiSprite.prototype.setPosition = function(x, y) {
