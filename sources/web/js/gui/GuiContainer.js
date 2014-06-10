@@ -74,7 +74,7 @@ GuiContainer.prototype.addGui = function(entity, name) {
 
 GuiContainer.prototype.removeGui = function(entity) {
 	popElementFromArray(entity, this.guiEntities);
-	if (this.guiEntitiesMap[entity.name]) {
+	if (entity.name && this.guiEntitiesMap[entity.name]) {
 		delete this.guiEntitiesMap[entity.name];
 	}
 	entity.remove();

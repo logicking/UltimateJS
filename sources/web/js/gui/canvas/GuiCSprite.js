@@ -247,7 +247,8 @@ GuiCSprite.prototype.onAdd = function() {
 };
 
 GuiCSprite.prototype.remove = function() {
-	this.canvas.removeFromRenderQueue(this);
+//	this.canvas.removeFromRenderQueue(this);
+	GuiCSprite.parent.remove.call(this);
 	Account.instance.removeScheduledEntity(this);
 };
 

@@ -254,6 +254,10 @@ GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 	this.animationEndCallback = animationEndCallback;
 };
 
+GuiSprite.prototype.getAnimation = function(animationName) {
+	return this.animations[animationName];
+};
+
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
 		independentUpdate) {
 

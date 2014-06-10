@@ -494,10 +494,14 @@ GuiElement.prototype.remove = function() {
 
 	// console.log("Removing item with id %s, classname = %s", this.id,
 	// this.className);
+	if (this.canvas)
+		this.canvas.removeFromRenderQueue(this);
 	if(this.tooltip){
 		this.tooltip.remove();
 	}
-	this.children.remove();
+	if (this.children)				/// TODO
+		this.children.remove();
+	if (this.jObject)			/// These two ifs are hack for canvas. Hardcore only, this must refactored
 	this.jObject['remove']();
 };
 

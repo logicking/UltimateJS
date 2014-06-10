@@ -24,12 +24,6 @@ entityFactory.addClass(PhysicScene);
 PhysicScene.prototype.init = function(params) {
 	PhysicScene.parent.init.call(this, params);
 	this.physicWorld = Physics.getWorld();
-	if(params['physicsBorder']) {
-		Physics.createWorldBorder(params['physicsBorder']);
-	}
-	this.contactProcessor = function(contactProcessor) {
-
-	};
 };
 
 PhysicScene.prototype.addChild = function(child) {
@@ -38,12 +32,8 @@ PhysicScene.prototype.addChild = function(child) {
 
 PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
-	var that = this;
-	function updateWorld() {
-		Physics.updateWorld();
-		that.setTimeout(updateWorld, 15);
-	}
-	updateWorld();
+
+	this.setInterval(Physics.updateWorld, 15);
 };
 
 PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {
@@ -55,11 +45,12 @@ PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {
 	visual.resize();
 };
 
-PhysicScene.prototype.attachChildVisual = function(child) {
-	PhysicScene.parent.attachChildVisual.call(this, child);
+PhysicScene.prototype.destroy = function() {
+	Physics.getContactProcessor().clearContactCallbacks();
+	PhysicScene.parent.destroy.call(this);
 };
 
-PhysicScene.prototype.destroy = function() {
-	PhysicScene.parent.destroy.call(this);
-	// $(document)['unbind'](".BattleSceneEvent");
+
+PhysicScene.prototype.attachChildVisual = function(child) {
+	PhysicScene.parent.attachChildVisual.call(this, child);
 };

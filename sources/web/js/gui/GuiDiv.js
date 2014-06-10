@@ -289,7 +289,8 @@ GuiDiv.prototype.setDragListener = function(isTrue, priority) {
 		DragManager.addListener(this);
 	} else {
 		DragManager.removeListener(this);
-		this.$()['unbind'](".dragEvents");
+		if (this.$ && this.$()) 				/// TODO Another hack for GuiCSprite. Must be refactord as soon as possible
+			this.$()['unbind'](".dragEvents");
 	}
 };
 

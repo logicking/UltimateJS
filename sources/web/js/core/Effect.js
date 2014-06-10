@@ -57,12 +57,6 @@ Effect.prototype.play = function(position, callback) {
 			}, that.params.lifeTime);		
 		});	
 	});
-
-//	that.setTimeout(function() {
-//		that.destroy();
-//	
-//		if (callback) callback();
-//	}, this.params.lifeTime);
 };
 
 Effect.prototype.destroy = function() {

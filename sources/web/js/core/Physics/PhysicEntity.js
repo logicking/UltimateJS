@@ -28,27 +28,22 @@ entityFactory.addClass(PhysicEntity);
 // Initializing and creating physic entity with visuals
 //
 PhysicEntity.prototype.init = function (params) {
-    var description = {};
+	var description = {};
     this.physicsEnabled = true;
-    
     if (Screen.isDOMForced())
     	this.initialPosRequiered = true;
-    	
-
     if (params.type != null)
         description = Account.instance.descriptionsData[params.type];
     PhysicEntity.parent.init.call(this, $['extend'](params, description));
     if (this.params.physics) {
         this.createPhysics();
-
         assert(!this.physics['m_userData']);
         this.physics['m_userData'] = this;
-
-        this.updatePositionFromPhysics();
 //TODO: check
         if (!this.physics.m_type == b2Body.b2_staticBody || Physics.debugMode())
             Physics.updateItemAdd(this);
     }
+    this.material = null;
 };
 
 /**
@@ -58,6 +53,8 @@ PhysicEntity.prototype.createPhysics = function () {
     var fixtureDefList = [];
     var bodyDefinition;
     var physicParams = this.params['physics']; // preloaded from json
+    this.params.x = this.params.x ? this.params.x : 0;
+    this.params.y = this.params.y ? this.params.y : 0;
     var logicPosition = {
         x: this.params.x / Physics.getB2dToGameRatio(),
         y: this.params.y / Physics.getB2dToGameRatio()
@@ -236,7 +233,7 @@ PhysicEntity.prototype.createVisual = function () {
 
 // Update visual position from physics world
 PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate) {
-    if (!this.physics || !this.physicsEnabled || Physics.paused() || !this.physics.IsAwake())
+    if (!this.physics || this.physicsEnabled === false || Physics.paused() === true || this.physics.IsAwake() === false)
         return false;
     
     this.positionUpdated = false;
@@ -265,12 +262,12 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 // Makes entity "kinematic" or dynamic
 PhysicEntity.prototype.physicsEnable = function (v) {
 
-    // if (!v) {
-    // Physics.updateItemRemove(this);
-    // } else {
-    // if (!this.physics['IsStatic']() || Physics.debugMode())
-    // Physics.updateItemAdd(this);
-    // }
+     if (!v) {
+    	 Physics.updateItemRemove(this);
+     } else {
+     if (!this.physics['IsStatic']() || Physics.debugMode())
+    	 Physics.updateItemAdd(this);
+     }
     this.physicsEnabled = !!v;
     this.physics.SetActive(this.physicsEnabled);
 };
@@ -287,12 +284,10 @@ PhysicEntity.prototype.getPhysicsRotation = function () {
 PhysicEntity.prototype.setPhysicsPosition = function (pos) {
     var pos = new b2Vec2(pos.x, pos.y);
     pos.Multiply(1 / Physics.getB2dToGameRatio());
-    if (Screen.isDOMForced())
-    	this.physics.SetAwake(true);
+   	this.physics.SetAwake(true);
     this.physics.SetPosition(pos);
     this.updatePositionFromPhysics();
-    if (Screen.isDOMForced())
-    	this.physics.SetAwake(false);
+   	this.physics.SetAwake(false);
 };
 
 /**
@@ -351,25 +346,31 @@ PhysicEntity.prototype.rotate = function (angleInRad) {
 };
 
 PhysicEntity.prototype.destroy = function () {
-    PhysicEntity.parent.destroy.call(this);
+	this.destroyPhysics();
+   	PhysicEntity.parent.destroy.call(this);
+};
+
+PhysicEntity.prototype.destroyPhysics = function () {
+//	Physics.getContactProcessor().clearContactCallbacks(this);
     if (this.physics) {
-        if (Physics.getWorld().IsLocked()) {
+    	Physics.updateItemRemove(this);
+    	if (!Physics.getWorld().IsLocked()) {
+    		this.physics.SetUserData(null);
+    		Physics.getWorld().DestroyBody(this.physics);
+    	} else
             Physics.addBodyToDestroy(this.physics);
-        } else {
-            Physics.getWorld().DestroyBody(this.physics);
-        }
+        this.physics = null;
     }
-    Account.instance.removeEntity(this.id, true);
 };
 
 // damage received by other object
 PhysicEntity.prototype.onDamage = function (damage) {
     var that = this;
-    if (!this.destructable || this.health <= 0) {
+    if (!damage || !this.destructable || !this.health) 
         return;
-    }
+    
 
-    this.health -= damage;
+    this.health = Math.max(this.health - damage, 0);
 
     // damage levels - show animation of different damages levels
     if (this.params.physics.destructionLevels) {
@@ -388,21 +389,27 @@ PhysicEntity.prototype.onDamage = function (damage) {
         $['each'](that.visuals, function (id, visualInfo) {
             if (that.params.builtInDestruction)
                 visualInfo.visual.setAnimationEndCallback(function () {
-                    that.destroy();
-//					delete that;
+                	Account.instance.removeEntity(that.id);
                 });
-            else {
-                that.destroy();
-//				delete that;
-            }
+            else 
+            	Account.instance.removeEntity(that.id);
+            
             return;
         });
     }
 };
 
+
+PhysicEntity.prototype.setContactBeginCallback = function (callback) {
+    Physics.getContactProcessor().setContactBeginCalback(callback, this.className);
+};
+
+PhysicEntity.prototype.setContactEndCallback = function (callback) {
+    Physics.getContactProcessor().setContactEndCalback(callback, this.className);
+};
+
 PhysicEntity.prototype.setMaterial = function (material) {
-    if (typeof (material) == "string" && material != "")
-        this.material = material;
+    this.material = material;
 };
 
 PhysicEntity.prototype.getMaterial = function () {

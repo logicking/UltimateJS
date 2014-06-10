@@ -44,9 +44,8 @@ Scene.prototype.createVisual = function(noChildAttach) {
 		this.canvas = guiFactory.createObject("GuiCanvas", {
 			"parent" : visualInfo.visual,
 			"style": "canvasSurface",
-			"z": 10
-			,
-			"wrap": true
+			"z": 10,
+			"wrap": false
 		});
 		visualInfo.visual.addGui(this.canvas, "canvasSurface");
 	}

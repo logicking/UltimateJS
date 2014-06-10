@@ -572,6 +572,13 @@ function countProperties(obj) {
     return Object.keys(obj).length;
 }
 
+function getRandomInt(min, max)
+{
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+// Mega Hack for Android
 var mathSin = Math.sin;
 Math.sin = function(a){
     if (a === 0) return 0;
