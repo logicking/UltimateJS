@@ -63,6 +63,12 @@ Scene.prototype.attachChildVisual = function(child) {
 	}
 };
 
+Scene.prototype.destroy = function() {
+	if (this.canvas)
+		Account.instance.removeRenderEntity(this.canvas);
+	Scene.parent.destroy.call(this);
+};
+
 Scene.prototype.move = function(dx, dy, parallaxDepth) {
 	var visual = this.getVisual();
 	if (parallaxDepth) {

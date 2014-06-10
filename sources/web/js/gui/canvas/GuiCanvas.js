@@ -79,6 +79,11 @@ GuiCanvas.prototype.removeFromRenderQueue = function(elem) {
 	this.setAwake(true);
 };
 
+GuiCanvas.prototype.destroy = function() {
+	Account.instance.removeRenderEntity(this);
+	GuiCanvas.parent.destroy.call(this);
+};
+
 GuiCanvas.prototype.setGuiOffset = function(offsetX, offsetY) {
 	this.guiOffsetX = this.calcPercentageWidth(offsetX?offsetX:0);
 	this.guiOffsetY = this.calcPercentageHeight(offsetY?offsetY:0);
