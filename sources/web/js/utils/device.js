@@ -44,8 +44,7 @@ var Device = (function() {
         isWebkitBrowser = userAgent.indexOf("webkit") > -1;
 
         var nua = navigator.userAgent;
-        isAndroidStockBrowser = (nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1);
-
+        isAndroidStockBrowser = ((nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1) && !(nua.indexOf('Chrome') > -1));
         // check android version
         var androidStr = "android";
         var idx1 = userAgent.indexOf(androidStr);
