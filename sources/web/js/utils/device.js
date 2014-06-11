@@ -200,7 +200,7 @@ var Device = (function() {
 	        			val = JSON.stringify(val);
 	        			break;
 	        	};
-				Native.Storage.SaveToIsolatedStorage(key, val);
+				Native.Storage.SaveToIsolatedStorage(storagePrefix + key, val);
 				return;
 			}
 			if (supportsHtml5Storage()) {
