@@ -246,7 +246,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function () {
 	        that.params.physics.height / 2);
 	}
 
-    if (that.params.physics.type != "Circle") {
+//    if (that.params.physics.type != "Circle") {
     	var angleInDeg = that.getPhysicsRotation().toFixed(3);
     	if (!DOM_MODE || that.initialPosRequiered || !Device.isMobile() || !that.angleInDeg || Math.abs(angleInDeg - that.angleInDeg) > 0.02) {
 	    	that.angleInDeg = that.getPhysicsRotation().toFixed(3);
@@ -255,7 +255,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function () {
 	            visualInfo.visual.rotate(angleInDeg);
 	        });
     	}
-    }
+//    }
 };
 
 // Makes entity "kinematic" or dynamic
@@ -272,12 +272,12 @@ PhysicEntity.prototype.physicsEnable = function (v) {
 };
 
 // PhysicEntity update function
-PhysicEntity.prototype.updatePhysics = function () {
-    if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused())) {
-        this.updatePositionFromPhysics();
-        //this.physics.SetCenterPosition(this.physics.GetCenterPosition(), this.physics.GetRotation());
-    }
-};
+//PhysicEntity.prototype.updatePhysics = function () {
+//    if ((this.params.physics) && (this.physicsEnabled) && (!Physics.paused())) {
+//        this.updatePositionFromPhysics();
+//        //this.physics.SetCenterPosition(this.physics.GetCenterPosition(), this.physics.GetRotation());
+//    }
+//};
 
 // Gets object rotation from physics (IN WHAT MEASURE? - in !Radians!)
 PhysicEntity.prototype.getPhysicsRotation = function () {

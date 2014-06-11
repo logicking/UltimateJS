@@ -38,12 +38,12 @@ PhysicScene.prototype.addChild = function(child) {
 
 PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
-	var that = this;
-	function updateWorld() {
-		Physics.updateWorld();
-		that.setTimeout(updateWorld, 15);
-	}
-	updateWorld();
+//	var that = this;
+
+    this.setInterval(function updateWorld() {
+        Physics.updateWorld();
+    }, 15);
+//	updateWorld();
 };
 
 PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {
