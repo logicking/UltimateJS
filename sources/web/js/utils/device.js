@@ -185,7 +185,7 @@ var Device = (function() {
 		},
 		setStoragePrefix : function(val) {
 			assert(typeof(val) == "string", "Wrong storage prefix: " + val);
-			storagePrefix = val;
+			storagePrefix = val + "_";
 		},
 		setStorageItem : function(key, val) {
 			if (Device.isNative()) {
