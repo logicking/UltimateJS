@@ -392,7 +392,7 @@ GuiSprite.prototype.setTransform = function(matrix, angle) {
 
 GuiSprite.prototype.resize = function() {
 	GuiSprite.parent.resize.call(this);
-//	this.setRealBackgroundPosition(this.offsetX1, this.offsetY1);
+	this.setRealBackgroundPosition(this.offsetX1, this.offsetY1);
 };
 
 GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
