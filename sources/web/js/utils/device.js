@@ -39,7 +39,7 @@ var Device = (function() {
 
 		// check apple iOs
 		isAppleMobileOs = (/iphone|ipod|ipad/gi).test(navigator.platform);
-		isIpod = (/iphone|ipod|ipad/gi).test(navigator.platform);
+		isIpod = (/iphone|ipod/gi).test(navigator.platform);
 
 		isWebkitBrowser = userAgent.indexOf("webkit") > -1;
 
@@ -400,16 +400,20 @@ var Device = (function() {
 
 		// becnmark test for slow devices
 		isSlow : function() {
-			if (Device.isNative() || Device.isWindowsPhone())
+			if (Device.isNative() || Device.isWindowsPhone()) {
+				 alert("I'm native, or windows");
 				return false;
+			}
 			if (Device.isIpodDevice()) {
+				 alert("I'm ipod");
 				return true;
 			}
 			if ((Device.isAndroid() && Device.androidVersion() < 2.3)
 					|| benchmarkTest < 80) {
-				// alert("Yes, we are slow");
+				 alert("Yes, we are slow = " + benchmarkTest);
 				return true;
 			} else {
+				 alert("We are fast = " + benchmarkTest);
 				return false;
 			}
 		},
