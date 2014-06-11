@@ -14,6 +14,7 @@ var Device = (function() {
     var androidOsVersion = null;
     var isAppleMobileOs = null;
     var isIpod = null;
+    var iOS = null;
     var isIeBrowser = null;
     var isWebkitBrowser = null;
     var isAndroidStockBrowser = null;
@@ -39,7 +40,7 @@ var Device = (function() {
 
         // check apple iOs
         isAppleMobileOs = (/iphone|ipod|ipad/gi).test(navigator.platform);
-        isIpod = (/iphone|ipod|ipad/gi).test(navigator.platform);
+        isIpod = (/iphone|ipod/gi).test(navigator.platform);
 
         isWebkitBrowser = userAgent.indexOf("webkit") > -1;
 
@@ -108,6 +109,13 @@ var Device = (function() {
         time = (new Date - startTime) + 1;
         benchmarkTest = 100 * IPHONE_4_TIME / time;
         // alert("test " + benchmarkTest + " time " + time);
+    }
+
+    function iOSVersion() {
+        return parseFloat(
+            ('' + (/CPU.*OS ([0-9_]{1,5})|(CPU like).*AppleWebKit.*Mobile/i.exec(navigator.userAgent) || [0,''])[1])
+                .replace('undefined', '3_2').replace('_', '.').replace('_', '')
+        ) || false;
     }
 
     function supportsHtml5Storage() {
@@ -399,16 +407,28 @@ var Device = (function() {
 
         // becnmark test for slow devices
         isSlow : function() {
-            if (Device.isNative() || Device.isWindowsPhone())
+            if (Device.isNative() || Device.isWindowsPhone()) {
+//				 alert("I'm native, or windows");
                 return false;
-            if (Device.isIpodDevice()) {
-                return true;
+            }
+//			if (Device.isIpodDevice()) {
+////				 alert("I'm ipod");
+//				return true;
+//			}
+            if (Device.isAppleMobile()) {
+                if (iOSVersion() < 7) {
+//					alert("I'm too old for this... iOS"+iOSVersion());
+                    return true;
+                } else {
+//					alert("I'm so good... iOS"+iOSVersion());
+                }
             }
             if ((Device.isAndroid() && Device.androidVersion() < 2.3)
                 || benchmarkTest < 80) {
-                // alert("Yes, we are slow");
+//				 alert("Yes, we are slow = " + benchmarkTest);
                 return true;
             } else {
+//				 alert("We are fast = " + benchmarkTest);
                 return false;
             }
         },
