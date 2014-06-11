@@ -6,6 +6,7 @@ var USE_NATIVE_RENDER = true;
 var Device = (function() {
 	// private interface
 
+	var storagePrefix = "";
 	var storageSupported = null;
 
 	var reserveStorage = {};
@@ -147,6 +148,8 @@ var Device = (function() {
 			 * 
 			 */
 			params = selectValue(params, {});
+			Device.setStoragePrefix(selectValue(params.name, ""));
+			
 			var icon114x114 = selectValue(params.icon, "images/icon114x114.png");
 			var icon114x114alpha = selectValue(params.iconAlpha,
 					"images/icon114x114alpha.png");
@@ -180,6 +183,10 @@ var Device = (function() {
 
             isSupportsToDataURL = supportsToDataURL();
 		},
+		setStoragePrefix : function(val) {
+			assert(typeof(val) == "string", "Wrong storage prefix: " + val);
+			storagePrefix = val;
+		},
 		setStorageItem : function(key, val) {
 			if (Device.isNative()) {
 				if (typeof(val) == "undefined" || typeof(val) == "function")
@@ -198,14 +205,14 @@ var Device = (function() {
 			}
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
-				storage.setItem(key, val);
+				storage.setItem(storagePrefix + key, val);
 			} else {
-				reserveStorage[key] = val;
+				reserveStorage[storagePrefix + key] = val;
 			}
 		},
 		getStorageItem : function(key, defaultVal) {
 			if (Device.isNative()){
-	        	var answer = Native.Storage.GetFromIsolatedStorage(key);
+	        	var answer = Native.Storage.GetFromIsolatedStorage(storagePrefix + key);
 	        	if (answer == null || answer == "" || answer == "null")
 	        		answer = defaultVal;
 	        	else if (!isNaN(answer))
@@ -220,11 +227,11 @@ var Device = (function() {
 			}
 			if (supportsHtml5Storage()) {
 				var storage = window['localStorage'];
-				var val = storage.getItem(key);
+				var val = storage.getItem(storagePrefix + key);
 				return (val != null) ? val : defaultVal;
 			} else {
-				if (reserveStorage[key])
-					return reserveStorage[key];
+				if (reserveStorage[storagePrefix + key])
+					return reserveStorage[storagePrefix + key];
 				return defaultVal;
 			}
 		},
