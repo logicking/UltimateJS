@@ -244,9 +244,8 @@ var Physics = (function () {
             return contactListener;
         },
         updateWorld: function () {
-            if (pause === true) {
+            if (pause === true)
                 return;
-            }
 
             var world = Physics.getWorld();
             world.Step(1 / 45, 5, 5);
@@ -261,7 +260,7 @@ var Physics = (function () {
             for (var i = 0; i < updateItems.length; ++i) {
                 updateItems[i].updatePositionFromPhysics();
                 if (Screen.isDOMForced() === true && updateItems[i].initialPosRequiered === true) {
-                	updateItems[i].initialPosRequiered = null;
+                	updateItems[i].initialPosRequiered = false;
             		updateItems[i].physics.SetAwake(false);
                 }
             }

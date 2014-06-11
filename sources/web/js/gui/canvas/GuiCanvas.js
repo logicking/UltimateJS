@@ -203,12 +203,19 @@ GuiCanvas.prototype.render = function() {
 	} else {
 		this.context.clearRect(0, 0, w, h);
 	}
+
+//	this.smartClear();
 	for (var i = 0; i < this.renderQueue.length; i++) {
-		if (this.renderQueue[i].render) {
 			this.context.save();
 			this.renderQueue[i].render(this.context);
 			this.context.restore();
-		}
 	}
-	
+};
+
+GuiCanvas.prototype.smartClear = function() {
+	for (var i = 0; i < this.renderQueue.length; i++) {
+		this.context.save();
+		this.renderQueue[i].clear(this.context);
+		this.context.restore();
+	}
 };

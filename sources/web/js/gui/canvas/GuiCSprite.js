@@ -20,10 +20,6 @@ GuiCSprite.prototype.createInstance = function(params) {
 	return entity;
 };
 
-//GuiCSprite.prototype.generateId = function() {
-//	return this.className + uniqueId();
-//};
-
 guiFactory.addClass(GuiCSprite);
 
 /**
@@ -36,14 +32,19 @@ guiFactory.addClass(GuiCSprite);
  */
 GuiCSprite.prototype.initialize = function(params) {
 	var that = this;
-	
 	this.canvasToParentOffset = {
 		'left' : 0,
 		'top': 0
 	};
-	
+	this.lastFrame = {
+		sourceRect: [0, 0, 0, 0], 
+		destRect: [0, 0, 0, 0],
+		translate: [0, 0],
+		rotate: 0,
+		scale: [0, 0]
+	};
 	this.params = params;
-	this.canvas = params['canvas'];
+	this.canvas = params['canvas'] ? params['canvas'] : null;
 
 	this.x = this.calcPercentageWidth(params.x||0);
 	this.y = this.calcPercentageHeight(params.y||0);
@@ -191,11 +192,6 @@ GuiCSprite.prototype.transform = function(transfromations) {
 	this.canvas.setAwake(true);
 };
 
-GuiCSprite.prototype.rotate = function(angle) {
-	GuiCSprite.parent.rotate.call(this, angle, true);
-	this.canvas.setAwake(true);
-};
-
 GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
 	this.transformOrigin = {
             x : (transformOrigin && !isNaN(transformOrigin.x))?(Math.round(transformOrigin.x * 100) / 100):0.5,
@@ -323,46 +319,50 @@ GuiCSprite.prototype.setOpacity = function(opacity) {
 GuiCSprite.prototype.render = function(ctx) {
 	if (!this.visible) 
 		return;
-	var scrnRatio = {
-			x : Screen.widthRatio(),
-			y : Screen.heightRatio()
-	};
 
-	var x = Math.round(this.canvasToParentOffset.left + (this.x + /*this.parent.guiOffsetX*/ + this.offsetX)*scrnRatio.x);
-    var y =  Math.round(this.canvasToParentOffset.top + (this.y + /*this.parent.guiOffsetY*/ + this.offsetY)*scrnRatio.y);
-    var w = Math.ceil(this.width*scrnRatio.x);// this.imageWidth;//
-    var h =  Math.ceil(this.height*scrnRatio.y);// this.imageHeight;//
-	var bx = Math.ceil(this.backgroundPosition.x * this.imageWidth);
-	var by = Math.ceil(this.backgroundPosition.y * this.imageHeight);
+	var x = this.canvasToParentOffset.left + (this.x + this.offsetX) * Screen.widthRatio();
+    var y = this.canvasToParentOffset.top + (this.y + this.offsetY) * Screen.heightRatio();
+
+	this.lastFrame.destRect[2] = this.width * Screen.widthRatio();
+	this.lastFrame.destRect[3] = this.height * Screen.heightRatio();
+	this.lastFrame.destRect[0] = -this.lastFrame.destRect[2] * this.transformOrigin.x;
+	this.lastFrame.destRect[1] = -this.lastFrame.destRect[3] * this.transformOrigin.y;
 	
-    var ratio = {
-        x : this.transformOrigin.x,
-        y : this.transformOrigin.y
-    };
+	this.lastFrame.translate[0] = x - this.lastFrame.destRect[0];
+	this.lastFrame.translate[1] = y - this.lastFrame.destRect[1];
 	
-    var translate = {
-    		x: Math.round((x+w*ratio.x)),
-    		y: Math.round((y+h*ratio.y))
-    };
-    var rot = MathUtils.toRad(Math.round(this.angle));
-    rot = rot.toFixed(3)*1;
-	ctx.translate(translate.x, translate.y);
-	ctx.rotate(rot); 
+	this.lastFrame.rotate = this.angle;
+	
+	ctx.translate(this.lastFrame.translate[0], this.lastFrame.translate[1]);
+	ctx.rotate(this.lastFrame.rotate); 
 	ctx.globalAlpha = this.opacity;
 	
 // ctx.scale(this.scale.x, this.scale.y);
 
-	var sizeX = Math.ceil(this.imageWidth);
-	var sizeY = Math.ceil(this.imageHeight);
-	var offsetX = -Math.ceil(w*ratio.x);
-	var offsetY = -Math.ceil(h*ratio.y);
-	
-	if (bx+sizeX <= this.img.width && by+sizeY <= this.img.height)
+	this.lastFrame.sourceRect[0] = this.backgroundPosition.x * this.imageWidth;
+	this.lastFrame.sourceRect[1] = this.backgroundPosition.y * this.imageHeight;
+	this.lastFrame.sourceRect[2] = this.imageWidth;
+	this.lastFrame.sourceRect[3] = this.imageHeight;
+
+	if (this.lastFrame.sourceRect[0] + this.imageWidth <= this.img.width 
+			&& this.lastFrame.sourceRect[1] + this.imageHeight <= this.img.height)
 	    ctx.drawImage(this.img,
-			    bx, by,
-			    sizeX, sizeY,
-	            offsetX, offsetY,
-	            w, h);
+	    		this.lastFrame.sourceRect[0], this.lastFrame.sourceRect[1],
+	    		this.lastFrame.sourceRect[2], this.lastFrame.sourceRect[3],
+	    		this.lastFrame.destRect[0], this.lastFrame.destRect[1],
+	    		this.lastFrame.destRect[2], this.lastFrame.destRect[3]);
 	else 
 		console.warn('Shit is happining. Again. Source rect is out of image bounds');
+};
+
+GuiCSprite.prototype.clear = function(ctx) {
+	if (!this.visible) 
+		return;
+	ctx.translate(this.lastFrame.translate[0], this.lastFrame.translate[1]);
+	ctx.rotate(this.lastFrame.rotate); 
+	ctx.globalAlpha = this.opacity;
+// ctx.scale(1.2, 1.2);
+
+	    ctx.clearRect(this.lastFrame.destRect[0], this.lastFrame.destRect[1],
+	    			  this.lastFrame.destRect[2], this.lastFrame.destRect[3]);
 };

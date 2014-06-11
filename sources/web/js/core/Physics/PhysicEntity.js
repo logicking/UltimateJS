@@ -247,16 +247,27 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	    this.positionUpdated = true;
 	}
 
-	this.newAngle = this.getPhysicsRotation().toFixed(3);
+	this.newAngle = this.physics.GetAngle();
 	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
 			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
-		this.newAngle = MathUtils.toDeg(this.newAngle);
+//		this.newAngle = MathUtils.toDeg(this.newAngle);
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);
         this.positionUpdated = true;
 	}
-	return this.positionUpdated;
+};
+
+PhysicEntity.prototype.updatePosition = function () {
+    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
+	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
+    this.lastUpdatedPos = this.physics.GetPosition();
+};
+
+PhysicEntity.prototype.updateAngle = function () {
+    for (var name in this.visuals)
+    	this.visuals[name].visual.rotate(this.newAngle);
+    this.lastUpdatedAngle = this.physics.GetAngle();
 };
 
 // Makes entity "kinematic" or dynamic
@@ -287,7 +298,6 @@ PhysicEntity.prototype.setPhysicsPosition = function (pos) {
    	this.physics.SetAwake(true);
     this.physics.SetPosition(pos);
     this.updatePositionFromPhysics();
-   	this.physics.SetAwake(false);
 };
 
 /**

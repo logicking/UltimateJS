@@ -23,7 +23,9 @@ GuiSprite.prototype.initialize = function(params) {
 
 	// .hack temporary disable viewport for sprites at all
 	this.clampByViewport = this.clampByViewportSimple;
-
+//	this.canvas = params['canvas']? params.canvas : null;
+	this.canvas = null; 
+	
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
 	this.frameCallback = null;
@@ -370,10 +372,12 @@ GuiSprite.prototype.transform = function(transfromations, dontCallCssTransform) 
 				this.translate);
 };
 
-GuiSprite.prototype.rotate = function(angle, dontCallTransform) {
+GuiSprite.prototype.rotate = function(angle) {
 	this.angle = angle;
-	if (!dontCallTransform)
+	if (this.canvas === null)
 		this.transform();
+	else
+		this.canvas.setAwake(true);
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
