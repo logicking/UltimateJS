@@ -401,19 +401,19 @@ var Device = (function() {
 		// becnmark test for slow devices
 		isSlow : function() {
 			if (Device.isNative() || Device.isWindowsPhone()) {
-				 alert("I'm native, or windows");
+//				 alert("I'm native, or windows");
 				return false;
 			}
 			if (Device.isIpodDevice()) {
-				 alert("I'm ipod");
+//				 alert("I'm ipod");
 				return true;
 			}
 			if ((Device.isAndroid() && Device.androidVersion() < 2.3)
 					|| benchmarkTest < 80) {
-				 alert("Yes, we are slow = " + benchmarkTest);
+//				 alert("Yes, we are slow = " + benchmarkTest);
 				return true;
 			} else {
-				 alert("We are fast = " + benchmarkTest);
+//				 alert("We are fast = " + benchmarkTest);
 				return false;
 			}
 		},
