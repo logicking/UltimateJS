@@ -20,9 +20,13 @@ var BASE_MARGIN_WIDTH = 0;
 var BASE_MARGIN_HEIGHT = 0;
 //
 
+
+
 var Screen = (function() {
 	var screenConsts = {};
 
+	var domForced = false;
+	
 	// private interface
 
 	// reference to main application class
@@ -479,6 +483,12 @@ var Screen = (function() {
 				x : (width / Screen.widthRatio()),
 				y : (height / Screen.heightRatio())
 			};
+		},
+		isDOMForced : function() {
+			return domForced;
+		},
+		setDOMForced : function(forceDom) {
+			domForced = forceDom;
 		}
 	};
 })();

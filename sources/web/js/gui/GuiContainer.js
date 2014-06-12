@@ -25,18 +25,6 @@ GuiContainer.prototype.update = function(time) {
 	}
 };
 
-GuiContainer.prototype.render = function(ctx) {
-	if (ctx) {
-		for (var i = 0; i < this.guiEntities.length; i++) {
-			if (this.guiEntities[i].render) {
-				ctx.save();
-				this.guiEntities[i].render(ctx);
-				ctx.restore();
-			}
-		}
-	}
-};
-
 GuiContainer.prototype.setUpdateInterval = function(time) {
 	var that = this;
 	this.updateIntervalTime = time;
@@ -79,11 +67,14 @@ GuiContainer.prototype.addGui = function(entity, name) {
 		entity.name = name;
 		this.guiEntitiesMap[name] = entity;
 	}
+	
+	if (entity.onAdd)
+		entity.onAdd();
 };
 
 GuiContainer.prototype.removeGui = function(entity) {
 	popElementFromArray(entity, this.guiEntities);
-	if (this.guiEntitiesMap[entity.name]) {
+	if (entity.name && this.guiEntitiesMap[entity.name]) {
 		delete this.guiEntitiesMap[entity.name];
 	}
 	entity.remove();

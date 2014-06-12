@@ -43,7 +43,9 @@ Effect.prototype.play = function(position, callback) {
 
 	$['each'](that.params.visuals, function(id, value) {
 		value.parent = that.guiParent;
-
+		value.canvas = that.parent.getCanvas();
+		position.x = position.x - value.width/2;
+		position.y = position.y - value.height/2;
 		var gui = guiFactory.createObject(value['class'], $['extend'](
 				value, position));
 		gui.clampByParentViewport();
@@ -58,11 +60,6 @@ Effect.prototype.play = function(position, callback) {
 		});	
 	});
 
-//	that.setTimeout(function() {
-//		that.destroy();
-//	
-//		if (callback) callback();
-//	}, this.params.lifeTime);
 };
 
 Effect.prototype.destroy = function() {

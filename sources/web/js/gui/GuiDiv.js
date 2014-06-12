@@ -74,22 +74,6 @@ GuiDiv.prototype.initialize = function(params) {
 	if (this.innerScene) {
 		this.clampByParentViewport();
 	}
-	
-	if (params['canvas']) {
-		var cParams = params['canvas'];
-		$['extend'](cParams, {
-			"parent" : this
-		});
-
-		cParams["width"] = params['canvas'].width?params['canvas'].width:this.width;
-		cParams["height"] = params['canvas'].height?params['canvas'].height:this.height;
-		cParams["x"] = params['canvas'].x?params['canvas'].x:this.x;
-		cParams["y"] = params['canvas'].y?params['canvas'].y:this.y;
-		cParams["offsetX"] = params['canvas'].offsetX?params['canvas'].offsetX:this.offsetX;
-		cParams["offsetY"] = params['canvas'].offsetY?params['canvas'].offsetY:this.offsetY;
-		
-		this.canvas = guiFactory.createObject("GuiCanvas", cParams);
-	}
 };
 
 GuiDiv.prototype.generate = function(src) {
@@ -229,10 +213,6 @@ GuiDiv.prototype.resize = function() {
 	if (this.viewport) {
 		this.clampByViewport();
 	}
-	
-	if (this.canvas) {
-		this.canvas.resize(this.width, this.height);
-	}
 };
 
 GuiDiv.prototype.dragBegin = function(e) {
@@ -309,7 +289,8 @@ GuiDiv.prototype.setDragListener = function(isTrue, priority) {
 		DragManager.addListener(this);
 	} else {
 		DragManager.removeListener(this);
-		this.$()['unbind'](".dragEvents");
+		if (this.$ && this.$()) 				/// TODO Another hack for GuiCSprite. Must be refactord as soon as possible
+			this.$()['unbind'](".dragEvents");
 	}
 };
 
@@ -529,8 +510,6 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 
 
 GuiDiv.prototype.remove = function() {
-	if (this.canvas)
-		this.canvas.remove();
 	GuiDiv.parent.remove.call(this);
 	this.setDragListener(false);
 };

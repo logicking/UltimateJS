@@ -15,6 +15,8 @@ Entity.prototype.init = function(params) {
 
 	// Variables values for synchronizing with server
 	this.properties = {};
+	
+	this.sounds = params.sounds;
 
 	if (params['parent']) {
 		// find parent among entities in account
@@ -31,10 +33,12 @@ Entity.prototype.init = function(params) {
 
 	var enabled = selectValue(params['enabled'], true);
 	this.setEnable(enabled);
-
+	
 	// this.readUpdate(params);
 	this.timeouts = null;
 	this.intervals = null;
+	
+	this.initChildren(params);
 };
 
 Entity.prototype.assert = function(cond, msg) {
@@ -99,7 +103,7 @@ Entity.prototype.getChild = function(childId) {
 
 Entity.prototype.initChildren = function(params) {
 	if (params && params['children']) {
-		Account.instance.readGlobalUpdate(params['children']);
+		Account.instance.readGlobalUpdate(params['children'], this);
 	}
 };
 
@@ -153,7 +157,10 @@ Entity.prototype.readUpdate = function(data) {
 			this.parent = null;
 		}
 		if (data['parent']) {
-			Account.instance.getEntity(data['parent']).addChild(this);
+			if (typeof(data['parent']) == "string")
+				Account.instance.getEntity(data['parent']).addChild(this);
+			else
+				data['parent'].addChild(this);
 		}
 	}
 	// }
@@ -220,4 +227,17 @@ Entity.prototype.clearTimeouts = function() {
 		clearTimeout(this.timeouts[i]);
 	}
 	this.timeouts = new Array();
+};
+
+Entity.prototype.playSound = function(sound) {
+	if(!sound || !this.sounds || !this.sounds[sound]) {
+		console.log("No sound collection " + sound + " found for entity " + this.id);
+		return;
+	}
+	if (typeof(this.sounds[sound]) == "string")
+			Sound.play(this.sounds[sound]);
+	else if (this.sounds[sound].length) {
+		var soundIdx = getRandomInt(0, this.sounds[sound].length - 1);
+		Sound.play(this.sounds[sound][soundIdx]);
+	}
 };

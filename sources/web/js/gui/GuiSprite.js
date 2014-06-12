@@ -1,5 +1,3 @@
-DOM_MODE = true;
-
 var GUISPRITE_HACK_ON = false;
 
 /**
@@ -25,7 +23,9 @@ GuiSprite.prototype.initialize = function(params) {
 
 	// .hack temporary disable viewport for sprites at all
 	this.clampByViewport = this.clampByViewportSimple;
-
+//	this.canvas = params['canvas']? params.canvas : null;
+	this.canvas = null; 
+	
 	this.totalWidth = params['totalImageWidth'];
 	this.totalHeight = params['totalImageHeight'];
 	this.frameCallback = null;
@@ -133,7 +133,26 @@ GuiSprite.prototype.update = function(dt) {
 	}
 };
 
-GuiSprite.prototype.updateSpatialAnimation = function(dt) {
+GuiSprite.prototype.changeBackgroundPosition = function(x, y) {
+	this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
+			* x + Screen.heightRatio() * this.offsetX1)
+			+ "px "	+ Math.round(-Screen.heightRatio() * y
+					+ Screen.heightRatio() * this.offsetY1) + "px ");
+};
+
+GuiSprite.prototype.changeBackgroundPositionReal = function(x, y) {
+	this.jObject['css']("background-position", Math.round(Screen.widthRatio()
+			* (x * this.width + this.offsetX1))
+			+ "px "
+			+ Math.round(Screen.heightRatio() * (y * this.height + this.offsetY1))
+			+ "px ");
+};
+
+GuiSprite.prototype.selectFrame = function(frame, row) {
+	this.changeBackgroundPosition(frame * this.width, row * this.height);
+};
+
+GuiSprite.prototype.updateSpatialAnimation = function(dt, dontResize) {
 	if (this.spatialAnimation == null) {
 		return;
 	}
@@ -153,7 +172,8 @@ GuiSprite.prototype.updateSpatialAnimation = function(dt) {
 	if (this.spatialAnimation) {
 		this.spatialAnimation.timeLeft -= dt;
 	}
-	this.resize();
+	if (!dontResize)
+		this.resize();
 };
 
 GuiSprite.prototype.updateAnimation = function() {
@@ -166,18 +186,17 @@ GuiSprite.prototype.updateAnimation = function() {
 			return true;
 		}
 	}
-	
-	
 
 	var rowFramesLength = Math.round(this.totalWidth / this.width);
 	var frame = this.animations[this.currentAnimation].frames[this.currentFrame];
 	
 	if(this.frames[frame]){
 		var frm = this.frames[frame]; 
-		this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
-				* frm.x + Screen.heightRatio() * this.offsetX1)
-				+ "px "	+ Math.round(-Screen.heightRatio() * frm.y
-						+ Screen.heightRatio() * this.offsetY1) + "px ");
+		this.changeBackgroundPosition(frm.x, frm.y);
+//		this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
+//				* frm.x + Screen.heightRatio() * this.offsetX1)
+//				+ "px "	+ Math.round(-Screen.heightRatio() * frm.y
+//						+ Screen.heightRatio() * this.offsetY1) + "px ");
 //		if(frm.w && frm.h){
 //			this.jObject['css']("background-position", frm.w + "px " + frm.w + "px ");
 //		}
@@ -187,16 +206,18 @@ GuiSprite.prototype.updateAnimation = function() {
 		var row = this.animations[this.currentAnimation].row + q;
 		frame = remainder;
 
-		this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
-				* frame * this.width + Screen.heightRatio() * this.offsetX1)
-				+ "px "
-				+ Math.round(-Screen.heightRatio() * row * this.height
-						+ Screen.heightRatio() * this.offsetY1) + "px ");
+		this.selectFrame(frame, row);
+		
+//		this.jObject['css']("background-position", Math.round(-Screen.widthRatio()
+//				* frame * this.width + Screen.heightRatio() * this.offsetX1)
+//				+ "px "
+//				+ Math.round(-Screen.heightRatio() * row * this.height
+//						+ Screen.heightRatio() * this.offsetY1) + "px ");
 		this.frame = frame;
 		this.row = row;
 	}
 	
-	this.setRealBackgroundPosition();// test
+//	this.setRealBackgroundPosition();// test
 	if (this.frameCallback != null) {
 		if (this.frameCallback[this.currentAnimation]) {
 			this.frameCallback[this.currentAnimation](this.currentFrame);
@@ -205,8 +226,9 @@ GuiSprite.prototype.updateAnimation = function() {
 	this.currentFrame++;
 };
 
-GuiSprite.prototype.stopAnimation = function(dontCallCallback) {
-	this.jObject['stop']();
+GuiSprite.prototype.stopAnimation = function(dontCallCallback, dontCallJQuery) {
+	if (!dontCallJQuery)
+		this.jObject['stop']();
 	clearInterval(this.updateAnimationCallback);
 	this.updateAnimationCallback = null;
 	this.currentAnimation = null;
@@ -232,6 +254,10 @@ GuiSprite.prototype.setFrameCallback = function(frameCallback) {
 
 GuiSprite.prototype.setAnimationEndCallback = function(animationEndCallback) {
 	this.animationEndCallback = animationEndCallback;
+};
+
+GuiSprite.prototype.getAnimation = function(animationName) {
+	return this.animations[animationName];
 };
 
 GuiSprite.prototype.playAnimation = function(animationName, duration, isLooped,
@@ -320,12 +346,13 @@ GuiSprite.prototype.animate = function(animation, callback) {
 	}
 };
 
-GuiSprite.prototype.flip = function(needToBeFlipped) {
+GuiSprite.prototype.flip = function(needToBeFlipped, dontCallTransform) {
 	this.flipped = needToBeFlipped;
-	this.transform();
+	if (!dontCallTransform)
+		this.transform();
 };
 
-GuiSprite.prototype.transform = function(transfromations) {
+GuiSprite.prototype.transform = function(transfromations, dontCallCssTransform) {
 	if (transfromations) {
 		if (transfromations.matrix != null)
 			this.matrix = transfromations.matrix;
@@ -340,25 +367,35 @@ GuiSprite.prototype.transform = function(transfromations) {
 	var scaleX = scaleY;
 	scaleX *= (this.flipped ? -1 : 1);
 	
-	cssTransform(this.jObject, this.matrix, this.angle, scaleX, scaleY,
-			this.translate);
+	if (!dontCallCssTransform)
+		cssTransform(this.jObject, this.matrix, this.angle, scaleX, scaleY,
+				this.translate);
 };
 
 GuiSprite.prototype.rotate = function(angle) {
 	this.angle = angle;
-	this.transform();
+	if (this.canvas === null)
+		this.transform();
+	else
+		this.canvas.setAwake(true);
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
-	this.transformOrigin = transformOrigin;
+	if (typeof transformOrigin == 'string') {
+		this.transformOrigin = transformOrigin;
+	} if (transformOrigin && transformOrigin.x && transformOrigin.y) {
+		this.transformOrigin = parseInt(transformOrigin.x*100) + "% " + parseInt(transformOrigin.y*100) + "%";
+	} else {
+		this.transformOrigin = "50% 50%";
+	}
 	// console.log("Set transform origin to %s", transformOrigin);
 	var obj = this.jObject;
-	obj['css']("-webkit-transform-origin", transformOrigin);
-	obj['css']("transform-origin", transformOrigin);
-	obj['css']("-moz-transform-origin", transformOrigin);
-	obj['css']("-o-transform-origin", transformOrigin);
-	obj['css']("transform-origin", transformOrigin);
-	obj['css']("msTransform-origin", transformOrigin);
+	obj['css']("-webkit-transform-origin", this.transformOrigin);
+	obj['css']("transform-origin", this.transformOrigin);
+	obj['css']("-moz-transform-origin", this.transformOrigin);
+	obj['css']("-o-transform-origin", this.transformOrigin);
+	obj['css']("transform-origin", this.transformOrigin);
+	obj['css']("msTransform-origin", this.transformOrigin);
 };
 
 GuiSprite.prototype.setPosition = function(x, y) {
@@ -404,11 +441,12 @@ GuiSprite.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
 	}
 	var frame = selectValue(this.frame, 0);
 	var row = selectValue(this.row, 0);
-	this.jObject['css']("background-position", Math.round(Screen.widthRatio()
-			* (-frame * this.width + offsetX))
-			+ "px "
-			+ Math.round(Screen.heightRatio() * (row * this.height + offsetY))
-			+ "px ");
+	this.changeBackgroundPositionReal(-frame, row);
+//	this.jObject['css']("background-position", Math.round(Screen.widthRatio()
+//			* (-frame * this.width + offsetX))
+//			+ "px "
+//			+ Math.round(Screen.heightRatio() * (row * this.height + offsetY))
+//			+ "px ");
 };
 
 GuiSprite.prototype.resizeBackground = function() {

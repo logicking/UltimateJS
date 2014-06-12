@@ -4,95 +4,83 @@
  */
 
 function ContactProcessor() {
-	this.pairs = {};
-	this.defaultBegin = function() {};
-	this.defaultEnd = function() {};
+	this.beginCallbacks = {};
+	this.endCallbacks = {};
+//	this.preSolveCallbacks = {};
+//	this.postSolveCAllbacks = {};
 };
+
+ContactProcessor.prototype.init = function() {
+	if (Physics.getContactListener())
+		return;
+	var that = this;
+	var contactListener = Physics.getContactListener();
+	contactListener = new Box2D.Dynamics.b2ContactListener;
+
+    contactListener.BeginContact = function(contact) {
+			that.processBegin(contact);	
+    };
+    contactListener.EndContact = function(contact) {
+			that.processEnd(contact);	
+    };
+//    contactListener.PreSolve = function(contact, impulse) {
+////	    		that.processPreSolve(contact, impulse);
+//    };
+//    contactListener.PostSolve = function(contact, oldManifold) {
+////	    	that.processPostSolve(contact, oldManifold);
+//    };
+    var world = Physics.getWorld();
+    world.SetContactListener(contactListener);
+};
+
 
 //
 //	Adds pair to contact events dataset 
 //
-ContactProcessor.prototype.addPair = function(type1, type2, event, action) {
-	var that = this;
-	/// New contact listener version
-    if (!Physics.getContactListener())
-	{
-    	var contactListener = Physics.getContactListener();
-    	contactListener = new Box2D.Dynamics.b2ContactListener;
-
-	    contactListener.BeginContact = function(contact) {
-	    	if (that) {
-				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-				that.processBegin(type1, type2, contact);	
-	    	}
-	    };
-	    contactListener.EndContact = function(contact) {
-	    	if (that) {
-				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-				that.processEnd(type1, type2, contact);	
-	    	}
-			
-	    };
-	    contactListener.PreSolve = function(contact, impulse) {
-	    	
-	    };
-	    contactListener.PostSolve = function(contact, oldManifold) {
-	    	
-	    };
-	    var world = Physics.getWorld();
-	    world.SetContactListener(contactListener);
-	}
-	
-	
-	if (type1 in this.pairs) {
-		if (this.pairs[type1][type2])
-			this.pairs[type1][type2][event] = action;
-		else {
-			this.pairs[type1][type2] = {};
-			this.pairs[type1][type2][event] = action;
-		}
-	} else if (type2 in this.pairs) {
-		if (this.pairs[type2][type1])
-			this.pairs[type2][type1][event] = action;
-		else {
-			this.pairs[type2][type1] = {};
-			this.pairs[type2][type1][event] = action;
-		}
-	} else {
-		this.pairs[type1] = {};
-		this.pairs[type1][type2] = {};
-		this.pairs[type1][type2][event] = action;
-	}
+ContactProcessor.prototype.setContactBeginCalback = function(callback, param) {
+	this.init();
+	this.beginCallbacks[param] = callback;
 };
 
-ContactProcessor.prototype.setDefaultBeginContact = function(begin) {
-	this.defaultBegin = begin;
+ContactProcessor.prototype.getContactBeginCalback = function(entity) {
+	return this.beginCallbacks[entity.className];
 };
 
-ContactProcessor.prototype.setDefaultEndContact = function(end) {
-	this.defaultEnd = end;
+ContactProcessor.prototype.setContactEndCalback = function(callback, param) {
+	this.init();
+	this.endCallbacks[param] = callback;
 };
 
-//
-//	Predefined BeginContact processor
-//
-ContactProcessor.prototype.processBegin = function(type1, type2, contact) {
-	if ((type1 in this.pairs)&&(type2 in this.pairs[type1])&&(this.pairs[type1][type2])["beginContact"])
-		this.pairs[type1][type2]["beginContact"](contact); else
-	if ((type2 in this.pairs)&&(type1 in this.pairs[type2])&&(this.pairs[type2][type1])["beginContact"])
-		this.pairs[type2][type1]["beginContact"](contact); else
-			this.defaultBegin(contact);
+ContactProcessor.prototype.getContactEndCallback = function(entity) {
+	this.beginCallbacks[entity.className];
 };
 
-//
-//	Predefined EndContact processor
-//
-ContactProcessor.prototype.processEnd = function(type1, type2, contact) {
-	if ((type1 in this.pairs)&&(type2 in this.pairs[type1])&&(this.pairs[type1][type2]["endContact"]))
-		this.pairs[type1][type2]["endContact"](contact); else
-	if ((type2 in this.pairs)&&(type1 in this.pairs[type2])&&(this.pairs[type2][type1]["endContact"]))
-		this.pairs[type2][type1]["endContact"](contact); else
-			this.defaultEnd(contact);
+ContactProcessor.prototype.clearContactCallbacks = function(entity) {
+	if (!entity) {
+		this.beginCallbacks = {};
+		this.endCallbacks = {};
+	} else
+		delete this.beginCallbacks[entity.className];
+};
+
+ContactProcessor.prototype.processBegin = function(contact) {
+	var entityA = contact.GetFixtureA().GetBody().GetUserData();
+	var entityB = contact.GetFixtureB().GetBody().GetUserData();
+	var callback = entityA ? this.beginCallbacks[entityA.className] : false;
+	if (callback && entityA.physics) 
+		callback.call(entityA, contact, entityB);
+	callback = entityB ? this.beginCallbacks[entityB.className] : false;
+	if (callback && entityB.physics) 
+		callback.call(entityB, contact, entityA);
+};
+
+ContactProcessor.prototype.processEnd = function(contact) {
+	var entityA = contact.GetFixtureA().GetBody().GetUserData();
+	var entityB = contact.GetFixtureB().GetBody().GetUserData();
+	var callback = entityA ? this.endCallbacks[entityA.className] : false;
+	if (callback && entityA.physics) 
+		callback.call(entityA, contact, entityB);
+	callback = entityB ? this.endCallbacks[entityB.className] : false;
+	if (callback && entityB.physics) 
+		callback.call(entityB, contact, entityA);
 };

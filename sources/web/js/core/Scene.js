@@ -30,8 +30,7 @@ Scene.prototype.createVisual = function(noChildAttach) {
 		y : params['y'],
 		width : params['width'],
 		height : params['height'],
-		background : params['background'],
-		canvas : params['canvas']
+		background : params['background']
 	});
 
 	var visualInfo = {};
@@ -40,6 +39,17 @@ Scene.prototype.createVisual = function(noChildAttach) {
 
 	var that = this;
 	this.children = this.children ? this.children : new Array();
+	
+	if (!Screen.isDOMForced() && params['canvas']) {
+		this.canvas = guiFactory.createObject("GuiCanvas", {
+			"parent" : visualInfo.visual,
+			"style": "canvasSurface",
+			"z": 10,
+			"wrap": false
+		});
+		visualInfo.visual.addGui(this.canvas, "canvasSurface");
+	}
+	
 	if(!noChildAttach){
 		$['each'](this.children, function(id, val) {
 			that.attachChildVisual(val);
@@ -51,6 +61,12 @@ Scene.prototype.attachChildVisual = function(child) {
 	if (child.attachToGui) {
 		child.attachToGui(this.getVisual(), true);
 	}
+};
+
+Scene.prototype.destroy = function() {
+	if (this.canvas)
+		Account.instance.removeRenderEntity(this.canvas);
+	Scene.parent.destroy.call(this);
 };
 
 Scene.prototype.move = function(dx, dy, parallaxDepth) {
@@ -68,4 +84,8 @@ Scene.prototype.move = function(dx, dy, parallaxDepth) {
 	}
 
 	visual.move(dx, dy);
+};
+
+Scene.prototype.getCanvas = function() {
+	return this.canvas;
 };

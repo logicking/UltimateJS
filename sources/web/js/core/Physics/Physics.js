@@ -105,6 +105,12 @@ var Physics = (function () {
     var bodiesToDestroy = [];
     var contactListener = null;
     var contactProcessor = null;
+    var maxSpeed = {
+    		linearX: 0,
+    		linearY: 0,
+    		linear: 0,
+    		angular: 0
+    };
 
     function debugDrawing(v) {
         if (v && !debugCanvas) {
@@ -131,35 +137,6 @@ var Physics = (function () {
         }
         b2dToGameRatio = ratio != null ? ratio : DEFAULT_B2WORLD_RATIO;
         world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
-        contactProcessor = new ContactProcessor();
-        /// New contact listener version
-//        contactListener = new Box2D.Dynamics.b2ContactListener;
-//        contactListener.BeginContact = function(contact) {
-//        	if (contactProcessor) {
-//				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-//				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-//				contactProcessor.processBegin(type1, type2, contact);	
-//        	}
-//        };
-//        contactListener.EndContact = function(contact) {
-//        	if (contactProcessor) {
-//				var type1 = contact.GetFixtureA().GetBody().GetUserData().params["type"];
-//				var type2 = contact.GetFixtureB().GetBody().GetUserData().params["type"];
-//				contactProcessor.processEnd(type1, type2, contact);	
-//        	}
-//    		
-//        };
-//        contactListener.PreSolve = function(contact, impulse) {
-//        	
-//        };
-//        contactListener.PostSolve = function(contact, oldManifold) {
-//        	
-//        };
-//        
-//        world.SetContactListener(contactListener);
-        ///
-// Old one        
-//  contactListener = new ContactListener(contactProcessor);
     }
 
     // TODO: remove?
@@ -259,17 +236,18 @@ var Physics = (function () {
             createWorldBorder(params);
         },
         getContactProcessor: function () {
+        	if (!contactProcessor)
+        		contactProcessor = new ContactProcessor();
             return contactProcessor;
         },
         getContactListener: function () {
             return contactListener;
         },
         updateWorld: function () {
-            if (pause) {
+            if (pause === true)
                 return;
-            }
 
-            var world = this.getWorld();
+            var world = Physics.getWorld();
             world.Step(1 / 45, 5, 5);
             if (timeout) {
                 timeout.tick(15);
@@ -280,18 +258,41 @@ var Physics = (function () {
             }
             world.ClearForces();
             for (var i = 0; i < updateItems.length; ++i) {
-                updateItems[i].updatePhysics();
-                if (DOM_MODE && updateItems[i].initialPosRequiered) {
-                	updateItems[i].initialPosRequiered = null;
+                updateItems[i].updatePositionFromPhysics();
+                if (Screen.isDOMForced() === true && updateItems[i].initialPosRequiered === true) {
+                	updateItems[i].initialPosRequiered = false;
             		updateItems[i].physics.SetAwake(false);
                 }
             }
             if (bodiesToDestroy.length > 0) {
                 for (var i = 0; i < bodiesToDestroy.length; ++i) {
-                    world.DestroyBody(bodiesToDestroy[i]);
+                	if (world.IsLocked() === false)
+                		world.DestroyBody(bodiesToDestroy[i]);
+                	bodiesToDestroy[i].SetUserData(null);
+                	bodiesToDestroy[i] = null;
                 }
                 bodiesToDestroy = [];
             }
+        },
+        getMaxSpeed: function () {
+        	for (var i = 0; i < updateItems.length; ++i) {
+                if (updateItems[i].physics && updateItems[i].physics.GetType()) {
+                	maxSpeed.linearX = 0;
+                	maxSpeed.linearY = 0;
+                	maxSpeed.angular = 0;
+                	maxSpeed.linearX = Math.max(maxSpeed.linearX, Math.abs(updateItems[i].physics.m_linearVelocity.x));
+                	maxSpeed.linearY = Math.max(maxSpeed.linearY, Math.abs(updateItems[i].physics.m_linearVelocity.y));
+                	maxSpeed.linear = Math.max(maxSpeed.linearX, maxSpeed.linearY);
+                	maxSpeed.angular = Math.max(maxSpeed.angular, Math.abs(updateItems[i].physics.m_angularVelocity));
+                }
+            }
+        	return maxSpeed;
+        },
+        getCalm: function (exclude) {
+        	for (var i = 0; i < updateItems.length; ++i) 
+                if (updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake() === true)
+                	return false;
+            return true;
         },
         destroy: function (physics) {
             if (!physics) {
