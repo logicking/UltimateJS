@@ -373,11 +373,13 @@ GuiSprite.prototype.transform = function(transfromations, dontCallCssTransform) 
 };
 
 GuiSprite.prototype.rotate = function(angle) {
-	this.angle = angle;
-	if (this.canvas === null)
+	if (this.canvas === null || Screen.isDOMForced()) {
+		this.angle = MathUtils.toDeg(angle);
 		this.transform();
-	else
+	} else {
+		this.angle = angle;
 		this.canvas.setAwake(true);
+	}
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {

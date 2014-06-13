@@ -251,7 +251,6 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
 			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
-//		this.newAngle = MathUtils.toDeg(this.newAngle);
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);
         this.positionUpdated = true;
