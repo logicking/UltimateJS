@@ -383,9 +383,9 @@ GuiSprite.prototype.rotate = function(angle) {
 };
 
 GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
-	if (typeof transformOrigin == 'string') {
+	if (typeof transformOrigin == 'string' || Device.isNative()) {
 		this.transformOrigin = transformOrigin;
-	} if (transformOrigin && transformOrigin.x && transformOrigin.y) {
+	} else if (transformOrigin && transformOrigin.x && transformOrigin.y) {
 		this.transformOrigin = parseInt(transformOrigin.x*100) + "% " + parseInt(transformOrigin.y*100) + "%";
 	} else {
 		this.transformOrigin = "50% 50%";
