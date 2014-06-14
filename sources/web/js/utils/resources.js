@@ -217,6 +217,43 @@ var Resources = (function() {
 		// TODO rewrite
 		loadMedia : function(data, oncomplete, onprogress, onerror) {
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
+			
+			function onAssetLoad() {
+				++j;
+				// if progress callback, give information of assets loaded,
+				// total and percent
+				if (onprogress) {
+					onprogress.call(this, {
+						loaded : j,
+						total : total,
+						percent : (j / total * 100)
+					});
+				}
+				if (j === total) {
+					if (oncomplete)
+						oncomplete();
+				}
+			};
+
+			// if there is an error, pass it in the callback (this will be
+			// the object that didn't load)
+			function onAssetError() {
+				if (onerror) {
+					onerror.call(this, {
+						loaded : j,
+						total : total,
+						percent : (j / total * 100)
+					});
+				} else {
+					j++;
+					if (j === total) {
+						if (oncomplete)
+							oncomplete();
+					}
+				}
+			};
+			
+			
 			for (; i < l; ++i) {
 				current = data[i];
 				ext = current.substr(current.lastIndexOf('.') + 1)
@@ -230,8 +267,15 @@ var Resources = (function() {
 						j++;
 				} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
 						|| ext === "png") {
-					obj = new Image();
-					obj.src = Resources.getImage(current);
+					if (Device.isNative()) {
+						if (Native.Loader.LoadImage(Resources.getImage(current)))
+							onAssetLoad();
+						else
+							onAssetError();
+					} else {
+						obj = new Image();
+						obj.src = Resources.getImage(current);
+					}
 				} else {
 					total--;
 					continue; // skip if not applicable
@@ -240,40 +284,13 @@ var Resources = (function() {
 				// add to global asset collection
 				assets[current] = obj;
 
-				obj.onload = function() {
-					++j;
-					// if progress callback, give information of assets loaded,
-					// total and percent
-					if (onprogress) {
-						onprogress.call(this, {
-							loaded : j,
-							total : total,
-							percent : (j / total * 100)
-						});
-					}
-					if (j === total) {
-						if (oncomplete)
-							oncomplete();
-					}
-				};
-
-				// if there is an error, pass it in the callback (this will be
-				// the object that didn't load)
-				obj.onerror = function() {
-					if (onerror) {
-						onerror.call(this, {
-							loaded : j,
-							total : total,
-							percent : (j / total * 100)
-						});
-					} else {
-						j++;
-						if (j === total) {
-							if (oncomplete)
-								oncomplete();
-						}
-					}
-				};
+				if (!Device.isNative()) {
+					obj.onload = onAssetLoad;
+	
+					// if there is an error, pass it in the callback (this will be
+					// the object that didn't load)
+					obj.onerror = onAssetError;
+				}
 			}
 		}
 	};

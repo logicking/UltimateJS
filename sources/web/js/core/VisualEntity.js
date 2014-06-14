@@ -82,7 +82,7 @@ VisualEntity.prototype.attachToGui = function(guiParent, clampByParentViewport) 
 		$['each'](that.visuals, function(id, visualInfo) {
 			visualInfo.visual.visualEntity = that;
 			that.guiParent.addGui(visualInfo.visual);
-			if (visualInfo.visual.clampByParentViewport)
+			if (visualInfo.visual.clampByParentViewport && !Device.isNative())
 				visualInfo.visual.clampByParentViewport(clampByParentViewport);
 		});
 	}
