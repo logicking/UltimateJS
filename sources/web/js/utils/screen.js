@@ -386,7 +386,7 @@ var Screen = (function() {
 				return;
 			});
 
-            resizeField();
+            $(window)['trigger']("resize");
 		},
 
 		// some portals (like Spil Games) will require manual resize function

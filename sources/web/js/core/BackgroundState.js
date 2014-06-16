@@ -97,7 +97,7 @@ BackgroundState.prototype.init = function(params) {
 	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
 	this.mask.setZ(1000);
-	this.mask.hide();
+    this.mask.hide();
 };
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
@@ -142,6 +142,7 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 
 BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
+    this.mask.resize();
 	if (this.loader != null) {
 		this.loader.resize();
 		this.loader.$()['css']("position", "absolute");
