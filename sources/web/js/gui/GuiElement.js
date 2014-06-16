@@ -33,7 +33,7 @@ GuiElement.prototype.create = function(src) {
 //	 this.id, src, this.className);
 	if (!this.setParent(this.parent)) {
 		// if no parent provided assigning to the body object
-		this.setParent($("body"));
+		this.setParent($("#all"));
 		console.warn("No parent was provided for object id = " + this.id);
 	}
 
