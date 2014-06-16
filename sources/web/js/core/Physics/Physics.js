@@ -1,6 +1,6 @@
-var DEFAULT_B2WORLD_RATIO = 1;
+var USE_NATIVE_PHYSICS = true;
 
-if (typeof(Native) == "undefined") {
+if (typeof(Native) == "undefined" || !USE_NATIVE_PHYSICS) {
 	b2Math = Box2D.Common.Math.b2Math;
 	b2Vec2 = Box2D.Common.Math.b2Vec2;
 	b2BodyDef = Box2D.Dynamics.b2BodyDef;
@@ -13,7 +13,15 @@ if (typeof(Native) == "undefined") {
 	b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 	b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 	b2MouseJointDef = Box2D.Dynamics.Joints.b2MouseJointDef;
+	b2ContactListener = Box2D.Dynamics.b2ContactListener; 
 }
+
+var DEFAULT_B2WORLD_RATIO = 30;
+var DEFAULT_B2WORLD_GRAVITY = new b2Vec2(0, 10);
+var DEFAULT_B2WORLD_TIMESTEP = 1/45;
+var DEFAULT_B2WORLD_POS_ITERATIONS = 5;
+var DEFAULT_B2WORLD_VEL_ITERATIONS = 5;
+var DEFAULT_B2WORLD_UPDATE_INTERVAL = 15;
 
 // TODO: remove?
 function boxPolyVertices(positionX, positionY, extentionX, extentionY) {
@@ -95,21 +103,28 @@ function DebugCanvas() {
 
 var Physics = (function () {
     var world = null;
-    var b2dToGameRatio = DEFAULT_B2WORLD_RATIO; // Box2d to Ultimate.js coordinates //TODO: implement
-    var worldBorder = null;
     var timeout = null;
     var pause = false;
     var debugMode = true;
     var debugCanvas = null;
     var updateItems = [];
     var bodiesToDestroy = [];
-    var contactListener = null;
     var contactProcessor = null;
+    var contactListener = null;
+    var nativePhysics = Device.isNative();//Device.isNative() && USE_NATIVE_PHYSICS;//Device.isNative();// && typeof(NativeContactBegin) != "undefined";
     var maxSpeed = {
     		linearX: 0,
     		linearY: 0,
     		linear: 0,
     		angular: 0
+    };
+    var worldParams = {
+    		b2dToGameRatio: DEFAULT_B2WORLD_RATIO * 1,
+    		gravity: DEFAULT_B2WORLD_GRAVITY.Copy(),
+    		timeStep: DEFAULT_B2WORLD_TIMESTEP * 1,
+    		positionIterations: DEFAULT_B2WORLD_POS_ITERATIONS * 1,
+    		velocityIterations: DEFAULT_B2WORLD_VEL_ITERATIONS * 1,
+    		updateInterval: DEFAULT_B2WORLD_UPDATE_INTERVAL *1
     };
 
     function debugDrawing(v) {
@@ -131,95 +146,41 @@ var Physics = (function () {
      * @param {boolean} sleep default: true;
      * @param {number} ratio Box2d to Ultimate.js coordinates
      */
-    function createWorld(gravity, sleep, ratio) {
-        if (world != null) {
+    function createWorld(gravity, sleep) {
+        if (world != null) 
             return;
-        }
-        b2dToGameRatio = ratio != null ? ratio : DEFAULT_B2WORLD_RATIO;
-        world = new b2World(gravity != null ? gravity : new b2Vec2(0, 10), sleep != null ? sleep : true);
-    }
-
-    // TODO: remove?
-    function createWorldBorder(params) {
-        assert(world);
-
-        var SIDE = ENHANCED_BASE_MARGIN_WIDTH;
-        if (!GROUND) {
-            var GROUND = 0;
-        }
-
-        var ADD_HEIGHT = 1000;
-        var borderWidth = 100;
-        var B = borderWidth;
-        var W = BASE_WIDTH;
-        var H = BASE_HEIGHT;
-        var WE = W + 2 * B + 2 * SIDE;
-        var HE = H + 2 * B - GROUND;
-        var poligons = [
-            boxPolyVertices(-B - SIDE, -B - ADD_HEIGHT, B, HE + ADD_HEIGHT),
-            boxPolyVertices(W + SIDE, -B - ADD_HEIGHT, B, HE + ADD_HEIGHT),
-            boxPolyVertices(-B - SIDE, H - GROUND, WE, B) ];
-        worldBorder = Physics.createPolyComposite(0, 0, 0, poligons);
-    }
-
-    // TODO: remove?
-    function putToSleep() { // 2dBody function
-        world['m_contactManager']['CleanContactList']();
-        this['m_flags'] |= b2Body['e_sleepFlag'];
-        this['m_linearVelocity']['Set'](0.0, 0.0);
-        this['m_angularVelocity'] = 0.0;
-        this['m_sleepTime'] = 0.0;
-    }
-
-    // TODO: remove?
-    function setBodyPoseByShape(position, angle) {
-        this['SetCenterPosition'](position, angle);
-        var shapeToBody = b2Math['SubtractVV'](this['m_position'],
-            this['GetShapeList']()['GetPosition']());
-        this['SetCenterPosition']
-        (b2Math['AddVV'](position, shapeToBody), angle);
-    }
-
-    // TODO: remove?
-    function getShapesCount() {// 2dBody function
-        var shape = this['GetShapeList']();
-        var shapesCount = 0;
-        for (; shape != null; ++shapesCount, shape = shape['m_next'])
-            ;
-        return shapesCount;
-    }
-
-    // TODO: remove?
-    function getShapeByIdx(shapeIdx) {// 2dBody function
-        var shapesCount = this.getShapesCount();
-        var listPosition = shapesCount - 1 - shapeIdx;
-        var shape = this['GetShapeList']();
-        for (var i = 0; i < listPosition; ++i) {
-            if (!shape['m_next']) {
-                eLog("bad shape idx!");
-                return null;
-            }
-            shape = shape['m_next'];
-        }
-
-        return shape;
-    }
-
-    // TODO: remove?
-    function setContactCallback(callback, shapeIdx) {
-        if (shapeIdx != undefined) {
-            this.getShapeByIdx(shapeIdx)['contactCallback'] = callback;
-            return;
-        }
-        var shape = this['GetShapeList']();
-        for (; shape != null; shape = shape['m_next']) {
-            shape['contactCallback'] = callback;
-        }
+        gravity = gravity? gravity : worldParams.gravity;
+        world = new b2World(gravity, sleep != null ? sleep : true);
     }
 
     return { // public interface
-        createWorld: function (gravity, sleep, ratioB2dToUl) {
-            createWorld(gravity, sleep, ratioB2dToUl);
+        setup: function (params) {
+        	if (params) {
+	        	if (!isNaN(params.ratio))
+	        		worldParams.b2dToGameRatio = params.ratio * 1;
+	        	if (!isNaN(params.timeStep))
+	        		worldParams.timeStep = params.timeStep * 1;
+	        	if (!isNaN(params.positionIterations))
+	        		worldParams.posIterations = params.positionIterations * 1;
+	        	if (!isNaN(params.velocityIterations))
+	        		worldParams.velocityIterations = params.velocityIterations * 1;
+	        	if (!isNaN(params.updateInterval))
+	        		worldParams.updateInterval = params.updateInterval * 1;
+	        	if (params.gravity && !isNaN(params.gravity.x) && !isNaN(params.gravity.y))
+	        		worldParams.gravity.Set(params.gravity.x * 1, params.gravity.y * 1);
+	        	
+	        	if (world !== null)
+	        		world.SetGravity(worldParams.gravity);
+        	}
+        	if (nativePhysics)
+        		Native.Physics.Setup(JSON.stringify(worldParams));
+        },
+        createWorld: function (gravity, sleep, ratio) {
+        	Physics.setup({
+	        		'gravity': gravity, 
+	        		'ratio': ratio
+        		});
+            createWorld(worldParams.gravity, sleep, worldParams.ratio);
         },
         getWorld: function () {
             createWorld();
@@ -227,13 +188,13 @@ var Physics = (function () {
             return world;
         },
         getB2dToGameRatio: function () {
-            return b2dToGameRatio;
+            return worldParams.b2dToGameRatio;
         },
-        addBodyToDestroy: function (body) {
-            bodiesToDestroy.push(body);
+        getGravity: function () {
+            return worldParams.gravity.Copy();
         },
-        createWorldBorder: function (params) {
-            createWorldBorder(params);
+        getUpdateInterval: function () {
+            return worldParams.updateInterval * 1;
         },
         getContactProcessor: function () {
         	if (!contactProcessor)
@@ -244,11 +205,11 @@ var Physics = (function () {
             return contactListener;
         },
         updateWorld: function () {
-            if (pause === true)
+            if (world === null || pause === true || nativePhysics === true)
                 return;
 
             var world = Physics.getWorld();
-            world.Step(1 / 45, 5, 5);
+            world.Step(worldParams.timeStep, worldParams.positionIterations, worldParams.velocityIterations);
             if (timeout) {
                 timeout.tick(15);
             }
@@ -288,30 +249,24 @@ var Physics = (function () {
             }
         	return maxSpeed;
         },
-        getCalm: function (exclude) {
+        getCalm: function () {
         	for (var i = 0; i < updateItems.length; ++i) 
                 if (updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake() === true)
                 	return false;
             return true;
         },
-        destroy: function (physics) {
-            if (!physics) {
+        destroyBody: function (body) {
+            if (!body) 
                 return;
-            }
             assert(world);
-            world.DestroyBody(physics);
+            if (world.IsLocked() === false || nativePhysics === true)
+            	world.DestroyBody(body);
+            else
+            	bodiesToDestroy.push(body);
         },
         destroyWorld: function () {
-            Physics.destroy(worldBorder);
             world = null;
             updateItems = [];
-        },
-        getWorldBorder: function () {
-            if (!worldBorder) {
-                createWorld();
-            }
-            assert(worldBorder);
-            return worldBorder;
         },
         pause: function (v) {
             if (v == null) {
@@ -319,6 +274,8 @@ var Physics = (function () {
             } else {
                 pause = v;
             }
+            if (nativePhysics)
+            	Native.Physics.PauseWorld(v);
         },
         paused: function () {
             return pause;
@@ -360,13 +317,10 @@ var Physics = (function () {
             }
         },
         destroy: function (entity) {
-            if (!entity) {
+            if (!entity) 
                 return;
-            }
             Physics.updateItemRemove(entity);
-            if (world && entity.physics) {
-                world.DestroyBody(entity.physics);
-            }
+            Physics.destroyBody(entity.physics);
         },
         debugDrawing: function (trueOrFalse) {
             debugDrawing(trueOrFalse);

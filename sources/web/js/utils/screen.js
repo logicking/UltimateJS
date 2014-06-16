@@ -175,20 +175,20 @@ var Screen = (function() {
 	function windowOnResize(event, w, h) {
 		// TODO Should it be so?
 		if (typeof(Native) != "undefined") {
-		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
-		    	var BASE_MARGIN_HEIGHT  = (Native.ScreenHeight - BASE_HEIGHT)/2;
-		         
-		         ENHANCED_BASE_MARGIN_WIDTH = (ENHANCED_BASE_WIDTH - Native.ScreenWidth)/2;
-		         ENHANCED_BASE_MARGIN_HEIGHT = (ENHANCED_BASE_HEIGHT - Native.ScreenHeight)/2;
-		         
-		    	var rootDiv = $('#root');
-		        if (rootDiv.length > 0) {
-		            rootDiv['css']("left", ENHANCED_BASE_MARGIN_WIDTH);
-		            rootDiv['css']("top", ENHANCED_BASE_MARGIN_HEIGHT);
-		        }
-		        
-		       Native.Screen.SetBaseMargins(BASE_MARGIN_WIDTH, BASE_MARGIN_HEIGHT,
-		    		   ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
+//		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
+//		    	var BASE_MARGIN_HEIGHT  = (Native.ScreenHeight - BASE_HEIGHT)/2;
+//		         
+//		         ENHANCED_BASE_MARGIN_WIDTH = (ENHANCED_BASE_WIDTH - Native.ScreenWidth)/2;
+//		         ENHANCED_BASE_MARGIN_HEIGHT = (ENHANCED_BASE_HEIGHT - Native.ScreenHeight)/2;
+//		         
+//		    	var rootDiv = $('#root');
+//		        if (rootDiv.length > 0) {
+//		            rootDiv['css']("left", ENHANCED_BASE_MARGIN_WIDTH);
+//		            rootDiv['css']("top", ENHANCED_BASE_MARGIN_HEIGHT);
+//		        }
+//		        
+//		       Native.Screen.SetBaseMargins(BASE_MARGIN_WIDTH, BASE_MARGIN_HEIGHT,
+//		    		   ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
  			    		
 		    		return;
 		}

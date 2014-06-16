@@ -36,19 +36,14 @@ Effect.prototype.createVisual = function() {
 //
 Effect.prototype.play = function(position, callback) {
 	var that = this;
-	if (position) {
-		that.x = position.x;
-		that.y = position.y;
-	}
 
 	$['each'](that.params.visuals, function(id, value) {
 		value.parent = that.guiParent;
 		value.canvas = that.parent.getCanvas();
-		position.x = position.x - value.width/2;
-		position.y = position.y - value.height/2;
-		var gui = guiFactory.createObject(value['class'], $['extend'](
-				value, position));
-		gui.clampByParentViewport();
+		var pos = new b2Vec2( position.x - value.width/2, position.y - value.height/2);
+		var gui = guiFactory.createObject(value['class'],	value);
+		that.guiParent.addGui(gui);
+		gui.setPosition(pos.x, pos.y);;
 		that.guis.push(gui);
 		$['each'](gui.animations, function(id, anim) {
 			gui.playAnimation(id, that.params.lifeTime, false, true);		
@@ -59,7 +54,6 @@ Effect.prototype.play = function(position, callback) {
 			}, that.params.lifeTime);		
 		});	
 	});
-
 };
 
 Effect.prototype.destroy = function() {

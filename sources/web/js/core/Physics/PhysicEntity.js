@@ -238,7 +238,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
     
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (!dontTranslate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+    if (!dontTranslate && (!Screen.isDOMForced() || this.initialPosRequiered 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
     		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) {
 	    this.lastUpdatedPos = this.getPosition();
@@ -248,7 +248,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.physics.GetAngle();
-	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered || !Device.isMobile() 
+	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered 
 			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
         for (var name in this.visuals)
@@ -361,15 +361,8 @@ PhysicEntity.prototype.destroy = function () {
 
 PhysicEntity.prototype.destroyPhysics = function () {
 //	Physics.getContactProcessor().clearContactCallbacks(this);
-    if (this.physics) {
-    	Physics.updateItemRemove(this);
-    	if (!Physics.getWorld().IsLocked()) {
-    		this.physics.SetUserData(null);
-    		Physics.getWorld().DestroyBody(this.physics);
-    	} else
-            Physics.addBodyToDestroy(this.physics);
-        this.physics = null;
-    }
+    Physics.destroy(this);
+    this.physics = null;
 };
 
 // damage received by other object

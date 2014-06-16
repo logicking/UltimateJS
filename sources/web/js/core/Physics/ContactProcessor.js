@@ -15,7 +15,7 @@ ContactProcessor.prototype.init = function() {
 		return;
 	var that = this;
 	var contactListener = Physics.getContactListener();
-	contactListener = new Box2D.Dynamics.b2ContactListener;
+	contactListener = new b2ContactListener;
 
     contactListener.BeginContact = function(contact) {
 			that.processBegin(contact);	

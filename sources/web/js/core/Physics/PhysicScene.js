@@ -23,7 +23,8 @@ entityFactory.addClass(PhysicScene);
 
 PhysicScene.prototype.init = function(params) {
 	PhysicScene.parent.init.call(this, params);
-	this.physicWorld = Physics.getWorld();
+	this.world = Physics.getWorld();
+	Physics.setup();
 };
 
 PhysicScene.prototype.addChild = function(child) {
@@ -33,7 +34,7 @@ PhysicScene.prototype.addChild = function(child) {
 PhysicScene.prototype.createVisual = function() {
 	PhysicScene.parent.createVisual.call(this);
 
-	this.setInterval(Physics.updateWorld, 15);
+	this.setInterval(Physics.updateWorld, Physics.getUpdateInterval());
 };
 
 PhysicScene.prototype.setBackgrounds = function(backgrounds, visual) {

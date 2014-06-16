@@ -204,7 +204,7 @@ var Resources = (function() {
 		preloadFonts : function(fontClasses) {
 			for ( var i = 0; i < fontClasses.length; ++i) {
 				$("#root")['append']("<div id='fontsPreload" + i
-						+ "' + style='opacity:0.1;font-size:1px'>.</div>");
+						+ "' style='opacity:0.1;font-size:1px'>.</div>");
 				var testDiv = $("#fontsPreload" + i);
 				testDiv['addClass'](fontClasses[i]);
 				setTimeout(function() {
@@ -216,6 +216,7 @@ var Resources = (function() {
 		// temporary borrowed from CraftyJS game engine
 		// TODO rewrite
 		loadMedia : function(data, oncomplete, onprogress, onerror) {
+			
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
 			
 			function onAssetLoad() {
@@ -268,7 +269,10 @@ var Resources = (function() {
 				} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
 						|| ext === "png") {
 					if (Device.isNative()) {
-						if (Native.Loader.LoadImage(Resources.getImage(current)))
+//						ImageTable[Resources.getImage(current)] = ImageTableSeed;
+						if (Native.Loader.LoadImage(Resources.getImage(current)
+//								, ImageTableSeed++
+								))
 							onAssetLoad();
 						else
 							onAssetError();
