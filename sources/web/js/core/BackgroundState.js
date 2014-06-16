@@ -142,6 +142,7 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 
 BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
+    this.mask.resize();
 	if (this.loader != null) {
 		this.loader.resize();
 		this.loader.$()['css']("position", "absolute");
