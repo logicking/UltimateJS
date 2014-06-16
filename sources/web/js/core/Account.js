@@ -64,6 +64,7 @@ Account.prototype.init = function(params) {
 //		that.activateUpdateAndRender();
 //
 //	});
+    this.backgroundState.resize();
 };
 
 Account.prototype.addEntity = function(newEntity) {

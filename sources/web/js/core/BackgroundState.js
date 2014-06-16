@@ -38,12 +38,14 @@ BackgroundState.prototype.init = function(params) {
 	// an transparent PNG image 1x1 pixel size
 	// to prevent clicks
 	this.mask = guiFactory.createObject("GuiDiv", {
-		parent : "body",
+		parent : "#all",
 		image : image,
 		background : background,
 		style : "mask",
-		width : "FULL_WIDTH",
-		height : "FULL_HEIGHT",
+//        width : "FULL_WIDTH",
+//        height : "FULL_HEIGHT",
+        width : "100%",
+        height : "100%",
 		x : 0,
 		y : 0
 	});
@@ -95,7 +97,7 @@ BackgroundState.prototype.init = function(params) {
 	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
 	this.mask.setZ(1000);
-	this.mask.hide();
+    this.mask.hide();
 };
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
