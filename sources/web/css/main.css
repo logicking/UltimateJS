@@ -50,6 +50,14 @@ div {
 	overflow: hidden;
 }
 
+#all {
+    left:50%;
+    top:50%;
+    margin-left:-50%;
+    margin-top:-25%;
+    border: 1px #ffffff;
+}
+
 #root {
 	position: absolute;
 }

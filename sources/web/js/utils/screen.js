@@ -34,7 +34,7 @@ var Screen = (function() {
 
 	var fieldWidth = BASE_WIDTH;
 	var fieldHeight = BASE_HEIGHT;
-	var currentFieldHeight, currentFieldWidth;
+	var currentFieldHeight, currentFieldWidth, enchancedFieldWidth, enchancedFieldHeight;
 	var fullWidth, fullHeight, currentFullWidth, currentFullHeight;
 
 	var rotateMsgHeightWidthRatio;
@@ -107,16 +107,19 @@ var Screen = (function() {
 		fullWidth = windowInnerWidth;
 		fullHeight = windowInnerHeight;
 
-		fieldWidth = Math.min(MAX_WIDTH, windowInnerWidth);
-		fieldHeight = Math.min(MAX_HEIGHT, windowInnerHeight);
+        fieldWidth = Math.min(MAX_WIDTH, windowInnerWidth);
+        fieldHeight = Math.min(MAX_HEIGHT, windowInnerHeight);
 
 		// proportionally scale the screen and center it
-		var normalK = BASE_WIDTH / BASE_HEIGHT;
-		if (fieldWidth / normalK >= fieldHeight) {
-			fieldWidth = Math.ceil(fieldHeight * normalK);
-		} else {
-			fieldHeight = Math.ceil(fieldWidth / normalK);
-		}
+        var normalK = BASE_WIDTH / BASE_HEIGHT;
+        if (fieldWidth / normalK >= fieldHeight) {
+            fieldWidth = Math.ceil(fieldHeight * normalK);
+        } else {
+            fieldHeight = Math.ceil(fieldWidth / normalK);
+        }
+
+        enchancedFieldWidth = fieldWidth * (ENHANCED_BASE_WIDTH/BASE_WIDTH);
+        enchancedFieldHeight = fieldHeight * (ENHANCED_BASE_HEIGHT/BASE_HEIGHT);
 
 		// nothing to do if field size didn't change
 		if (currentFieldHeight == fieldHeight
@@ -126,8 +129,10 @@ var Screen = (function() {
 			return false;
 		}
 
-		offsetX = Math.round((windowInnerWidth - fieldWidth) / 2);
-		offsetY = Math.round((windowInnerHeight - fieldHeight) / 2);
+        var offsetXroot = Math.round((enchancedFieldWidth - fieldWidth) / 2);
+        var offsetYroot = Math.round((enchancedFieldHeight - fieldHeight) / 2);
+        offsetX = Math.round((windowInnerWidth - fieldWidth) / 2);
+        offsetY = Math.round((windowInnerHeight - fieldHeight) / 2);
 
 		currentFullWidth = fullWidth;
 		currentFullHeight = fullHeight;
@@ -141,10 +146,18 @@ var Screen = (function() {
 		heightRatio = fieldHeight / BASE_HEIGHT;
 
 		var rootDiv = $('#root');
-		if (rootDiv.length > 0) {
-			rootDiv['css']("left", offsetX);
-			rootDiv['css']("top", offsetY);
-		}
+        if (rootDiv.length > 0) {
+            rootDiv['css']("left", offsetXroot);
+            rootDiv['css']("top", offsetYroot);
+        }
+
+        var allDiv = $('#all');
+        if (allDiv.length > 0) {
+            allDiv['css']("width", enchancedFieldWidth);
+            allDiv['css']("height", enchancedFieldHeight);
+            allDiv['css']("marginLeft", -enchancedFieldWidth/2);
+            allDiv['css']("marginTop", -enchancedFieldHeight/2);
+        }
 
 		// Size for the rect of maximum size with root div
 		// of base size in the center
@@ -373,6 +386,7 @@ var Screen = (function() {
 				return;
 			});
 
+            resizeField();
 		},
 
 		// some portals (like Spil Games) will require manual resize function

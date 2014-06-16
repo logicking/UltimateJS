@@ -44,7 +44,7 @@ GuiDialog.prototype.initialize = function(params) {
 	// to prevent clicks
 	if (!GuiDialog.prototype.maskDivSoul) {
 		GuiDialog.prototype.maskDivSoul = guiFactory.createObject("GuiDiv", {
-			"parent" : "body",
+			"parent" : "#all",
 			// "image" :
 			// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
 			"style" : "mask",
