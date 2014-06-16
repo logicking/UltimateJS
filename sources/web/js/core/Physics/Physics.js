@@ -209,6 +209,10 @@ var Physics = (function () {
                 return;
 
             var world = Physics.getWorld();
+            if (nativePhysics) {
+           	 world.UpdateBodies();
+           	 world.UpdateContactListener();
+            }
             world.Step(worldParams.timeStep, worldParams.positionIterations, worldParams.velocityIterations);
             if (timeout) {
                 timeout.tick(15);

@@ -238,7 +238,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
     
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (!dontTranslate && (!Screen.isDOMForced() || this.initialPosRequiered 
+    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
     		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) {
 	    this.lastUpdatedPos = this.getPosition();
@@ -248,7 +248,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.physics.GetAngle();
-	if (!dontRotate && (!Screen.isDOMForced() || this.initialPosRequiered 
+	if (!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
 			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
         for (var name in this.visuals)
