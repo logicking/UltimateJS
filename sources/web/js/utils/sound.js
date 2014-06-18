@@ -140,7 +140,7 @@ else
 				// }
 			},
 			play : function(id, loop, priority, channel) {
-				try {
+//				try {
 					var that = this;
 					if (!this.soundBuffers[id] || (!this.isOn() && channel != "background")) {
 						return;
@@ -202,8 +202,8 @@ else
 							ch.playing = null;
 						});
 					}
-				}
-				catch (e) {console.log(e);}
+//				}
+//				catch (e) {console.log(e);}
 			},
 	        playWithVolume : function(id, volume, priority, loop) {
 	            try {
@@ -302,7 +302,7 @@ else
 		var context = null;
 	
 		try {
-			context = new webkitAudioContext();
+			context = new (window.AudioContext || window.webkitAudioContext)();
 	//		context = null;
 		} catch (e) {
 			context = null;
@@ -312,9 +312,9 @@ else
 			snd.type = "webAudio";
 			snd.instance = new WebSound(context);
 		} else {
-			snd.type = "jSound";
-			snd.instance = new jSound();
-	//		snd.instance = new htmlSound();
+			snd.type = "htmlSound";
+//			snd.instance = new jSound();
+			snd.instance = new htmlSound();
 		}
 	
 		return snd;
