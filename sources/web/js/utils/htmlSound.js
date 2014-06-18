@@ -16,7 +16,7 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 
 	if (!spriteInst || spriteInst.play) {
-		if (spriteInst.priority && (spriteInst.priority <= sndInst.priority)) {
+		if (spriteInst.priority <= sndInst.priority) {
 			this.stop(sndInst);
 		} else {
 			return;
