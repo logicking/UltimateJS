@@ -37,13 +37,22 @@ BackgroundState.prototype.init = function(params) {
 	BackgroundState.parent.init.call(this, params);
 	// an transparent PNG image 1x1 pixel size
 	// to prevent clicks
+	
+	if (params['transparent']) {
+		this.transparent = true;
+	} else {
+		this.transparent = false;	
+	}
+	
 	this.mask = guiFactory.createObject("GuiDiv", {
-		parent : "body",
-		image : image,
-		background : background,
-		style : "mask",
-		width : "FULL_WIDTH",
-		height : "FULL_HEIGHT",
+		parent : "#all",
+		image : !this.transparent?image:null,
+		background : !this.transparent?background:null,
+		style : !this.transparent?"mask":'',
+//        width : "FULL_WIDTH",
+//        height : "FULL_HEIGHT",
+        width : "100%",
+        height : "100%",
 		x : 0,
 		y : 0
 	});
@@ -95,7 +104,7 @@ BackgroundState.prototype.init = function(params) {
 	this.mask.setClickTransparent(true);
 	this.mask.$()['css']("opacity", 0);
 	this.mask.setZ(1000);
-	this.mask.hide();
+    this.mask.hide();
 };
 
 BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
@@ -112,7 +121,8 @@ BackgroundState.prototype.fadeIn = function(fadeTime, color, callback) {
 	this.mask.show();
 	this.mask.$()['stop']();
 	this.mask.$()['css']("opacity", 0);
-	this.mask.$()['css']("background-color", color);
+	if (!this.transparent)
+		this.mask.$()['css']("background-color", color);
 	this.mask.fadeTo(1, fadeTime, function(){
 		that.faded = true;
 //		that.mask.show();
@@ -140,6 +150,7 @@ BackgroundState.prototype.fadeOut = function(fadeTime, callback) {
 
 BackgroundState.prototype.resize = function() {
 	BackgroundState.parent.resize.call(this);
+    this.mask.resize();
 	if (this.loader != null) {
 		this.loader.resize();
 		this.loader.$()['css']("position", "absolute");

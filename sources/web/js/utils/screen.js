@@ -20,9 +20,13 @@ var BASE_MARGIN_WIDTH = 0;
 var BASE_MARGIN_HEIGHT = 0;
 //
 
+
+
 var Screen = (function() {
 	var screenConsts = {};
 
+	var domForced = false;
+	
 	// private interface
 
 	// reference to main application class
@@ -30,7 +34,7 @@ var Screen = (function() {
 
 	var fieldWidth = BASE_WIDTH;
 	var fieldHeight = BASE_HEIGHT;
-	var currentFieldHeight, currentFieldWidth;
+	var currentFieldHeight, currentFieldWidth, enchancedFieldWidth, enchancedFieldHeight;
 	var fullWidth, fullHeight, currentFullWidth, currentFullHeight;
 
 	var rotateMsgHeightWidthRatio;
@@ -103,16 +107,19 @@ var Screen = (function() {
 		fullWidth = windowInnerWidth;
 		fullHeight = windowInnerHeight;
 
-		fieldWidth = Math.min(MAX_WIDTH, windowInnerWidth);
-		fieldHeight = Math.min(MAX_HEIGHT, windowInnerHeight);
+        fieldWidth = Math.min(MAX_WIDTH, windowInnerWidth);
+        fieldHeight = Math.min(MAX_HEIGHT, windowInnerHeight);
 
 		// proportionally scale the screen and center it
-		var normalK = BASE_WIDTH / BASE_HEIGHT;
-		if (fieldWidth / normalK >= fieldHeight) {
-			fieldWidth = Math.ceil(fieldHeight * normalK);
-		} else {
-			fieldHeight = Math.ceil(fieldWidth / normalK);
-		}
+        var normalK = BASE_WIDTH / BASE_HEIGHT;
+        if (fieldWidth / normalK >= fieldHeight) {
+            fieldWidth = Math.ceil(fieldHeight * normalK);
+        } else {
+            fieldHeight = Math.ceil(fieldWidth / normalK);
+        }
+
+        enchancedFieldWidth = fieldWidth * (ENHANCED_BASE_WIDTH/BASE_WIDTH);
+        enchancedFieldHeight = fieldHeight * (ENHANCED_BASE_HEIGHT/BASE_HEIGHT);
 
 		// nothing to do if field size didn't change
 		if (currentFieldHeight == fieldHeight
@@ -122,8 +129,10 @@ var Screen = (function() {
 			return false;
 		}
 
-		offsetX = Math.round((windowInnerWidth - fieldWidth) / 2);
-		offsetY = Math.round((windowInnerHeight - fieldHeight) / 2);
+        var offsetXroot = Math.round((enchancedFieldWidth - fieldWidth) / 2);
+        var offsetYroot = Math.round((enchancedFieldHeight - fieldHeight) / 2);
+        offsetX = Math.round((windowInnerWidth - fieldWidth) / 2);
+        offsetY = Math.round((windowInnerHeight - fieldHeight) / 2);
 
 		currentFullWidth = fullWidth;
 		currentFullHeight = fullHeight;
@@ -137,10 +146,18 @@ var Screen = (function() {
 		heightRatio = fieldHeight / BASE_HEIGHT;
 
 		var rootDiv = $('#root');
-		if (rootDiv.length > 0) {
-			rootDiv['css']("left", offsetX);
-			rootDiv['css']("top", offsetY);
-		}
+        if (rootDiv.length > 0) {
+            rootDiv['css']("left", offsetXroot);
+            rootDiv['css']("top", offsetYroot);
+        }
+
+        var allDiv = $('#all');
+        if (allDiv.length > 0) {
+            allDiv['css']("width", enchancedFieldWidth);
+            allDiv['css']("height", enchancedFieldHeight);
+            allDiv['css']("marginLeft", -enchancedFieldWidth/2);
+            allDiv['css']("marginTop", -enchancedFieldHeight/2);
+        }
 
 		// Size for the rect of maximum size with root div
 		// of base size in the center
@@ -171,20 +188,20 @@ var Screen = (function() {
 	function windowOnResize(event, w, h) {
 		// TODO Should it be so?
 		if (typeof(Native) != "undefined") {
-		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
-		    	var BASE_MARGIN_HEIGHT  = (Native.ScreenHeight - BASE_HEIGHT)/2;
-		         
-		         ENHANCED_BASE_MARGIN_WIDTH = (ENHANCED_BASE_WIDTH - Native.ScreenWidth)/2;
-		         ENHANCED_BASE_MARGIN_HEIGHT = (ENHANCED_BASE_HEIGHT - Native.ScreenHeight)/2;
-		         
-		    	var rootDiv = $('#root');
-		        if (rootDiv.length > 0) {
-		            rootDiv['css']("left", ENHANCED_BASE_MARGIN_WIDTH);
-		            rootDiv['css']("top", ENHANCED_BASE_MARGIN_HEIGHT);
-		        }
-		        
-		       Native.Screen.SetBaseMargins(BASE_MARGIN_WIDTH, BASE_MARGIN_HEIGHT,
-		    		   ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
+//		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
+//		    	var BASE_MARGIN_HEIGHT  = (Native.ScreenHeight - BASE_HEIGHT)/2;
+//		         
+//		         ENHANCED_BASE_MARGIN_WIDTH = (ENHANCED_BASE_WIDTH - Native.ScreenWidth)/2;
+//		         ENHANCED_BASE_MARGIN_HEIGHT = (ENHANCED_BASE_HEIGHT - Native.ScreenHeight)/2;
+//		         
+//		    	var rootDiv = $('#root');
+//		        if (rootDiv.length > 0) {
+//		            rootDiv['css']("left", ENHANCED_BASE_MARGIN_WIDTH);
+//		            rootDiv['css']("top", ENHANCED_BASE_MARGIN_HEIGHT);
+//		        }
+//		        
+//		       Native.Screen.SetBaseMargins(BASE_MARGIN_WIDTH, BASE_MARGIN_HEIGHT,
+//		    		   ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
  			    		
 		    		return;
 		}
@@ -369,6 +386,7 @@ var Screen = (function() {
 				return;
 			});
 
+            $(window)['trigger']("resize");
 		},
 
 		// some portals (like Spil Games) will require manual resize function
@@ -479,6 +497,12 @@ var Screen = (function() {
 				x : (width / Screen.widthRatio()),
 				y : (height / Screen.heightRatio())
 			};
+		},
+		isDOMForced : function() {
+			return domForced;
+		},
+		setDOMForced : function(forceDom) {
+			domForced = forceDom;
 		}
 	};
 })();
