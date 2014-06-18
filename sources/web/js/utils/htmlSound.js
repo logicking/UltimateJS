@@ -16,9 +16,14 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 
 	if (!spriteInst || spriteInst.play) {
-		return;
+		if (spriteInst.priority && (spriteInst.priority <= sndInst.priority)) {
+			this.stop(sndInst);
+		} else {
+			return;
+		}
 	}
 
+	spriteInst.priority = sndInst.priority;
 	spriteInst.stopCallback = callback;
 	spriteInst.audio.volume = sndInst.volume;
 	spriteInst.audio.pause();
