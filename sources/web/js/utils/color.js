@@ -67,6 +67,15 @@ ColorRgb.prototype.subtract = function (colorRgb) {
 
 /**
  *
+ * @param {ColorRgb} colorRgb
+ * @return {boolean}
+ */
+ColorRgb.prototype.equals = function (colorRgb) {
+    return this.r === colorRgb.r && this.g === colorRgb.g && this.b === colorRgb.b;
+};
+
+/**
+ *
  * @param {ColorRgb} a current color
  * @param {ColorRgb} b new color
  * @constructor
