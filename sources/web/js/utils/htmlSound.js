@@ -147,15 +147,15 @@ htmlSound.prototype.loadSound = function(audioSpriteName, callback) {
 	if (callback) {
 
 		audio.addEventListener('abort', function() {
-			alert(audioSpriteName + " aborted");
+//			alert(audioSpriteName + " aborted");
 		}, true);
 
 		audio.addEventListener('error', function() {
-			alert(audioSpriteName + " error");
+//			alert(audioSpriteName + " error");
 		}, true);
 
 		audio.addEventListener('suspend', function() {
-			alert(audioSpriteName + " suspend");
+//			alert(audioSpriteName + " suspend");
 		}, true);
 
 		var canplay = function() {
