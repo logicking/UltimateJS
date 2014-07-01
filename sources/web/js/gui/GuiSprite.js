@@ -80,7 +80,12 @@ GuiSprite.prototype.initialize = function(params) {
 	if(params['frames']){
 		this.frames = params['frames']; 
 	}
-
+	
+	if (!params['mirror']) {
+		this.setMirror(1,1);
+	} else {
+		this.setMirror(params['mirror'].x,params['mirror'].y);
+	}
 };
 
 GuiSprite.prototype.setStaticUpdate = function(isStatic){
@@ -363,8 +368,8 @@ GuiSprite.prototype.transform = function(transfromations, dontCallCssTransform) 
 		if (transfromations.translate != null)
 			this.translate = transfromations.translate;
 	}
-	var scaleY = selectValue(this.scale, 1);
-	var scaleX = scaleY;
+	var scaleY = this.mirrorY * selectValue(this.scale, 1);
+	var scaleX = this.mirrorX * scaleY;
 	scaleX *= (this.flipped ? -1 : 1);
 	
 	if (!dontCallCssTransform)
@@ -486,3 +491,14 @@ GuiSprite.prototype.recolorFullImage = function (changingColorPair) {
     this.setBackgroundFromParams({image: url}, null);
     return url;
 };
+
+/**
+*
+* @param {x} vertical mirror
+* @param {y} horizontal mirror
+*/
+GuiSprite.prototype.setMirror = function (x, y) {
+    this.mirrorX = x || 1;
+    this.mirrorY = y || 1;
+};
+

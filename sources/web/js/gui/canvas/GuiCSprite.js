@@ -366,3 +366,9 @@ GuiCSprite.prototype.clear = function(ctx) {
 	    ctx.clearRect(this.lastFrame.destRect[0], this.lastFrame.destRect[1],
 	    			  this.lastFrame.destRect[2], this.lastFrame.destRect[3]);
 };
+
+GuiCSprite.prototype.setMirror = function (x, y) {
+    this.mirrorX = x || 1;
+    this.mirrorY = y || 1;
+};
+
