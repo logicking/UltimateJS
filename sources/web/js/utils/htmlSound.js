@@ -37,6 +37,7 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	spriteInst.startTime = sndInst.offset + this.soundOffset;
 	spriteInst.endTime = spriteInst.startTime + sndInst.duration;
 	spriteInst.audio.currentTime = spriteInst.startTime;
+    spriteInst.audio.endTime = spriteInst.endTime;
 	spriteInst.play = true;
 	spriteInst.audio.play();
 };
