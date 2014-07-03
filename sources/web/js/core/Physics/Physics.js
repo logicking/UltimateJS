@@ -87,8 +87,8 @@ function DebugCanvas() {
             "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px;'></canvas>");
         canvasElm = document.getElementById("debugCanvas");
     }
-    canvasElm.width = BASE_WIDTH;
-    canvasElm.height = BASE_HEIGHT;
+    canvasElm.width = ENHANCED_BASE_WIDTH;
+    canvasElm.height = ENHANCED_BASE_HEIGHT;
     canvasElm.style.width = canvasElm.width * Screen.widthRatio();
     canvasElm.style.height = canvasElm.height * Screen.heightRatio();
 
