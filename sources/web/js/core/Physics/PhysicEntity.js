@@ -32,6 +32,8 @@ PhysicEntity.prototype.init = function (params) {
     this.physicsEnabled = true;
     if (Screen.isDOMForced())
     	this.initialPosRequiered = true;
+    else
+        this.initialPosRequiered = false;
     if (params.type != null)
         description = Account.instance.descriptionsData[params.type];
     PhysicEntity.parent.init.call(this, $['extend'](params, description));
