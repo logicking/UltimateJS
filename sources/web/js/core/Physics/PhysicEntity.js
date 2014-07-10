@@ -412,6 +412,14 @@ PhysicEntity.prototype.setContactEndCallback = function (callback) {
     Physics.getContactProcessor().setContactEndCalback(callback, this.className);
 };
 
+PhysicEntity.prototype.setContactPreSolveCalback = function (callback) {
+    Physics.getContactProcessor().setContactPreSolveCalback(callback, this.className);
+};
+
+PhysicEntity.prototype.setContactPostSolveCalback = function (callback) {
+    Physics.getContactProcessor().setContactPostSolveCalback(callback, this.className);
+};
+
 PhysicEntity.prototype.setMaterial = function (material) {
     this.material = material;
 };
