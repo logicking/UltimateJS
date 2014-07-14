@@ -84,7 +84,7 @@ function DebugCanvas() {
     if (!canvasElm) {
         $("#root")
             .append(
-            "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px;'></canvas>");
+            "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px; z-index:9999999999; pointer-events:none;'></canvas>");
         canvasElm = document.getElementById("debugCanvas");
     }
     canvasElm.width = BASE_WIDTH;//ENHANCED_BASE_WIDTH;
