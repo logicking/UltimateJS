@@ -240,7 +240,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
     
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
+    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
     		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) {
 	    this.lastUpdatedPos = this.getPosition();
