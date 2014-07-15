@@ -234,15 +234,15 @@ PhysicEntity.prototype.createVisual = function () {
 };
 
 // Update visual position from physics world
-PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate) {
-    if (!this.physics || this.physicsEnabled === false || Physics.paused() === true || this.physics.IsAwake() === false)
+PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate, force) {
+    if (!this.physics || this.physicsEnabled === false || (Physics.paused() === true && !force) || this.physics.IsAwake() === false)
         return false;
     
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
+    if ((!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
-    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) {
+    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) || force) {
 	    this.lastUpdatedPos = this.getPosition();
 	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
 	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
@@ -250,8 +250,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.physics.GetAngle();
-	if (!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
-			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) {
+	if ((!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
+			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) || force) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);

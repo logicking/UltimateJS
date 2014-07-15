@@ -226,7 +226,7 @@ var Physics = (function () {
             world.ClearForces();
             for (var i = 0; i < updateItems.length; ++i) {
                 updateItems[i].updatePositionFromPhysics();
-                if (Screen.isDOMForced() === true && updateItems[i].initialPosRequiered === true) {
+                if (Screen.isDOMForced() === true && updateItems[i] && updateItems[i].initialPosRequiered === true) {
                 	updateItems[i].initialPosRequiered = false;
             		updateItems[i].physics.SetAwake(false);
                 }

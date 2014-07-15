@@ -26,6 +26,9 @@ GuiDiv.prototype.initialize = function(params) {
 	this.divname = params['divname'];
 	this.backgrounds = new Array();
 	if (VIEWPORT_KILLER) this.disableViewport();
+    if (params['enhancedViewport']) {
+        this.setViewport(Screen.fullRect());
+    }
 	// short alias for background
 	if (params['image']) {
 		params['background'] = {
