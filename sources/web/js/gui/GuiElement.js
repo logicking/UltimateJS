@@ -171,6 +171,10 @@ GuiElement.prototype.initialize = function(params) {
 		this.show();
 	}
 
+    if (params['clickTransparent']) {
+        this.setClickTransparent(true);
+    }
+
 	if (typeof params['opacity'] == "number") {
 		this.setOpacity(params['opacity']);
 	}

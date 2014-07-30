@@ -18,9 +18,10 @@ WebSound.prototype.createSource = function(buffer) {
 	  return source;
 };
 
-WebSound.prototype.createGain = function(source) {
+WebSound.prototype.createGain = function(source, vol) {
 	  var gainNode = this.context.createGain();
-	  source.connect(gainNode);
+      gainNode.gain.value = (vol || vol === 0)?vol:1;
+    source.connect(gainNode);
 	  gainNode.connect(this.context.destination);
 	  source.gain = gainNode.gain;
 	  
@@ -60,9 +61,11 @@ WebSound.prototype.stop = function(sndInst) {
 };
 
 WebSound.prototype.mute = function(channel) {
+    var that = this;
 	this.muted = true;
 	if(channel){
-		channel.playing.source = that.createGain(channel.playing.source);
+		if (channel.playing && !channel.playing.source)
+            channel.playing.source = that.createGain(channel.playing.source, 0);
 		channel.playing.source.gain.value = 0;
 	}else{
 		this.volume = 0;
@@ -70,9 +73,11 @@ WebSound.prototype.mute = function(channel) {
 };
 
 WebSound.prototype.unmute = function(channel) {
+    var that = this;
 	this.muted = false;
 	if(channel){
-		channel.playing.source = that.createGain(channel.playing.source);
+        if (channel.playing && !channel.playing.source)
+            channel.playing.source = that.createGain(channel.playing.source, channel.volume);
 		channel.playing.source.gain.value = channel.volume;
 	}else{
 		this.volume = 1;
