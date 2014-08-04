@@ -408,11 +408,17 @@ GuiSprite.prototype.setTransformOrigin = function(transformOrigin) {
 	obj['css']("msTransform-origin", this.transformOrigin);
 };
 
-GuiSprite.prototype.setPosition = function(x, y) {
+GuiSprite.prototype.setPosition = function(x, y, angle) {
 //	if (this.x !== x || this.y !== y) {
 		this.x = x;
 		this.y = y;
-
+        if (angle) {
+            if (this.canvas === null || Screen.isDOMForced()) {
+                this.angle = MathUtils.toDeg(angle);
+            } else {
+                this.angle = angle;
+            }
+        }
 		if (this.viewport) {
 			this.clampByViewport();
 		} else {
@@ -505,3 +511,10 @@ GuiSprite.prototype.setMirror = function (x, y) {
     this.mirrorY = y || 1;
 };
 
+GuiSprite.prototype.bindEvent = function(event, callback) {
+    this.jObject['bind'](event, callback);
+};
+
+GuiSprite.prototype.setCursor= function(cursor) {
+    this.jObject['css']("cursor", cursor);
+};

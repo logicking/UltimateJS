@@ -144,7 +144,13 @@ GuiCSprite.prototype.initialize = function(params) {
 	}
 	
 	this.resize();
-	
+
+    if (!params['mirror']) {
+        this.setMirror(1,1);
+    } else {
+        this.setMirror(params['mirror'].x,params['mirror'].y);
+    }
+
 	this.parent.addGui(this);
 };
 
@@ -200,9 +206,17 @@ GuiCSprite.prototype.setTransformOrigin = function(transformOrigin) {
 	this.canvas.setAwake(true);
 };
 
-GuiCSprite.prototype.setPosition = function(x, y) {
+GuiCSprite.prototype.setPosition = function(x, y, angle) {
 	this.x = this.calcPercentageWidth(x);
 	this.y = this.calcPercentageHeight(y);
+    if (angle) {
+        if (this.canvas === null || Screen.isDOMForced()) {
+            this.angle = MathUtils.toDeg(angle);
+        } else {
+            this.angle = angle;
+        }
+    }
+
 	this.canvas.setAwake(true);
 };
 
@@ -336,8 +350,9 @@ GuiCSprite.prototype.render = function(ctx) {
 	ctx.translate(this.lastFrame.translate[0], this.lastFrame.translate[1]);
 	ctx.rotate(this.lastFrame.rotate); 
 	ctx.globalAlpha = this.opacity;
-	
-// ctx.scale(this.scale.x, this.scale.y);
+
+    if (this.mirrorX < 0 || this.mirrorY < 0)
+        ctx.scale(this.mirrorX, this.mirrorY);
 
 	this.lastFrame.sourceRect[0] = this.backgroundPosition.x * this.imageWidth;
 	this.lastFrame.sourceRect[1] = this.backgroundPosition.y * this.imageHeight;
@@ -367,8 +382,11 @@ GuiCSprite.prototype.clear = function(ctx) {
 	    			  this.lastFrame.destRect[2], this.lastFrame.destRect[3]);
 };
 
-GuiCSprite.prototype.setMirror = function (x, y) {
-    this.mirrorX = x || 1;
-    this.mirrorY = y || 1;
+GuiCSprite.prototype.bindEvent = function(event, callback) {
+//    this.jObject['bind'](event, callback);
+};
+
+GuiSprite.prototype.setCursor= function(cursor) {
+//    this.jObject['css']("cursor", cursor);
 };
 
