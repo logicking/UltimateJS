@@ -304,6 +304,9 @@ GuiSprite.prototype.isPlayingAnimation = function(animationName) {
 	return this.currentAnimation == animationName;
 };
 
+GuiSprite.prototype.isPlaying = function(animationName) {
+    return (this.currentAnimation == null)?false:true;
+};
 // GuiSprite.prototype.animate = function(moveVector, duration) {
 // var that = this;
 // this.jObject['animate']({
