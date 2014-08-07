@@ -386,7 +386,7 @@ GuiCSprite.prototype.bindEvent = function(event, callback) {
 //    this.jObject['bind'](event, callback);
 };
 
-GuiSprite.prototype.setCursor= function(cursor) {
+GuiCSprite.prototype.setCursor= function(cursor) {
 //    this.jObject['css']("cursor", cursor);
 };
 

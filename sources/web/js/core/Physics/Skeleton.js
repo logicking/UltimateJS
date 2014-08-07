@@ -93,7 +93,7 @@ Skeleton.prototype.createPhysics = function () {
         value.linearDamping = physicParams['linearDamping'];
         if (id === "body") {
             body = BodyFactory.createBody(value, CollisionFilter.categoryBits.MAN_CATEGORY_BITS,
-                    CollisionFilter.categoryBits.START_CATEGORY_BITS, Skeleton.collisionGroupIndex);
+                    /*CollisionFilter.categoryBits.MAN_CATEGORY_BITS | */CollisionFilter.categoryBits.START_CATEGORY_BITS, Skeleton.collisionGroupIndex);
         } else {
             body = BodyFactory.createBody(value, CollisionFilter.categoryBits.LIMBS_CATEGORY_BITS,
                 CollisionFilter.categoryBits.MAN_CATEGORY_BITS, Skeleton.collisionGroupIndex);
