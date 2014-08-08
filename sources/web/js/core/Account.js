@@ -66,11 +66,16 @@ Account.prototype.init = function(params) {
 //	});
 };
 
-Account.prototype.addEntity = function(newEntity) {
-	assert(typeof (newEntity.id) == "string", "Entity ID must be string");
-	assert(this.allEntities[newEntity.id] == null, "Entity with ID '"
-			+ newEntity.id + "' already exists");
-	this.allEntities[newEntity.id] = newEntity;
+Account.prototype.addEntity = function(newEntity, unsafe) {
+    if (unsafe) {
+        assert(typeof (newEntity.id) == "string", "Entity ID must be string");
+        assert(this.allEntities[newEntity.id] == null, "Entity with ID '"
+            + newEntity.id + "' already exists");
+    }
+    if (!this.allEntities[newEntity.id] && typeof (newEntity.id) == "string")
+	    this.allEntities[newEntity.id] = newEntity;
+    else
+        return false;
 };
 
 Account.prototype.getEntity = function(id) {
