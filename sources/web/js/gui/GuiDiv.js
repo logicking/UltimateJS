@@ -399,6 +399,7 @@ GuiDiv.prototype.clampByViewport = function() {
 	var h = bottom - top;
 
 	// item is completely outside viewport, hide it
+    // Glukozavr : Works realy strange. Hides smth it shouldn`t. Do we need to hide everything abroad?
 	if (w < 0 || h < 0) {
 		if (!this.viewRect.isOutside) {
 			this.jObject['hide']();
@@ -498,7 +499,7 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 	if (screenLeft + this.width < 0 || screenLeft > rect.width
 			|| screenTop + this.height < 0 || screenTop > rect.height) {
 
-		if (!this.viewRect.isOutside) {
+/*		if (!this.viewRect.isOutside) {
 			this.jObject['hide']();
 			this.viewRect.isOutside = true;
 		}
@@ -506,7 +507,7 @@ GuiDiv.prototype.clampByViewportSimple = function() {
 		if (this.viewRect.isOutside) {
 			this.jObject['show']();
 			this.viewRect.isOutside = false;
-		}
+		}*/
 	}
 	this.setRealPosition(screenLeft, screenTop);
 };
