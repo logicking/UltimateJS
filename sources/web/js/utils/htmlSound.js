@@ -13,13 +13,17 @@ var htmlSound = function() {
 };
 
 htmlSound.prototype.play = function(sndInst, callback) {
-	var that = this;
 	var spriteInst = this.audioSpriteInstance[sndInst.spriteName];
 
 	if (!spriteInst || spriteInst.play) {
-		return;
+		if (spriteInst.priority <= sndInst.priority) {
+			this.stop(sndInst);
+		} else {
+			return;
+		}
 	}
 
+	spriteInst.priority = sndInst.priority;
 	spriteInst.stopCallback = callback;
 	spriteInst.audio.volume = sndInst.volume;
 	spriteInst.audio.pause();
@@ -33,9 +37,9 @@ htmlSound.prototype.play = function(sndInst, callback) {
 	spriteInst.startTime = sndInst.offset + this.soundOffset;
 	spriteInst.endTime = spriteInst.startTime + sndInst.duration;
 	spriteInst.audio.currentTime = spriteInst.startTime;
+    spriteInst.audio.endTime = spriteInst.endTime;
 	spriteInst.play = true;
 	spriteInst.audio.play();
-
 };
 
 htmlSound.prototype.stop = function(sndInst) {

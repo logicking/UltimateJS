@@ -3,25 +3,46 @@ var WebSound = function(context) {
 	this.context = context;
 	this.volume = 1;
 	this.fade = false;
+//	if (context.createGain) {
+//		this.gainNode = context.createGain();
+//		alert('context.createGain')
+//	}
+};
+
+WebSound.prototype.createSource = function(buffer) {
+	  var source = this.context.createBufferSource();
+	  source.buffer = buffer;
+	  
+	  source = this.createGain(source);
+
+	  return source;
+};
+
+WebSound.prototype.createGain = function(source, vol) {
+	  var gainNode = this.context.createGain();
+      gainNode.gain.value = (vol || vol === 0)?vol:1;
+    source.connect(gainNode);
+	  gainNode.connect(this.context.destination);
+	  source.gain = gainNode.gain;
+	  
+	  return source;
 };
 
 WebSound.prototype.play = function(sndInst, callback) {
 	var that = this;
-	var source = this.context.createBufferSource();
-	sndInst.source = source;
-	sndInst.source.connect(this.context.destination);
 	if(!sndInst.buffer){
 		return;
 	}
-	sndInst.source.buffer = sndInst.buffer;
+	sndInst.source = this.createSource(sndInst.buffer);
 	sndInst.source.loop = sndInst.loop;
 	sndInst.source.gain.value = sndInst.volume;
-	sndInst.source.noteGrainOn(0, sndInst.offset, sndInst.duration);
+	sndInst.source.start(0, sndInst.offset, sndInst.duration);
+//  deprecated
+//	sndInst.source.noteGrainOn(0, sndInst.offset, sndInst.duration);
 	var buf = sndInst.buffer;
 	if (!sndInst.loop) {
 		this.playTimeout = setTimeout(function() {
-			sndInst.source = that.context.createBufferSource();
-			sndInst.source.buffer = buf;
+			sndInst.source = that.createSource(buf);
 			if (callback) {
 				callback();
 			}
@@ -40,8 +61,11 @@ WebSound.prototype.stop = function(sndInst) {
 };
 
 WebSound.prototype.mute = function(channel) {
+    var that = this;
 	this.muted = true;
 	if(channel){
+		if (channel.playing && !channel.playing.source)
+            channel.playing.source = that.createGain(channel.playing.source, 0);
 		channel.playing.source.gain.value = 0;
 	}else{
 		this.volume = 0;
@@ -49,8 +73,11 @@ WebSound.prototype.mute = function(channel) {
 };
 
 WebSound.prototype.unmute = function(channel) {
+    var that = this;
 	this.muted = false;
 	if(channel){
+        if (channel.playing && !channel.playing.source)
+            channel.playing.source = that.createGain(channel.playing.source, channel.volume);
 		channel.playing.source.gain.value = channel.volume;
 	}else{
 		this.volume = 1;
@@ -68,6 +95,7 @@ WebSound.prototype.fadeTo = function(fadeInst) {
 	}
 	this.fade = fadeInst.sndInst.id;
 	var that = this;
+	fadeInst.sndInst.source = that.createGain(fadeInst.sndInst.source);
 	fadeInst.dVol = fadeInst.volume - fadeInst.sndInst.source.gain.value;
 	if(fadeInst.dVol == 0){
 		return;
