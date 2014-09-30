@@ -185,6 +185,8 @@ var Device = (function() {
         setStoragePrefix : function(val) {
             assert(typeof(val) == "string", "Wrong storage prefix: " + val);
             storagePrefix = val + "_";
+            if (Device.isNative())
+            	Native.Storage.SetStoragePrefix(storagePrefix);
         },
         setStorageItem : function(key, val) {
             if (Device.isNative()) {
@@ -194,6 +196,9 @@ var Device = (function() {
                     case "string":
                         break;
                     case "number":
+                        break;
+                    case "boolean":
+                        val = val ? "true" : "false";
                         break;
                     case "object":
                         val = JSON.stringify(val);

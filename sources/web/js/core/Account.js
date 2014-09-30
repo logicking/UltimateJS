@@ -174,9 +174,11 @@ Account.prototype.removeScheduledEntity = function(entity) {
 	assert(typeof (entity.id) == "string", "Entity ID must be string");
 	delete this.scheduledEntities[entity.id];
 	// if nothing to schedule anymore stop interval either
-	if (!this.globalUpdateIntervalHandle
-			&& $['isEmptyObject'](this.scheduledEntities)) {
-		this.clearInterval(this.globalUpdateIntervalHandle);
+	
+	if (this.globalUpdateIntervalHandle	&& $['isEmptyObject'](this.scheduledEntities)) {
+		
+//		this.clearInterval(this.globalUpdateIntervalHandle);
+		window.cancelAnimationFrame(this.globalUpdateIntervalHandle);
 		this.globalUpdateIntervalHandle = null;
 	}
 };
@@ -195,8 +197,24 @@ window.requestAnimationFrame = (function () {
          * @param {function} callback
          * @param element DOM element
          */
-            function (callback, element) {
-            window.setTimeout(callback, 1000 / 50);
+        function (callback, element) {
+            /*window.*/return setTimeout(callback, 1000 / 50);
+        };
+})();
+
+window.cancelAnimationFrame = (function () {
+    return  window.cancelAnimationFrame ||
+        window.webkitCancelAnimationFrame ||
+        window.mozCancelAnimationFrame ||
+        window.oCancelAnimationFrame ||
+        window.msCancelAnimationFrame ||
+        /**
+         *
+         * @param {function} callback
+         * @param element DOM element
+         */
+        function (id) {
+            clearTimeout(id);
         };
 })();
 

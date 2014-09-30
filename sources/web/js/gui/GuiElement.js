@@ -234,8 +234,8 @@ GuiElement.prototype.move = function(dx, dy) {
 
 GuiElement.prototype.getRealPosition = function() {
 	return {
-		x : this.jObject['css']("left").replace("px", ""),
-		y : this.jObject['css']("top").replace("px", "")
+	    x: Device.isNative() ? this.jObject.offsetX * 1 : this.jObject['css']("left").replace("px", ""),
+	    y: Device.isNative() ? this.jObject.offsetY * 1 : this.jObject['css']("top").replace("px", "")
 	};
 };
 
@@ -246,9 +246,13 @@ GuiElement.prototype.getPosition = function() {
 	};
 };
 
-GuiElement.prototype.setZ = function(z) {
-	this.jObject['css']("z-index", z);
-	this.jObject['css']("-webkit-transform", "translateZ(0)");
+GuiElement.prototype.setZ = function (z) {
+    if (Device.isNative()) {
+        this.jObject.setZ(z);
+    } else {
+        this.jObject['css']("z-index", z);
+        this.jObject['css']("-webkit-transform", "translateZ(0)");
+    }
 	this.z = z;
 };
 
@@ -262,8 +266,11 @@ GuiElement.prototype.hide = function() {
 	this.visible = false;
 };
 
-GuiElement.prototype.setOpacity = function(opacity) {
-	this.jObject['css']("opacity", opacity);
+GuiElement.prototype.setOpacity = function (opacity) {
+    if (Device.isNative())
+        this.jObject.setOpacity(opacity);
+    else
+	    this.jObject['css']("opacity", opacity);
 };
 
 GuiElement.prototype.isEventIn = function(e) {
@@ -384,13 +391,21 @@ GuiElement.prototype.setSize = function(width, height) {
 };
 
 GuiElement.prototype.setRealSize = function(width, height) {
-	var size = Screen.calcRealSize(width, height);
+    var size = Screen.calcRealSize(width, height);
+    if (Device.isNative()) {
+        this.jObject.setSize(size.x, size.y);
+        return;
+    }
 	this.jObject['css']("width", size.x);
 	this.jObject['css']("height", size.y);
 };
 
 GuiElement.prototype.setRealPosition = function(x, y) {
-	var pos = Screen.calcRealSize(x, y);
+    var pos = Screen.calcRealSize(x, y);
+    if (Device.isNative()) {
+        this.jObject.setXY(pos.x, pos.y);
+        return;
+    }
 	this.jObject['css']("left", pos.x);
 	this.jObject['css']("top", pos.y);
 };
@@ -415,6 +430,10 @@ GuiElement.prototype.disableResize = function(isTrue) {
 		this.resize = function() {
 		};
 	}
+};
+
+GuiElement.prototype.refresh = function() {
+	this.children.refresh();
 };
 
 GuiElement.prototype.change = function(src) {
@@ -505,8 +524,8 @@ GuiElement.prototype.remove = function() {
 	}
 	if (this.children)				/// TODO
 		this.children.remove();
-	if (this.jObject)			/// These two ifs are hack for canvas. Hardcore only, this must refactored
-	this.jObject['remove']();
+	if (this.jObject)			/// These two ifs are hack for canvas. Hardcore only, this must be refactored
+		this.jObject['remove']();
 };
 
 GuiElement.prototype.detach = function() {
@@ -578,7 +597,12 @@ GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 	// });
 	this.jObject['animate']({
 		opacity : fadeValue
-	}, time, callback);
+	}, time, !Device.isNative() ? callback : function() {
+		if (fadeValue <= 0 && !dontChangeVisibility)
+			that.hide();
+		if (typeof (callback) == "function")
+			callback.call(that);
+	});
 };
 
 GuiElement.prototype.blinking = function(isOn, blinkTime, blinkMin, blinkMax) {

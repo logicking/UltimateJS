@@ -70,6 +70,15 @@ GuiLabel.prototype.change = function(src, fontSize) {
 //	this.resize();
 };
 
+GuiLabel.prototype.refresh = function() {
+	this.change(Resources.getString(this.params.text && this.params.text.length ? this.params.text : this.getText()));
+	GuiLabel.parent.refresh.call(this);
+};
+
+GuiLabel.prototype.getText = function() {
+	return $("#" + this.cellId).text();
+};
+
 GuiLabel.prototype.append = function(src) {
 	$("#" + this.cellId).append(src);
 	this.resize();

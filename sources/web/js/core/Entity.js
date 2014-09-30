@@ -208,11 +208,15 @@ Entity.prototype.setTimeout = function(func, time) {
 
 Entity.prototype.clearTimeout = function(handle) {
 	clearTimeout(handle);
+	if (this.timeouts)
+		popElementFromArray(handle, this.timeouts);
 	// TODO add removing from array
 };
 
 Entity.prototype.clearInterval = function(handle) {
 	clearInterval(handle);
+	if (this.intervals)
+		popElementFromArray(handle, this.intervals);
 	// TODO add removing from array
 };
 
@@ -229,15 +233,16 @@ Entity.prototype.clearTimeouts = function() {
 	this.timeouts = new Array();
 };
 
-Entity.prototype.playSound = function(sound) {
+Entity.prototype.playSound = function (sound, volume) {
+	volume = isNaN(volume) ? 1 : Math.max(Math.min(volume, 1), 0);
 	if(!sound || !this.sounds || !this.sounds[sound]) {
 		console.log("No sound collection " + sound + " found for entity " + this.id);
 		return;
 	}
 	if (typeof(this.sounds[sound]) == "string")
-			Sound.play(this.sounds[sound]);
+			Sound.playWithVolume(this.sounds[sound], volume);
 	else if (this.sounds[sound].length) {
 		var soundIdx = getRandomInt(0, this.sounds[sound].length - 1);
-		Sound.play(this.sounds[sound][soundIdx]);
+		Sound.playWithVolume(this.sounds[sound][soundIdx], volume);
 	}
 };

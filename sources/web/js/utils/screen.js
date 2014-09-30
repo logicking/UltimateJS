@@ -145,6 +145,9 @@ var Screen = (function() {
 		widthRatio = fieldWidth / BASE_WIDTH;
 		heightRatio = fieldHeight / BASE_HEIGHT;
 
+		if (Device.isNative())
+		    Native.Screen.SetRatios(widthRatio, heightRatio);
+
 		var rootDiv = $('#root');
         if (rootDiv.length > 0) {
             rootDiv['css']("left", offsetXroot);
@@ -187,24 +190,24 @@ var Screen = (function() {
 	
 	function windowOnResize(event, w, h) {
 		// TODO Should it be so?
-		if (typeof(Native) != "undefined") {
+//		if (typeof(Native) != "undefined") {
 //		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
 //		    	var BASE_MARGIN_HEIGHT  = (Native.ScreenHeight - BASE_HEIGHT)/2;
 //		         
 //		         ENHANCED_BASE_MARGIN_WIDTH = (ENHANCED_BASE_WIDTH - Native.ScreenWidth)/2;
 //		         ENHANCED_BASE_MARGIN_HEIGHT = (ENHANCED_BASE_HEIGHT - Native.ScreenHeight)/2;
 //		         
-//		    	var rootDiv = $('#root');
-//		        if (rootDiv.length > 0) {
-//		            rootDiv['css']("left", ENHANCED_BASE_MARGIN_WIDTH);
-//		            rootDiv['css']("top", ENHANCED_BASE_MARGIN_HEIGHT);
-//		        }
+//		    	var documentElementDiv = documentJS.body;
+//		    	documentElementDiv.setXY(ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
 //		        
+//		        console.warn(ENHANCED_BASE_MARGIN_WIDTH + ", " + ENHANCED_BASE_MARGIN_HEIGHT)
+//		        
+		        
 //		       Native.Screen.SetBaseMargins(BASE_MARGIN_WIDTH, BASE_MARGIN_HEIGHT,
 //		    		   ENHANCED_BASE_MARGIN_WIDTH, ENHANCED_BASE_MARGIN_HEIGHT);
- 			    		
-		    		return;
-		}
+// 			    		
+//		    		return;
+//		}
 		
 		
 		if(DO_NOT_RESIZE){
@@ -220,7 +223,9 @@ var Screen = (function() {
 //		oldW = null;
 //		oldH = null;
 		orientationFlag = null;
-		
+		if (typeof(Native) != "undefined") {
+			actualResize(w, h);
+		} else
 		if (!Screen.isCorrectOrientation()) {
 			if (!Loader.loadingMessageShowed()) {
 				resizeRotateMsg(w, h);
@@ -247,23 +252,24 @@ var Screen = (function() {
 		}
 			
 		// A little hack for S3
-		setTimeout(function() {
-			if (!Screen.isCorrectOrientation()) {
-				if (!Loader.loadingMessageShowed()) {
-					resizeRotateMsg(w, h);
-					$("#rotateMsg")['css']("display", "block");
-					$("#rotateMsg")['css']("z-index", 99999999);
+		if (typeof(Native) == "undefined")
+			setTimeout(function() {
+				if (!Screen.isCorrectOrientation()) {
+					if (!Loader.loadingMessageShowed()) {
+						resizeRotateMsg(w, h);
+						$("#rotateMsg")['css']("display", "block");
+						$("#rotateMsg")['css']("z-index", 99999999);
+					}
+				} else {
+					// absorb nearly simultaneous calls to resize
+					clearTimeout(resizeTimeoutHandle);
+					resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
+					windowScrollDown();
+	
+					$("#rotateMsg")['css']("z-index", 0);
+					$("#rotateMsg")['css']("display", "none");
 				}
-			} else {
-				// absorb nearly simultaneous calls to resize
-				clearTimeout(resizeTimeoutHandle);
-				resizeTimeoutHandle = setTimeout(function() {actualResize(w, h); }, 100);
-				windowScrollDown();
-
-				$("#rotateMsg")['css']("z-index", 0);
-				$("#rotateMsg")['css']("display", "none");
-			}
-		}, 500);
+			}, 500);
 		// alert("resize " + Screen.isCorrectOrientation());
 		
 		return;
@@ -354,9 +360,12 @@ var Screen = (function() {
 					$('head')['append']
 							('<link rel="stylesheet" href="css/orientationLandscape.css" type="text/css" />');
 				}
-			} else {
+			} else { 
+			    
 				isLandscapeDefault = null;
-				$('#rotateMsg').remove();
+				if (!Device.isNative()) {
+				    $('#rotateMsg').remove();
+				}
 			}
 
 			disableTouchEvents();
@@ -400,6 +409,8 @@ var Screen = (function() {
 		},
 
 		isCorrectOrientation : function() {
+		    if (typeof (Native) != "undefined")
+		        return true;
 			var isPortrait = window.innerWidth / window.innerHeight < 1.1;
 			// alert("correct orient " + window.innerWidth + ", "
 			// + window.innerHeight + ", " + window.orientation);

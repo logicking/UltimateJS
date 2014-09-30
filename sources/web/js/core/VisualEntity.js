@@ -35,7 +35,6 @@ VisualEntity.prototype.addVisual = function(visualId, visualInfo) {
 	this.assert(this.visuals[id] == null, "Visual id = '" + id
 			+ "' is already created.");
 	this.visuals[id] = visualInfo;
-
 };
 
 

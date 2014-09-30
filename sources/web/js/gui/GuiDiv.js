@@ -110,8 +110,8 @@ GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX, bac
     }
 
     idx = idx ? idx : 0;
-    frameX = frameX ? frameX : (this.backgrounds[idx] && this.backgrounds[idx].frameX ? this.backgrounds[idx].frameX : 0);
-    frameY = frameY ? frameY : (this.backgrounds[idx] && this.backgrounds[idx].frameY ? this.backgrounds[idx].frameY : 0);
+    frameX = !isNaN(frameX) ? frameX : (this.backgrounds[idx] && !isNaN(this.backgrounds[idx].frameX) ? this.backgrounds[idx].frameX : 0);
+    frameY = !isNaN(frameY) ? frameY : (this.backgrounds[idx] && !isNaN(this.backgrounds[idx].frameY) ? this.backgrounds[idx].frameY : 0);
     backWidth = backWidth ? backWidth : (this.backgrounds[idx] && this.backgrounds[idx].width ? this.backgrounds[idx].width : this.width);
     backHeight = backHeight ? backHeight : (this.backgrounds[idx] && this.backgrounds[idx].height ? this.backgrounds[idx].height : this.height);
 
@@ -131,12 +131,12 @@ GuiDiv.prototype.setBackground = function(src, backWidth, backHeight, backX, bac
 };
 
 GuiDiv.prototype.setBackgroundFromParams = function(param, j) {
-	var x = param['x'] ? Screen.macro(param['x']) : 0;
-	var y = param['y'] ? Screen.macro(param['y']) : 0;
+	var x = !isNaN(param['x']) ? Screen.macro(param['x']) : 0;
+	var y = !isNaN(param['y']) ? Screen.macro(param['y']) : 0;
 	var w = param['width'] ? Screen.macro(param['width']) : this.width;
 	var h = param['height'] ? Screen.macro(param['height']) : this.height;
-    var frameX = param['frameX'] ? Screen.macro(param['frameX']) : 0;
-    var frameY = param['frameY'] ? Screen.macro(param['frameY']) : 0;
+    var frameX = !isNaN(param['frameX']) ? Screen.macro(param['frameX']) : 0;
+    var frameY = !isNaN(param['frameY']) ? Screen.macro(param['frameY']) : 0;
 	var r = param['repeat'] ? param['repeat'] : null;
 	this.setBackground(param['image'], w, h, x, y, r, frameX, frameY, j);
 };
@@ -151,37 +151,65 @@ GuiDiv.prototype.setBackgroundPosition = function(backX, backY, idx) {
 	this.setRealBackgroundPosition(0, 0);
 };
 
-GuiDiv.prototype.setRealBackgroundPosition = function(offsetX, offsetY) {
-	var positions = " ";
-	$['each'](this.backgrounds, function(i, back) {
-		if (!back)
-			return;
-		var pos = Screen.calcRealSize(back.left + offsetX, back.top + offsetY);
-		positions += pos.x + "px " + pos.y + "px,";
-	});
-	positions = positions.substr(0, positions.length - 1);
-	this.jObject['css']("background-position", positions);
+GuiDiv.prototype.setRealBackgroundPosition = function (offsetX, offsetY) {
+    if (Device.isNative()) {
+        var that = this;
+        $['each'](this.backgrounds, function (i, back) {
+            if (!back)
+                return;
+            var pos = Screen.calcRealSize(back.left + offsetX, back.top + offsetY);
+            that.jObject.setBackgroundPosition(pos.x, pos.y);
+            return;
+        });
+    } else {
+        var positions = " ";
+        $['each'](this.backgrounds, function (i, back) {
+            if (!back)
+                return;
+            var pos = Screen.calcRealSize(back.left + offsetX, back.top + offsetY);
+            positions += pos.x + "px " + pos.y + "px,";
+        });
+        positions = positions.substr(0, positions.length - 1);
+        this.jObject['css']("background-position", positions);
+    }
 };
 
 GuiDiv.prototype.resizeBackground = function() {
-    var positions = " ";
-    var sizes = " ";
-    var that = this;
-    $['each'](this.backgrounds, function(i, back) {
-        if (!back)
-            return;
-        var pos = Screen.calcRealSize(back.left + back.frameX, back.top + back.frameY);
-        positions += pos.x + "px " + pos.y + "px,";
+    if (Device.isNative()) {
+        var that = this;
+        $['each'](this.backgrounds, function (i, back) {
+            if (!back)
+                return;
+            var pos = Screen.calcRealSize(back.left + back.frameX, back.top + back.frameY);
 
-        var w = that.calcPercentageWidth(back.width);
-        var h = that.calcPercentageHeight(back.height);
-        var size = Screen.calcRealSize(w, h);
-        sizes += size.x + "px " + size.y + "px,";
-    });
-    sizes = sizes.substr(0, sizes.length - 1);
-    positions = positions.substr(0, positions.length - 1);
-    this.jObject['css']("background-size", sizes);
-    this.jObject['css']("background-position", positions);
+            var w = that.calcPercentageWidth(back.width);
+            var h = that.calcPercentageHeight(back.height);
+            var size = Screen.calcRealSize(w, h);
+
+            that.jObject.setBackgroundSize(size.x, size.y);
+            that.jObject.setBackgroundPosition(pos.x, pos.y);
+            return;
+        });
+    } else {
+        var positions = " ";
+        var sizes = " ";
+        var that = this;
+        $['each'](this.backgrounds, function(i, back) {
+            if (!back)
+                return;
+            var pos = Screen.calcRealSize(back.left + back.frameX, back.top + back.frameY);
+            positions += pos.x + "px " + pos.y + "px,";
+
+            var w = that.calcPercentageWidth(back.width);
+            var h = that.calcPercentageHeight(back.height);
+            var size = Screen.calcRealSize(w, h);
+            sizes += size.x + "px " + size.y + "px,";
+        });
+        sizes = sizes.substr(0, sizes.length - 1);
+        positions = positions.substr(0, positions.length - 1);
+        this.jObject['css']("background-size", sizes);
+        this.jObject['css']("background-position", positions);
+    }
 };
 
 GuiDiv.prototype.setPosition = function(x, y) {
@@ -301,31 +329,47 @@ GuiDiv.prototype.hideBackground = function() {
 	this.jObject['css']("background-image", "none");
 };
 
-GuiDiv.prototype.showBackground = function() {
-	var urls = " ";
-	var repeats = " ";
-	var positions = " ";
+GuiDiv.prototype.showBackground = function () {
+    if (Device.isNative()) {
+        var that = this;
+        $['each'](this.backgrounds, function (i, back) {
+            if (!back)
+                return;
+            if (back.url)
+                that.jObject.setBackgroundImage(back.url);
+            // TODO: test it
+            if (!isNaN(back.frameX) && !isNaN(back.frameY)) {
+                var pos = Screen.calcRealSize(back.frameX, back.frameY);
+                that.jObject.setBackgroundPosition(pos.x, pos.y);
+            }
+            return;
+        });
+    } else {
+        var urls = " ";
+        var repeats = " ";
+        var positions = " ";
 
-	$['each'](this.backgrounds, function(i, back) {
-		if (!back)
-			return;
-		if (back.url) urls += "url('" + back.url + "'),";
+        $['each'](this.backgrounds, function (i, back) {
+            if (!back)
+                return;
+            if (back.url) urls += "url('" + back.url + "'),";
 
-        // TODO: test it
-        if (back.frameX && back.frameY) {
-            var pos = Screen.calcRealSize(back.frameX, back.frameY);
-            positions += pos.x + "px " + pos.y + "px,";
-        }
+            // TODO: test it
+            if (!isNaN(back.frameX) && !isNaN(back.frameY)) {
+                var pos = Screen.calcRealSize(back.frameX, back.frameY);
+                positions += pos.x + "px " + pos.y + "px,";
+            }
 
-		repeats += back.repeat + ",";
-	});
+            repeats += back.repeat + ",";
+        });
 
-	urls = urls.substr(0, urls.length - 1);
-	repeats = repeats.substr(0, repeats.length - 1);
-    positions = positions.substr(0, positions.length - 1);
-	this.jObject['css']("background-image", urls);
-	this.jObject['css']("background-position", positions);
-	this.jObject['css']("background-repeat", repeats);
+        urls = urls.substr(0, urls.length - 1);
+        repeats = repeats.substr(0, repeats.length - 1);
+        positions = positions.substr(0, positions.length - 1);
+        this.jObject['css']("background-image", urls);
+        this.jObject['css']("background-position", positions);
+        this.jObject['css']("background-repeat", repeats);
+    }
 };
 
 GuiDiv.prototype.clampByParentViewport = function(isTrue) {

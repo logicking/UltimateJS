@@ -69,7 +69,9 @@ function cssTransform(obj, matrix, rotate, scaleX, scaleY, translate) {
 	    var transform = {
 	            "matrix": matrix,
 	            "translate": [translate.x, translate.y],
-	            "rotate": rotate
+	            "rotate": rotate,
+	            "scaleX": scaleX,
+	            "scaleY": scaleY
 	        };
 	    obj['css']("transform", transform);
 	    return;

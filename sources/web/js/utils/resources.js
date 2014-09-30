@@ -9,7 +9,7 @@ var Resources = (function() {
 
 	var images = new Array();
 	var resolutions = new Object();
-
+	
 	// enum of strings of current language
 	var strings = new Object();
 
@@ -22,6 +22,8 @@ var Resources = (function() {
 		image.onload = callback;
 		return image;
 	};
+	
+	var indexed = {};
 
 	return { // public interface
 
@@ -77,6 +79,16 @@ var Resources = (function() {
 				resolutions[resolutionName].images[name] = name;
 			}
 		},
+		index : function(value, index) {
+			if (typeof (value) == "string" && !isNaN(index))
+				indexed[value] = index;
+		},
+		getIndex : function(value) {
+			if (typeof (value) == "string" && indexed[value])
+				return indexed[value];
+			else
+				return -1;
+		},
 		// returnes string
 		getString : function(stringId, rand) {
 			if (strings[stringId]) {
@@ -100,10 +112,21 @@ var Resources = (function() {
 			if ((array == true) && (typeof language == "object")) {
 				strings = language;
 			} else {
-				var fileName = "resources/localization/" + language + ".json";
-				$['getJSON'](fileName, function(data) {
-					strings = data;
-				});
+				if (language) {
+					var fileName = "resources/localization/" + language + ".json";
+					$['getJSON'](fileName, function(data) {
+						strings = data;
+					}).error(function () {
+					    fileName = "resources/localization/" + "EN" + ".json";
+					    $['getJSON'](fileName, function (data) {
+					        strings = data;
+					    })
+					});
+					Device.setStorageItem("language", language);
+					if (Device.isNative())
+					    Native.Screen.SetLanguage(language);
+				} else
+				    Resources.setLanguage(Device.getStorageItem("language", Device.isNative() ? Native.Screen.GetLanguage() : "EN"));
 			}
 		},
 		// returns filename of an image for current resolution
@@ -269,13 +292,17 @@ var Resources = (function() {
 				} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
 						|| ext === "png") {
 					if (Device.isNative()) {
-//						ImageTable[Resources.getImage(current)] = ImageTableSeed;
-						if (Native.Loader.LoadImage(Resources.getImage(current)
-//								, ImageTableSeed++
-								))
-							onAssetLoad();
-						else
-							onAssetError();
+					    //						ImageTable[Resources.getImage(current)] = ImageTableSeed;
+					    if (!indexed[Resources.getImage(current)]) {
+
+					        var imageId = Native.Loader.LoadImageIndexed(Resources.getImage(current));
+					        if (imageId > 0) {
+					            Resources.index(Resources.getImage(current), imageId);
+					            onAssetLoad();
+					        } else
+					            onAssetError();
+					    } else
+					        onAssetLoad();
 					} else {
 						obj = new Image();
 						obj.src = Resources.getImage(current);

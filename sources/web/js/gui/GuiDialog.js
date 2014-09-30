@@ -48,8 +48,8 @@ GuiDialog.prototype.initialize = function(params) {
 			// "image" :
 			// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
 			"style" : "mask",
-			"width" : "100%",
-			"height" : "100%",
+			"width" : "FULL_WIDTH",
+			"height" : "FULL_HEIGHT",
 			"x" : 0,
 			"y" : 0
 		});

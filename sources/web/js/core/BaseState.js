@@ -39,6 +39,10 @@ BaseState.prototype.resize = function() {
 	this.guiContainer.resize();
 };
 
+BaseState.prototype.refresh = function() {
+	this.guiContainer.refresh();
+};
+
 // Activate will either init object immediately or
 // preload required resources and then call init
 BaseState.prototype.activate = function(params) {
@@ -51,22 +55,46 @@ BaseState.prototype.activate = function(params) {
 	}
 };
 
-BaseState.prototype.hide = function (setEnable) {
-    this.getGui("enhancedScene").hide();
-    if (!setEnable) {
-        this.guiContainer.resetUpdateInterval();
-        this.setEnable(false);
-    }
+BaseState.prototype.hide = function () {
+	var mainGui = selectValue(this.getGui("enhancedScene"), this.guiContainer.guiEntities[0], null);
+	if (mainGui)
+		mainGui.hide();
+    if (this.guiContainer.updateIntervalHandler != null)
+    	this.guiContainer.resetUpdateInterval();
+    if (this.isEnabled())
+    	this.setEnable(false);
 };
 
-BaseState.prototype.show = function (setEnable) {
-    if (typeof (setEnable) == "undefined")
-        setEnable = true;
-    this.getGui("enhancedScene").show();
-    if (setEnable) {
-        this.guiContainer.setUpdateInterval(GLOBAL_UPDATE_INTERVAL);
-        this.setEnable(true);
-    }
+BaseState.prototype.show = function () {
+    var mainGui = selectValue(this.getGui("enhancedScene"), this.guiContainer.guiEntities[0], null);
+	if (mainGui)
+		mainGui.show();
+    if (this.guiContainer.updateIntervalHandler == null)
+    	this.guiContainer.setUpdateInterval(GLOBAL_UPDATE_INTERVAL);
+    if (!this.isEnabled()) 
+    	this.setEnable(true);
+};
+
+BaseState.prototype.fadeTo = function (fadeValue, time, callback) {
+	var that = this;
+    var mainGui = selectValue(this.getGui("enhancedScene"), this.guiContainer.guiEntities[0], null);
+	if (fadeValue > 0)
+	    this.show();
+	this.setEnable(false);
+    if (mainGui)
+    	mainGui.fadeTo(fadeValue, time, function() {
+    	    if (fadeValue <= 0)
+    	        that.hide();
+    	    else
+    	        that.setEnable(true);
+    		if (typeof(callback) == "function")
+    			callback.call(that);
+    	});
+    else
+    	if (fadeValue <= 0)
+    	    that.hide();
+    	else
+    	    this.setEnable(true);
 };
 
 // Preloading of static resources - resources that

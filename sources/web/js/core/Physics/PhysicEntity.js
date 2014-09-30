@@ -39,11 +39,12 @@ PhysicEntity.prototype.init = function (params) {
     PhysicEntity.parent.init.call(this, $['extend'](params, description));
     if (this.params.physics) {
         this.createPhysics();
-        assert(!this.physics['m_userData']);
-        this.physics['m_userData'] = this;
-//TODO: check
-        if (!this.physics.m_type == b2Body.b2_staticBody || Physics.debugMode())
-            Physics.updateItemAdd(this);
+        if (this.physics) {
+	        this.physics['m_userData'] = this;
+	//TODO: check
+	        if (this.physics.m_type !== b2Body.b2_staticBody || Physics.debugMode())
+	            Physics.updateItemAdd(this);
+        }
     }
     this.material = null;
 };
@@ -54,7 +55,7 @@ PhysicEntity.prototype.init = function (params) {
 PhysicEntity.prototype.createPhysics = function () {
     var fixtureDefList = [];
     var bodyDefinition;
-    var physicParams = this.params['physics']; // preloaded from json
+    var physicParams = cloneObject(this.params['physics']); // preloaded from json
     this.params.x = this.params.x ? this.params.x : 0;
     this.params.y = this.params.y ? this.params.y : 0;
     var logicPosition = {
@@ -210,14 +211,15 @@ PhysicEntity.prototype.createPhysics = function () {
         that.physics.CreateFixture(fixDef);
     });
 
-    this.physics.SetPosition(logicPosition);
+    this.physics.SetPositionAndAngle(logicPosition, this.params.angle);
+    
     this.destructable = physicParams["destructable"];
     if (this.destructable)
         this.health = physicParams["health"];
     else
         this.health = null;
-    if (this.params.angle)
-        this.rotate(this.params.angle * 2);
+    //if (this.params.angle)
+    //    this.rotate(this.params.angle * 2);
 };
 
 PhysicEntity.prototype.getContactedBody = function () {
@@ -230,19 +232,26 @@ PhysicEntity.prototype.getContactList = function () {
 };
 
 PhysicEntity.prototype.createVisual = function () {
-    PhysicEntity.parent.createVisual.call(this);
+//	Needed for cacheing physics for native
+    var that = this;
+    if (Device.isNative() && this.physics && !this.physics.IsStatic()) {
+        this.physicsId = that.physics.id;
+        $.each(this.visuals, function (id, visualInfo) {
+            visualInfo.visual.jObject.physicsId = that.physics.id;
+            console.log("Attaching physics with id = " + that.physics.id + " to " + that.id);
+        });
+    }
 };
 
 // Update visual position from physics world
-PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate, force) {
-    if (!this.physics || this.physicsEnabled === false || (Physics.paused() === true && !force) || this.physics.IsAwake() === false)
-        return false;
-    
+PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate, forceUpdate) {
+    if (!this.physics || this.physicsEnabled === false || (Physics.paused() === true && !forceUpdate ) || (!Device.isNative() && this.physics.IsAwake() === false))
+    	return false;
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if ((!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
+    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
-    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD)) || force) {
+    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD) || forceUpdate) {
 	    this.lastUpdatedPos = this.getPosition();
 	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
 	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
@@ -250,8 +259,8 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.physics.GetAngle();
-	if ((!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered
-			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD)) || force) {
+	if (!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
+			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) || forceUpdate) {
 		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);
@@ -349,7 +358,7 @@ PhysicEntity.prototype.rotate = function (angleInRad) {
     var newAngle = oldAngle + angleInRad;
     if (Screen.isDOMForced())
     	this.physics.SetAwake(true);
-    this.physics.SetPositionAndAngle(position, newAngle / 2);
+    this.physics.SetAngle(newAngle / 2);
 
     this.updatePositionFromPhysics();
     if (Screen.isDOMForced())
@@ -362,7 +371,7 @@ PhysicEntity.prototype.destroy = function () {
 };
 
 PhysicEntity.prototype.destroyPhysics = function () {
-//	Physics.getContactProcessor().clearContactCallbacks(this);
+	Physics.getContactProcessor().clearContactCallbacks(this);
     Physics.destroy(this);
     this.physics = null;
 };
@@ -405,19 +414,19 @@ PhysicEntity.prototype.onDamage = function (damage) {
 
 
 PhysicEntity.prototype.setContactBeginCallback = function (callback) {
-    Physics.getContactProcessor().setContactBeginCalback(callback, this.className);
+    Physics.getContactProcessor().setContactBeginCalback(callback, this.id);
 };
 
 PhysicEntity.prototype.setContactEndCallback = function (callback) {
-    Physics.getContactProcessor().setContactEndCalback(callback, this.className);
+    Physics.getContactProcessor().setContactEndCalback(callback, this.id);
 };
 
 PhysicEntity.prototype.setContactPreSolveCalback = function (callback) {
-    Physics.getContactProcessor().setContactPreSolveCalback(callback, this.className);
+    Physics.getContactProcessor().setContactPreSolveCalback(callback, this.id);
 };
 
 PhysicEntity.prototype.setContactPostSolveCalback = function (callback) {
-    Physics.getContactProcessor().setContactPostSolveCalback(callback, this.className);
+    Physics.getContactProcessor().setContactPostSolveCalback(callback, this.id);
 };
 
 PhysicEntity.prototype.setMaterial = function (material) {
