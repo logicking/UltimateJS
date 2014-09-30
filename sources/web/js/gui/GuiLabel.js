@@ -60,7 +60,7 @@ GuiLabel.prototype.create = function(src) {
 
 GuiLabel.prototype.change = function(src, fontSize) {
 	src = Resources.getString(src);
-	$("#" + this.cellId).text(src);
+	$("#" + this.cellId).html(src);
 	if (fontSize)
 		this.fontSize = fontSize;
 //	console.error(this.id,this.cellId, $("#" + this.cellId).text());
@@ -76,7 +76,7 @@ GuiLabel.prototype.refresh = function() {
 };
 
 GuiLabel.prototype.getText = function() {
-	return $("#" + this.cellId).text();
+	return $("#" + this.cellId).html();
 };
 
 GuiLabel.prototype.append = function(src) {
