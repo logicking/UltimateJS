@@ -66,14 +66,14 @@ function getCursorPositionXY(e) {
 function cssTransform(obj, matrix, rotate, scaleX, scaleY, translate) {
 
 	if (Device.isNative()) {
-	    var transform = {
-	            "matrix": matrix,
-	            "translate": [translate.x, translate.y],
-	            "rotate": rotate,
-	            "scaleX": scaleX,
-	            "scaleY": scaleY
-	        };
-	    obj['css']("transform", transform);
+//	    var transform = {
+//	            "matrix": matrix,
+//	            "translate": [translate.x, translate.y],
+//	            "rotate": rotate,
+//	            "scaleX": scaleX,
+//	            "scaleY": scaleY
+//	        };
+	    obj.setTransform(matrix, rotate, scaleX, scaleY, translate);
 	    return;
 	}
 	
