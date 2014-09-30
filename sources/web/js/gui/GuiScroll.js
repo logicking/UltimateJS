@@ -118,7 +118,6 @@ GuiScroll.prototype.createScroll = function() {
 };
 
 GuiScroll.prototype.refresh = function(height) {
-	GuiScroll.parent.refresh.call(this);
 	this.scroll['scrollTo'](0, 0, 0, false);
 	if (this.fixedHeight) {
 		this.scroll['refresh'](this.fixedHeight * Screen.heightRatio());
