@@ -30,10 +30,10 @@ entityFactory.addClass(PhysicEntity);
 PhysicEntity.prototype.init = function (params) {
 	var description = {};
     this.physicsEnabled = true;
-    if (Screen.isDOMForced() && !Device.isNative())
+//    if (Screen.isDOMForced() && !Device.isNative())
     	this.initialPosRequiered = true;
-    else
-        this.initialPosRequiered = false;
+//    else
+//        this.initialPosRequiered = false;
     if (params.type != null)
         description = Account.instance.descriptionsData[params.type];
     PhysicEntity.parent.init.call(this, $['extend'](params, description));
@@ -214,7 +214,7 @@ PhysicEntity.prototype.createPhysics = function () {
     	  body.SetActive(that.m_SetActiveOnCreate? true : false);
     	  that.m_SetActiveOnCreate = null;
       }
-      
+      that.initialPosRequiered = true;
     });
     
     this.destructable = physicParams["destructable"];
@@ -247,10 +247,10 @@ PhysicEntity.prototype.createVisual = function () {
 
 // Update visual position from physics world
 PhysicEntity.prototype.updatePositionFromPhysics = function (forceUpdate) {
-    if (!this.physics || this.physicsEnabled === false || ((Physics.paused() === true && !forceUpdate ) || 
-    		(!Device.isNative() && this.physics.IsAwake() === false)) && this.initialPosRequiered === false)
+    if (!this.physics || this.physicsEnabled === false || (this.initialPosRequiered === false && 
+    		!forceUpdate && (Physics.paused() === true || this.physics.IsAwake() === false) ))
     	return false;
-    this.positionUpdated = false;
+//    this.positionUpdated = false;
     this.newPosition = this.getPosition();
     if (forceUpdate || this.initialPosRequiered === true 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
@@ -258,7 +258,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (forceUpdate) {
 	    this.lastUpdatedPos = this.getPosition();
 	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
 	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
-	    this.positionUpdated = true;
+//	    this.positionUpdated = true;
 	}
 
 	this.newAngle = this.physics.GetAngle();
@@ -267,7 +267,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (forceUpdate) {
 		this.lastUpdatedAngle = this.getPhysicsRotation();
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);
-        this.positionUpdated = true;
+//        this.positionUpdated = true;
 	}
 };
 
