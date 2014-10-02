@@ -1,5 +1,11 @@
 var MAX_WIDTH = 1280;
 var MAX_HEIGHT = 800;
+
+if (typeof (Native) != "undefined") {
+	MAX_WIDTH = 4096;
+	MAX_HEIGHT = 4096;
+}
+
 //
 // var MAX_WIDTH = 640;
 // var MAX_HEIGHT = 480;
@@ -25,7 +31,7 @@ var BASE_MARGIN_HEIGHT = 0;
 var Screen = (function() {
 	var screenConsts = {};
 
-	var domForced = false;
+	var domForced = typeof(Native) != "undefined";// false;
 	
 	// private interface
 
@@ -150,8 +156,13 @@ var Screen = (function() {
 
 		var rootDiv = $('#root');
         if (rootDiv.length > 0) {
-            rootDiv['css']("left", offsetXroot);
-            rootDiv['css']("top", offsetYroot);
+		    if (typeof (Native) == "undefined") {
+		        rootDiv['css']("left", offsetXroot);
+		        rootDiv['css']("top", offsetYroot);
+		    } else {
+		        rootDiv['css']("left", offsetX);
+		        rootDiv['css']("top", offsetY);
+		    }
         }
 
         var allDiv = $('#all');
@@ -189,6 +200,7 @@ var Screen = (function() {
 	};
 	
 	function windowOnResize(event, w, h) {
+		console.log("Window resize: " + w + "; " + h);
 		// TODO Should it be so?
 //		if (typeof(Native) != "undefined") {
 //		    	var BASE_MARGIN_WIDTH = (Native.ScreenWidth - BASE_WIDTH)/2;
@@ -400,7 +412,6 @@ var Screen = (function() {
 
 		// some portals (like Spil Games) will require manual resize function
 		windowOnResize : function(w, h) {
-			console.log("Window resize: " + w+ "; " + h);
 			windowOnResize(null, w, h);
 		},
 		

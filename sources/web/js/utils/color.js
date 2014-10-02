@@ -83,6 +83,9 @@ function ColorRgbChangingPair(a, b) {
  * @return {string} url
  */
 function recolorImage(img, changingColorPairs) {
+	if (Device.isNative())
+		return recolorImageNative(img, changingColorPairs);
+	
     var c = document.createElement('canvas');
     var ctx = c.getContext("2d");
     var w = img.width;
@@ -130,6 +133,9 @@ function recolorImage(img, changingColorPairs) {
  * @return {string} url
  */
 function recolorFullImage(img, changingColorPair) {
+	if (Device.isNative())
+		return recolorFullImageNative(img, changingColorPairs);
+	
     var c = document.createElement('canvas');
     var ctx = c.getContext("2d");
     var w = img.width;
@@ -174,3 +180,70 @@ function recolorFullImage(img, changingColorPair) {
     c = null;
     return url;
 }
+
+function recolorImageNative(src, changingColorPairs) {
+	var idx = Resources.getIndex(Resources.getImage(src));
+	
+	var recolorIt = function(data) {
+		for (var i = 0; i < imageData.data.length; i += 4) {
+	        // is this pixel the old rgb?
+	        for (var j = 0; j < changingColorPairs.length; j++) {
+	            var currentColor = changingColorPairs[j].a;
+	            var newColor = changingColorPairs[j].b;
+	            if (data[i] == currentColor.r && data[i + 1] == currentColor.g && data[i + 2] == currentColor.b) {
+	                // change to your new rgb
+	                data[i] = newColor.r;
+	                data[i + 1] = newColor.g;
+	                data[i + 2] = newColor.b;
+	                break;
+	            }
+	        }
+	    }	
+	    
+	    var strData = "";
+	    for (var i = 0; i < data.length; i++)
+	    	strData += String.fromCharCode(prepare(data[i]));
+	    Native.Loader.SetIndexedTextureData(idx, strData);
+	};
+	
+	DecomposedTexturesPending[idx] = recolorIt;
+	Native.Loader.GetIndexedTextureData(idx);
+	
+	return src;
+}
+
+function recolorFullImageNative(src, changingColorPair) {
+	var idx = Resources.getIndex(Resources.getImage(src));
+	var recolorIt = function(data) {
+		var imageDataColor = new ColorRgb(0, 0, 0);
+		
+	    for (var i = 0; i < data.length; i += 4) {
+	        // transparent
+	        if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0 && data[i + 3] === 0) {
+	            continue;
+	        }
+
+	        var currentColor = changingColorPair.a;
+	        var newColor = changingColorPair.b;
+	        imageDataColor.set(data[i], data[i + 1], data[i + 2]);
+
+	        // offset to main color
+	        imageDataColor.subtract(currentColor);
+	        imageDataColor.add(newColor);
+
+	        data[i] = imageDataColor.r;
+	        data[i + 1] = imageDataColor.g;
+	        data[i + 2] = imageDataColor.b;
+	    }
+	    var strData = "";
+	    for (var i = 0; i < data.length; i++)
+	    	strData += String.fromCharCode(prepare(data[i]));
+	    Native.Loader.SetIndexedTextureData(idx, strData);
+	};
+	
+	DecomposedTexturesPending[idx] = recolorIt;
+	Native.Loader.GetIndexedTextureData(idx);
+	
+	return src;
+};
+

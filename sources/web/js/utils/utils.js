@@ -591,3 +591,7 @@ Math.cos = function(a){
     if (a === 0) return 1;
     else return mathCos(a);
 };
+
+Number.prototype.clamp = function(min, max) {
+	return Math.min(Math.max(this, min), max);
+};

@@ -171,7 +171,9 @@ var Device = (function() {
              * @return {boolean} support context.GetImageData()
              */
             function supportsToDataURL() {
-                if (isAndroidStockBrowser || Device.isNative()) {
+            	if (Device.isNative())
+            		return true;
+                if (isAndroidStockBrowser) {
                     console.log("supportsToDataURL is not implemented")
                     return false;
                 }

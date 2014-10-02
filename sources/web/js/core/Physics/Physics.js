@@ -109,6 +109,8 @@ var Physics = (function () {
     var debugCanvas = null;
     var updateItems = [];
     var bodiesToDestroy = [];
+    var bodiesToCreate = [];
+    var bodiesToActivate = [];
     var contactProcessor = null;
     var contactListener = null;
     var nativePhysics = Device.isNative();//Device.isNative() && USE_NATIVE_PHYSICS;//Device.isNative();// && typeof(NativeContactBegin) != "undefined";
@@ -233,7 +235,26 @@ var Physics = (function () {
                 	updateItems[i].initialPosRequiered = false;
             		updateItems[i].physics.SetAwake(false);
                 }
-            }
+            };
+            if (bodiesToCreate.length > 0 && !world.IsLocked()) {
+            	for (var i = 0; i < bodiesToCreate.length; ++i) {
+            		var body = world.CreateBody(bodiesToCreate[i].def);
+                	if (bodiesToCreate[i].callback)
+                		bodiesToCreate[i].callback(body);
+                }
+            	bodiesToCreate.length = 0;// = [];
+            };
+            
+            if (bodiesToActivate.length > 0 && !world.IsLocked()) {
+            	for (var i = 0; i < bodiesToActivate.length; ++i) {
+            		if (!bodiesToActivate[i].body)
+            			continue;
+            		bodiesToActivate[i].body.SetActive(bodiesToActivate[i].value);
+                	if (bodiesToActivate[i].callback)
+                		bodiesToActivate[i].callback(bodiesToActivate[i].body);
+                }
+            	bodiesToActivate.length = 0;// = [];
+            };
             if (bodiesToDestroy.length > 0) {
                 for (var i = 0; i < bodiesToDestroy.length; ++i) {
                 	if (world.IsLocked() === false)
@@ -241,8 +262,8 @@ var Physics = (function () {
                 	bodiesToDestroy[i].SetUserData(null);
                 	bodiesToDestroy[i] = null;
                 }
-                bodiesToDestroy = [];
-            }
+                bodiesToDestroy.length = 0;// = [];
+            };
         },
         getMaxSpeed: function () {
         	for (var i = 0; i < updateItems.length; ++i) {
@@ -263,6 +284,44 @@ var Physics = (function () {
                 if (updateItems[i].physics && updateItems[i].physics.GetType() && updateItems[i].physics.IsAwake() === true)
                 	return false;
             return true;
+        },
+        setActive: function (entity, value, callback) {
+            assert(world);
+//            if (!entity)
+//            	return;
+            if (!entity.physics) {
+            	entity.m_SetActiveOnCreate = value;
+            	return;
+            }
+            if (world.IsLocked() === false || nativePhysics) {
+            	entity.physics.SetActive(value);
+            	if (callback)
+            		callback(entity.physics);
+            }
+            else
+                bodiesToActivate.push({'body': entity.physics, 'value' : value? 1: 0, 'callback' : callback});
+        },
+        applyCenterImpulse: function (body, impulse) {
+            assert(world);
+            if (!body || !impulse)
+            	return;
+            if (nativePhysics)
+            	body.ApplyCenterImpulse(impulse);
+            else {
+            	var centerPos = body.GetWorldCenter();
+            	body.SetAwake(true);
+            	body.ApplyImpulse(impulse, centerPos);
+            }
+        },
+        createBody: function (bodyDef, callback) {
+            assert(world);
+            if (world.IsLocked() === false || nativePhysics) {
+                var body = world.CreateBody(bodyDef);
+            	if (callback)
+            		callback(body);
+            }
+            else
+                bodiesToCreate.push({'def' : bodyDef, 'callback' : callback});
         },
         destroyBody: function (body) {
             if (!body) 

@@ -3,7 +3,7 @@
  */
 
 var ANIM_DELAY = 400;
-var POSITION_TRESHHOLD = 1;
+var POSITION_TRESHHOLD = 2/Physics.getB2dToGameRatio();
 var ROTATION_TRESHHOLD = 0.02;
 
 /**
@@ -30,7 +30,7 @@ entityFactory.addClass(PhysicEntity);
 PhysicEntity.prototype.init = function (params) {
 	var description = {};
     this.physicsEnabled = true;
-    if (Screen.isDOMForced())
+    if (Screen.isDOMForced() && !Device.isNative())
     	this.initialPosRequiered = true;
     else
         this.initialPosRequiered = false;
@@ -39,12 +39,6 @@ PhysicEntity.prototype.init = function (params) {
     PhysicEntity.parent.init.call(this, $['extend'](params, description));
     if (this.params.physics) {
         this.createPhysics();
-        if (this.physics) {
-	        this.physics['m_userData'] = this;
-	//TODO: check
-	        if (this.physics.m_type !== b2Body.b2_staticBody || Physics.debugMode())
-	            Physics.updateItemAdd(this);
-        }
     }
     this.material = null;
 };
@@ -204,22 +198,30 @@ PhysicEntity.prototype.createPhysics = function () {
     bodyDefinition.position.Set(0, 0);
     bodyDefinition.linearDamping = physicParams.linearDamping != null ? physicParams.linearDamping : 0;
     bodyDefinition.angularDamping = physicParams.angularDamping != null ? physicParams.angularDamping : 0;
-    var physicWorld = Physics.getWorld();
-    this.physics = physicWorld.CreateBody(bodyDefinition);
+    
     var that = this;
-    $.each(fixtureDefList, function (id, fixDef) {
-        that.physics.CreateFixture(fixDef);
+    Physics.createBody(bodyDefinition, function(body){
+      $.each(fixtureDefList, function (id, fixDef) {
+    	  body.CreateFixture(fixDef);
+      });
+      body.SetPositionAndAngle(logicPosition, that.params.angle);
+//      body.SetUserData(that);
+      that.physics = body;
+      body['m_userData'] = that;
+      if (body.m_type !== b2Body.b2_staticBody || Physics.debugMode())
+          Physics.updateItemAdd(that);
+      if (!isNaN(that.m_SetActiveOnCreate)) {
+    	  body.SetActive(that.m_SetActiveOnCreate? true : false);
+    	  that.m_SetActiveOnCreate = null;
+      }
+      
     });
-
-    this.physics.SetPositionAndAngle(logicPosition, this.params.angle);
     
     this.destructable = physicParams["destructable"];
     if (this.destructable)
         this.health = physicParams["health"];
     else
         this.health = null;
-    //if (this.params.angle)
-    //    this.rotate(this.params.angle * 2);
 };
 
 PhysicEntity.prototype.getContactedBody = function () {
@@ -244,14 +246,15 @@ PhysicEntity.prototype.createVisual = function () {
 };
 
 // Update visual position from physics world
-PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTranslate, forceUpdate) {
-    if (!this.physics || this.physicsEnabled === false || (Physics.paused() === true && !forceUpdate ) || (!Device.isNative() && this.physics.IsAwake() === false))
+PhysicEntity.prototype.updatePositionFromPhysics = function (forceUpdate) {
+    if (!this.physics || this.physicsEnabled === false || ((Physics.paused() === true && !forceUpdate ) || 
+    		(!Device.isNative() && this.physics.IsAwake() === false)) && this.initialPosRequiered === false)
     	return false;
     this.positionUpdated = false;
     this.newPosition = this.getPosition();
-    if (!dontTranslate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
+    if (forceUpdate || this.initialPosRequiered === true 
     		|| !this.lastUpdatedPos || Math.abs(this.newPosition.x - this.lastUpdatedPos.x) > POSITION_TRESHHOLD 
-    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD) || forceUpdate) {
+    		|| Math.abs(this.newPosition.y - this.lastUpdatedPos.y) > POSITION_TRESHHOLD) {
 	    this.lastUpdatedPos = this.getPosition();
 	    this.setPosition(this.newPosition.x - this.params.physics.x - this.params.physics.width / 2,
 	    		this.newPosition.y - this.params.physics.y - this.params.physics.height / 2);
@@ -259,9 +262,9 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (dontRotate, dontTra
 	}
 
 	this.newAngle = this.physics.GetAngle();
-	if (!dontRotate && (Device.isNative() || !Screen.isDOMForced() || this.initialPosRequiered 
-			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) || forceUpdate) {
-		this.lastUpdatedAngle = this.getPhysicsRotation().toFixed(3);
+	if (forceUpdate || this.initialPosRequiered === true 
+			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) {
+		this.lastUpdatedAngle = this.getPhysicsRotation();
         for (var name in this.visuals)
         	this.visuals[name].visual.rotate(this.newAngle);
         this.positionUpdated = true;
@@ -356,12 +359,12 @@ PhysicEntity.prototype.rotate = function (angleInRad) {
     var position = this.physics.GetPosition();
     var oldAngle = this.physics.GetAngle();
     var newAngle = oldAngle + angleInRad;
-    if (Screen.isDOMForced())
+    if (Screen.isDOMForced() && !Device.isNative())
     	this.physics.SetAwake(true);
     this.physics.SetAngle(newAngle / 2);
 
     this.updatePositionFromPhysics();
-    if (Screen.isDOMForced())
+    if (Screen.isDOMForced() && !Device.isNative())
     	this.physics.SetAwake(false);
 };
 
