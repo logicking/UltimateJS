@@ -556,7 +556,7 @@ GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 		this.fadeToTimeout = null;
 	}
 
-	if (!this.visible && !dontChangeVisibility) {
+	if (fadeValue > 0 && !this.visible && !dontChangeVisibility) {
 		// .hack for iOs devices we need a tiny delay
 		// to avoid blinking
 
@@ -564,7 +564,7 @@ GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 		this.fadeToTimeout = setTimeout(function() {
 			that.show();
 		}, 1);
-	}
+	};
 	// console.log("ANIMATION!!FUCK IF DEFINED",
 	// CSSAnimations.get("fadeTo"+this.id));
 	// var fadeTo = CSSAnimations.create("fadeTo"+this.id);
@@ -595,14 +595,16 @@ GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 	// callback();
 	// }
 	// });
+	
+	
 	this.jObject['animate']({
-		opacity : fadeValue
-	}, time, !Device.isNative() ? callback : function() {
+		'opacity' : fadeValue
+	}, time, callback/*!Device.isNative() ? callback : function() {
 		if (fadeValue <= 0 && !dontChangeVisibility)
 			that.hide();
 		if (typeof (callback) == "function")
 			callback.call(that);
-	});
+	}*/);
 };
 
 GuiElement.prototype.blinking = function(isOn, blinkTime, blinkMin, blinkMax) {

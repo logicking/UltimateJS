@@ -38,7 +38,8 @@ var Loader = (function() {
 			return currentLoadingStatePercentage;
 		},
 		updateLoadingState : function(pecentage) {
-			currentLoadingStatePercentage = pecentage;
+			if (pecentage > currentLoadingStatePercentage)
+				currentLoadingStatePercentage = pecentage;
 			if (loadingStateText) {
 				loadingStateText['removeChild'](loadingStateText.firstChild);
 				loadingStateText

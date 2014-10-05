@@ -24,6 +24,7 @@ var Resources = (function() {
 	};
 	
 	var indexed = {};
+	var INDEX_SEED = 1;
 
 	return { // public interface
 
@@ -80,14 +81,25 @@ var Resources = (function() {
 			}
 		},
 		index : function(value, index) {
+			if (!index)
+				index = INDEX_SEED++;
 			if (typeof (value) == "string" && !isNaN(index))
 				indexed[value] = index;
+			return index;
 		},
 		getIndex : function(value) {
-			if (typeof (value) == "string" && indexed[value])
+			if (value && value.length && indexed[value])
 				return indexed[value];
 			else
 				return -1;
+		},
+		getValueAtIndex : function(index) {
+			if (!idNaN(index))
+				$.each(indexed, function(src, idx){
+					if (idx == index)
+						return src;
+				});
+			return null;
 		},
 		// returnes string
 		getString : function(stringId, rand) {
@@ -242,7 +254,7 @@ var Resources = (function() {
 			
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
 			
-			function onAssetLoad() {
+			function onAssetLoad(isImageTypeAsset) {
 				++j;
 				// if progress callback, give information of assets loaded,
 				// total and percent
@@ -253,9 +265,31 @@ var Resources = (function() {
 						percent : (j / total * 100)
 					});
 				}
-				if (j === total) {
-					if (oncomplete)
+				if (j === total && oncomplete) {
+					if (!Device.isNative())
 						oncomplete();
+					else {
+						var texturesToLoad = null;
+						var indexesToLoad = null;
+						$.each(indexed, function(src, idx){
+							if (texturesToLoad == null)
+								texturesToLoad = src;
+							else
+								texturesToLoad += "," + src;
+							if (indexesToLoad == null)
+								indexesToLoad = idx + "";
+							else
+								indexesToLoad += "," + idx;
+						});
+						if (texturesToLoad != null) {
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED] = {};
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].oncomplete = oncomplete;
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].onprogress = onprogress;
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].onerror = onerror;
+							Native.Loader.LoadTextures(texturesToLoad, indexesToLoad, ASSETSLOADCALLBACK_SEED++);
+						} else
+							oncomplete();
+					}
 				}
 			};
 
@@ -295,14 +329,14 @@ var Resources = (function() {
 					    //						ImageTable[Resources.getImage(current)] = ImageTableSeed;
 					    if (!indexed[Resources.getImage(current)]) {
 
-					        var imageId = Native.Loader.LoadImageIndexed(Resources.getImage(current));
+					        var imageId = Resources.index(Resources.getImage(current));//Native.Loader.LoadImageIndexed(Resources.getImage(current));
 					        if (imageId > 0) {
-					            Resources.index(Resources.getImage(current), imageId);
-					            onAssetLoad();
+//					            Resources.index(Resources.getImage(current), imageId);
+					            onAssetLoad(true);
 					        } else
 					            onAssetError();
 					    } else
-					        onAssetLoad();
+					        onAssetLoad(true);
 					} else {
 						obj = new Image();
 						obj.src = Resources.getImage(current);

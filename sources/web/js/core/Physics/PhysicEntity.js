@@ -265,8 +265,7 @@ PhysicEntity.prototype.updatePositionFromPhysics = function (forceUpdate) {
 	if (forceUpdate || this.initialPosRequiered === true 
 			|| !this.lastUpdatedAngle || Math.abs(this.newAngle - this.lastUpdatedAngle) > ROTATION_TRESHHOLD) {
 		this.lastUpdatedAngle = this.getPhysicsRotation();
-        for (var name in this.visuals)
-        	this.visuals[name].visual.rotate(this.newAngle);
+        PhysicEntity.parent.rotate.call(this, this.newAngle);
 //        this.positionUpdated = true;
 	}
 };
@@ -278,8 +277,7 @@ PhysicEntity.prototype.updatePosition = function () {
 };
 
 PhysicEntity.prototype.updateAngle = function () {
-    for (var name in this.visuals)
-    	this.visuals[name].visual.rotate(this.newAngle);
+	PhysicEntity.parent.rotate.call(this, this.newAngle);
     this.lastUpdatedAngle = this.physics.GetAngle();
 };
 

@@ -29,6 +29,8 @@ GuiDialog.prototype.resize = function() {
 };
 
 GuiDialog.prototype.initialize = function(params) {
+	
+
 	GuiDialog.parent.initialize.call(this, params);
 	
 	this.maskDiv = null;
@@ -40,11 +42,10 @@ GuiDialog.prototype.initialize = function(params) {
 	// "x" : ((Screen.baseWidth() - this.width) / 2),
 	// "y" : ((Screen.baseHeight() - this.height) / 2)
 
-	// an transparent PNG image 1x1 pixel size
-	// to prevent clicks
-	if (!GuiDialog.prototype.maskDivSoul) {
-		GuiDialog.prototype.maskDivSoul = guiFactory.createObject("GuiDiv", {
-			"parent" : Device.isNative()? that.parent : "#all",
+	//	Author does not understand logic of off shit happens here, so it just works for some cases...
+	if (Device.isNative()) {
+		this.maskDiv = guiFactory.createObject("GuiDiv", {
+			"parent" : that.parent.parent.parent? that.parent.parent : that.parent,//"#all",//that.parent,
 			// "image" :
 			// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
 			"style" : "mask",
@@ -53,13 +54,28 @@ GuiDialog.prototype.initialize = function(params) {
 			"x" : 0,
 			"y" : 0
 		});
-		var tempFunc = GuiDialog.prototype.maskDivSoul.remove;
-		GuiDialog.prototype.maskDivSoul.remove = function() {
-			GuiDialog.prototype.maskDivSoul = null;
-			tempFunc.call(this);
-		};
+		if (that.parent.parent.parent)
+			this.setParent(that.parent.parent);
+	} else {
+		// an transparent PNG image 1x1 pixel size
+		// to prevent clicks
+		if (!GuiDialog.prototype.maskDivSoul) {
+			GuiDialog.prototype.maskDivSoul = guiFactory.createObject("GuiDiv", {
+				"parent" : /*$('body'),//*/"body",
+				// "image" :
+				// "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=",
+				"style" : "mask",
+				"width" : "FULL_WIDTH",
+				"height" : "FULL_WIDTH"
+			});
+			var tempFunc = GuiDialog.prototype.maskDivSoul.remove;
+			GuiDialog.prototype.maskDivSoul.remove = function() {
+				GuiDialog.prototype.maskDivSoul = null;
+				tempFunc.call(this);
+			};
+		}
+		this.maskDiv = GuiDialog.prototype.maskDivSoul;
 	}
-	this.maskDiv = GuiDialog.prototype.maskDivSoul;
 //	this.maskDiv.setPosition(this.parent.width/2 - this.maskDiv.width, this.parent.height/2 - this.maskDiv.height);
 	this.maskDiv.setBackground("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NkAAIAAAoAAggA9GkAAAAASUVORK5CYII=");
 	this.maskDiv.bind(function(e) {
@@ -86,7 +102,7 @@ GuiDialog.prototype.init = function() {
 
 GuiDialog.prototype.show = function() {
 	GuiDialog.parent.show.call(this);
-	if (this.maskDiv) {
+	if (this.maskDiv/* && !Device.isNative()*/) {
 		this.maskDiv.resize();
 		this.maskDiv.show();
 	}

@@ -134,7 +134,7 @@ function recolorImage(img, changingColorPairs) {
  */
 function recolorFullImage(img, changingColorPair) {
 	if (Device.isNative())
-		return recolorFullImageNative(img, changingColorPairs);
+		return recolorFullImageNative(img, changingColorPair);
 	
     var c = document.createElement('canvas');
     var ctx = c.getContext("2d");
@@ -181,15 +181,18 @@ function recolorFullImage(img, changingColorPair) {
     return url;
 }
 
-function recolorImageNative(src, changingColorPairs) {
-	var idx = Resources.getIndex(Resources.getImage(src));
+function recolorImageNative(src, changingColorPair) {
+	console.log("Trying to recolor " + src);
+	var idx = Resources.getIndex(/*Resources.getImage(src)*/src);
+	if (!src || idx <= 0)
+		return src;
 	
 	var recolorIt = function(data) {
 		for (var i = 0; i < imageData.data.length; i += 4) {
 	        // is this pixel the old rgb?
-	        for (var j = 0; j < changingColorPairs.length; j++) {
-	            var currentColor = changingColorPairs[j].a;
-	            var newColor = changingColorPairs[j].b;
+	        for (var j = 0; j < changingColorPair.length; j++) {
+	            var currentColor = changingColorPair[j].a;
+	            var newColor = changingColorPair[j].b;
 	            if (data[i] == currentColor.r && data[i + 1] == currentColor.g && data[i + 2] == currentColor.b) {
 	                // change to your new rgb
 	                data[i] = newColor.r;
@@ -200,10 +203,10 @@ function recolorImageNative(src, changingColorPairs) {
 	        }
 	    }	
 	    
-	    var strData = "";
+	    var strData = "" + String.fromCharCode(idx);
 	    for (var i = 0; i < data.length; i++)
 	    	strData += String.fromCharCode(prepare(data[i]));
-	    Native.Loader.SetIndexedTextureData(idx, strData);
+	    Native.Loader.SetIndexedTextureData(strData);
 	};
 	
 	DecomposedTexturesPending[idx] = recolorIt;
@@ -213,13 +216,18 @@ function recolorImageNative(src, changingColorPairs) {
 }
 
 function recolorFullImageNative(src, changingColorPair) {
-	var idx = Resources.getIndex(Resources.getImage(src));
+	console.log("Trying to full recolor " + src);
+	var idx = Resources.getIndex(/*Resources.getImage(src)*/src);
+	if (!src || idx <= 0 || !src.length)
+		return src;
+	
+	var newSrc = generateNewImageSrc();
 	var recolorIt = function(data) {
 		var imageDataColor = new ColorRgb(0, 0, 0);
 		
 	    for (var i = 0; i < data.length; i += 4) {
 	        // transparent
-	        if (data[i] === 0 && data[i + 1] === 0 && data[i + 2] === 0 && data[i + 3] === 0) {
+	        if (data[i + 3] == 0) {
 	            continue;
 	        }
 
@@ -234,16 +242,18 @@ function recolorFullImageNative(src, changingColorPair) {
 	        data[i] = imageDataColor.r;
 	        data[i + 1] = imageDataColor.g;
 	        data[i + 2] = imageDataColor.b;
+	        
 	    }
-	    var strData = "";
+	    var strData = String.fromCharCode(src.length) + src 
+	    		+ String.fromCharCode(newSrc.length) + newSrc;// + String.fromCharCode(idx);
 	    for (var i = 0; i < data.length; i++)
 	    	strData += String.fromCharCode(prepare(data[i]));
-	    Native.Loader.SetIndexedTextureData(idx, strData);
+	    Native.Loader.SetTextureData(strData);
 	};
 	
-	DecomposedTexturesPending[idx] = recolorIt;
-	Native.Loader.GetIndexedTextureData(idx);
+	DecomposedTexturesPending[src] = recolorIt;
+	Native.Loader.GetTextureData(src);
 	
-	return src;
+	return newSrc;
 };
 

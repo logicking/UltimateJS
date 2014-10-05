@@ -40,7 +40,8 @@ BaseState.prototype.resize = function() {
 };
 
 BaseState.prototype.refresh = function() {
-	this.guiContainer.refresh();
+	if (this.guiContainer)
+		this.guiContainer.refresh();
 };
 
 // Activate will either init object immediately or
@@ -81,15 +82,15 @@ BaseState.prototype.fadeTo = function (fadeValue, time, callback) {
 	if (fadeValue > 0)
 	    this.show();
 	this.setEnable(false);
-    if (mainGui)
-    	mainGui.fadeTo(fadeValue, time, function() {
-    	    if (fadeValue <= 0)
-    	        that.hide();
-    	    else
-    	        that.setEnable(true);
-    		if (typeof(callback) == "function")
-    			callback.call(that);
-    	});
+	if (mainGui)
+			mainGui.fadeTo(fadeValue, time, function() {
+	    	    if (fadeValue <= 0)
+	    	        that.hide();
+	    	    else
+	    	        that.setEnable(true);
+	    		if (typeof(callback) == "function")
+	    			callback.call(that);
+	    	});
     else
     	if (fadeValue <= 0)
     	    that.hide();
@@ -102,22 +103,36 @@ BaseState.prototype.fadeTo = function (fadeValue, time, callback) {
 BaseState.prototype.preload = function() {
 	// Loading JSONs first
 	var totalToLoad = 0;
+	var remainToLoad = 0;
 	var that = this;
 	if (!this.resources) {
 		this.preloadComplete();
 		return;
 	}
+	if (Account.instance.loadingStates && Account.instance.loadingStates[that.id]) {
+		if (this.resources.media) 
+			Account.instance.loadingStates[that.id].totalMedia = countProperties(this.resources.media);
+		if (this.resources.json)
+			Account.instance.loadingStates[that.id].totalJsons = countProperties(this.resources.json);
+	}
 	
 	if (this.resources.json) {
 		totalToLoad = countProperties(that.resources.json);
+		var remainToLoad = totalToLoad + 0;
 		$['each'](this.resources.json, function(key, val) {
 			$['getJSON'](key, function(data) {
 				that.resources.json[key] = data;
 			}).error(function() {
 				assert(false, "error reading JSON " + key);
 			}).complete(function() {
-				totalToLoad--;
-				if (totalToLoad <= 0)
+				remainToLoad--;
+				if (Account.instance.loadingStates && Account.instance.loadingStates[that.id]) {
+					Account.instance.loadingStates[that.id].jsons = Math.min(totalToLoad - remainToLoad, totalToLoad);
+																	//(1 - remainToLoad/totalToLoad)* 100;
+					Account.instance.updateLoadingState();
+				}
+				
+				if (remainToLoad <= 0)
 					that.jsonPreloadComplete();
 				
 			});
@@ -129,12 +144,24 @@ BaseState.prototype.preload = function() {
 
 BaseState.prototype.jsonPreloadComplete = function() {
 	var that = this;
+	if (Account.instance.loadingStates && Account.instance.loadingStates[that.id])
+		Account.instance.loadingStates[that.id].jsons = Account.instance.loadingStates[that.id].totalJsons;
 	if (this.resources.media) {
 		var startTime = new Date();
 		Resources.loadMedia(this.resources.media, function() {
 			//console.log("Media loaded for %d ms", (new Date() - startTime));
 			that.preloadComplete();
-		}, this.preloadingCallback);
+			if (Account.instance.loadingStates && Account.instance.loadingStates[that.id])
+				Account.instance.loadingStates[that.id].media = Account.instance.loadingStates[that.id].totalMedia;
+			Account.instance.updateLoadingState();
+		}, function(data) {
+			if (Account.instance.loadingStates && Account.instance.loadingStates[that.id]) {
+				Account.instance.loadingStates[that.id].media = data.loaded;//(data.loaded/data.total) * 100;
+				Account.instance.updateLoadingState();
+			} else
+				that.preloadingCallback(data);
+
+		});
 	} else {
 		this.preloadComplete();
 	}
@@ -143,6 +170,8 @@ BaseState.prototype.jsonPreloadComplete = function() {
 BaseState.prototype.preloadComplete = function() {
 	// loading complete, make initializing
 	this.init(this.params);
+	if (this.params.onLoadComplete)
+		this.params.onLoadComplete();
 };
 
 BaseState.prototype.preloadJson = function(jsonToPreload) {
