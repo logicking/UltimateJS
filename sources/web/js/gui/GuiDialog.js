@@ -82,7 +82,7 @@ GuiDialog.prototype.initialize = function(params) {
 		e.preventDefault();
 		return false;
 	});
-	this.children.addGui(this.maskDiv);
+//	this.children.addGui(this.maskDiv);
 
 	this.maskDiv.setZ(130);
 	this.setZ(131);
@@ -100,9 +100,17 @@ GuiDialog.prototype.init = function() {
 	GuiDialog.parent.init.call(this);
 };
 
+GuiDialog.prototype.remove = function() {
+	if (this.maskDiv) {
+		this.maskDiv.hide();
+	}
+	GuiDialog.parent.remove.call(this);
+};
+
+
 GuiDialog.prototype.show = function() {
 	GuiDialog.parent.show.call(this);
-	if (this.maskDiv/* && !Device.isNative()*/) {
+	if (this.maskDiv) {
 		this.maskDiv.resize();
 		this.maskDiv.show();
 	}
