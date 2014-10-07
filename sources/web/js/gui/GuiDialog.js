@@ -25,7 +25,6 @@ guiFactory.addClass(GuiDialog);
 
 GuiDialog.prototype.resize = function() {
 	GuiDialog.parent.resize.call(this);
-	this.children.resize();
 };
 
 GuiDialog.prototype.initialize = function(params) {

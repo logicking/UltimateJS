@@ -551,20 +551,38 @@ GuiElement.prototype.center = function() {
 GuiElement.prototype.fadeTo = function(fadeValue, time, callback,
 		dontChangeVisibility) {
 	var that = this;
-	if (this.fadeToTimeout) {
-		clearTimeout(this.fadeToTimeout);
-		this.fadeToTimeout = null;
+
+	if (Device.isNative() && !dontChangeVisibility && fadeValue > 0 && !this.visible ) {
+		this.show();
+	} else {
+		if (this.fadeToTimeout) {
+			clearTimeout(this.fadeToTimeout);
+			this.fadeToTimeout = null;
+		}
+		if (fadeValue > 0 && !this.visible && !dontChangeVisibility) {
+			// .hack for iOs devices we need a tiny delay
+			// to avoid blinking
+	
+			// TODO setTimeout move to GuiElement class or create a GuiBase class
+			this.fadeToTimeout = setTimeout(function() {
+				that.show();
+			}, 1);
+		};
 	}
-
-	if (fadeValue > 0 && !this.visible && !dontChangeVisibility) {
-		// .hack for iOs devices we need a tiny delay
-		// to avoid blinking
-
-		// TODO setTimeout move to GuiElement class or create a GuiBase class
-		this.fadeToTimeout = setTimeout(function() {
-			that.show();
-		}, 1);
-	};
+	
+//	if (this.fadeToTimeout) {
+//		clearTimeout(this.fadeToTimeout);
+//		this.fadeToTimeout = null;
+//	}
+//	if (fadeValue > 0 && !this.visible && !dontChangeVisibility) {
+//		// .hack for iOs devices we need a tiny delay
+//		// to avoid blinking
+//
+//		// TODO setTimeout move to GuiElement class or create a GuiBase class
+//		this.fadeToTimeout = setTimeout(function() {
+//			that.show();
+//		}, 1);
+//	};
 	// console.log("ANIMATION!!FUCK IF DEFINED",
 	// CSSAnimations.get("fadeTo"+this.id));
 	// var fadeTo = CSSAnimations.create("fadeTo"+this.id);

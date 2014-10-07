@@ -1,3 +1,15 @@
+var ENVIRONMENT = {
+	'Web': 1,
+	'Android': 2,
+	'WindowsPhone7': 3,
+	'WindowsPhone8': 4,
+	'Windows': 5
+};
+
+if (typeof(CurrentEnvironment) == "undefined") {
+	var CurrentEnvironment = ENVIRONMENT.Web;
+}
+
 // Inheritance pattern
 Function.prototype.inheritsFrom = function(parentClassOrObject) {
 	if (parentClassOrObject.constructor == Function) {

@@ -55,6 +55,12 @@ ColorRgb.prototype.add = function (colorRgb) {
     this.b += colorRgb.b;
 };
 
+ColorRgb.prototype.ensureFormat = function () {
+    this.r = this.r.clamp(0, 255);
+    this.g = this.g.clamp(0, 255);
+    this.b = this.b.clamp(0, 255);
+};
+
 /**
  *
  * @param {ColorRgb} colorRgb
@@ -218,10 +224,11 @@ function recolorImageNative(src, changingColorPair) {
 function recolorFullImageNative(src, changingColorPair) {
 	console.log("Trying to full recolor " + src);
 	var idx = Resources.getIndex(/*Resources.getImage(src)*/src);
-	if (!src || idx <= 0 || !src.length)
+	if (!src || idx <= 0 || !src.length /*|| CurrentEnvironment == ENVIRONMENT.Android*/)
 		return src;
 	
 	var newSrc = generateNewImageSrc();
+	var data = GetTextureData(src);
 	var recolorIt = function(data) {
 		var imageDataColor = new ColorRgb(0, 0, 0);
 		
@@ -238,7 +245,9 @@ function recolorFullImageNative(src, changingColorPair) {
 	        // offset to main color
 	        imageDataColor.subtract(currentColor);
 	        imageDataColor.add(newColor);
-
+	        
+	        imageDataColor.ensureFormat();
+	        
 	        data[i] = imageDataColor.r;
 	        data[i + 1] = imageDataColor.g;
 	        data[i + 2] = imageDataColor.b;
@@ -251,8 +260,10 @@ function recolorFullImageNative(src, changingColorPair) {
 	    Native.Loader.SetTextureData(strData);
 	};
 	
-	DecomposedTexturesPending[src] = recolorIt;
-	Native.Loader.GetTextureData(src);
+	recolorIt(data);
+	
+//	DecomposedTexturesPending[src] = recolorIt;
+//	Native.Loader.GetTextureData(src);
 	
 	return newSrc;
 };

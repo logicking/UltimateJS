@@ -91,11 +91,15 @@ BaseState.prototype.fadeTo = function (fadeValue, time, callback) {
 	    		if (typeof(callback) == "function")
 	    			callback.call(that);
 	    	});
-    else
+    else {
+    	console.error("nothing to fade, " + this.guiContainer.length);
     	if (fadeValue <= 0)
     	    that.hide();
     	else
     	    this.setEnable(true);
+    	if (callback)
+    		callback.call(this);
+    }
 };
 
 // Preloading of static resources - resources that

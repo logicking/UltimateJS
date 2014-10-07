@@ -132,7 +132,7 @@ var Resources = (function() {
 					    fileName = "resources/localization/" + "EN" + ".json";
 					    $['getJSON'](fileName, function (data) {
 					        strings = data;
-					    })
+					    });
 					});
 					Device.setStorageItem("language", language);
 					if (Device.isNative())

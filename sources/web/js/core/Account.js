@@ -485,3 +485,11 @@ Account.prototype.syncWithServer = function(callback, data, syncInterval) {
 		// console.log("sheduleStoped"+(acc-1),((new Date()).getTime() - g));
 	}
 };
+
+function OnBackButtonClick() {
+	if (Account.instance && Account.instance.currentState) {
+		var currentState = Account.instance.getEntity(Account.instance.currentState);
+		if (currentState && currentState.onBackButton) 
+			Account.instance.getEntity(Account.instance.currentState).onBackButton();
+	}
+};
