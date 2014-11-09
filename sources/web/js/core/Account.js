@@ -55,15 +55,14 @@ Account.prototype.init = function(params) {
 
 	
 	
-	this.tabActive = true;
-//	$(window).blur(function(e) {
-//		that.tabActive = false;
-//	});
-//	$(window).focus(function(e) {
-//		that.tabActive = true;
-//		that.activateUpdateAndRender();
-//
-//	});
+/*	this.tabActive = true;
+	$(window).blur(function(e) {
+		that.tabActive = false;
+	});
+	$(window).focus(function(e) {
+		that.tabActive = true;
+		that.activateUpdateAndRender();
+	});*/
 };
 
 Account.prototype.addEntity = function(newEntity, unsafe) {
@@ -114,6 +113,11 @@ Account.prototype.activateUpdateAndRender = function() {
 
 	this.cancelUpdate = true;
 
+    clearTimeout(that.globalUpdateIntervalHandle);
+    if (cancelAnimationFrame) {
+        window.cancelAnimationFrame(that.globalUpdateIntervalHandle);
+    }
+
 	setTimeout(function() {
 		that.prevUpdateTime = Date.now();
 		that.cancelUpdate = false;
@@ -123,7 +127,7 @@ Account.prototype.activateUpdateAndRender = function() {
 		that.globalRenderFrameHandle = window.requestAnimationFrame(function() {
 			that.render();
 		});
-	}, 500);
+	}, 1000);
 };
 
 //Account.prototype.activateUpdateAndRender = function() {
