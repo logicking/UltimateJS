@@ -4,24 +4,24 @@
  */
 
 function ContactProcessor() {
-	this.beginCallbacks = {};
-	this.endCallbacks = {};
+    this.beginCallbacks = {};
+    this.endCallbacks = {};
 	this.preSolveCallbacks = {};
-	this.postSolveCAllbacks = {};
+	this.postSolveCallbacks = {};
 };
 
-ContactProcessor.prototype.init = function() {
-	if (Physics.getContactListener())
-		return;
-	var that = this;
-	var contactListener = Physics.getContactListener();
-	contactListener = new b2ContactListener;
+ContactProcessor.prototype.init = function () {
+    if (Physics.getContactListener())
+        return;
+    var that = this;
+    var contactListener = Physics.getContactListener();
+    contactListener = new b2ContactListener;
 
-    contactListener.BeginContact = function(contact) {
-			that.processBegin(contact);	
+    contactListener.BeginContact = function (contact) {
+        that.processBegin(contact);
     };
-    contactListener.EndContact = function(contact) {
-			that.processEnd(contact);	
+    contactListener.EndContact = function (contact) {
+        that.processEnd(contact);
     };
     contactListener.PreSolve = function(contact, impulse) {
 	    		that.processPreSolve(contact, impulse);
@@ -37,22 +37,22 @@ ContactProcessor.prototype.init = function() {
 //
 //	Adds pair to contact events dataset 
 //
-ContactProcessor.prototype.setContactBeginCalback = function(callback, param) {
-	this.init();
-	this.beginCallbacks[param] = callback;
+ContactProcessor.prototype.setContactBeginCalback = function (callback, param) {
+    this.init();
+    this.beginCallbacks[param] = callback;
 };
 
-ContactProcessor.prototype.getContactBeginCalback = function(entity) {
-	return this.beginCallbacks[entity.className];
+ContactProcessor.prototype.getContactBeginCalback = function (entity) {
+    return this.beginCallbacks[entity.id];
 };
 
-ContactProcessor.prototype.setContactEndCalback = function(callback, param) {
-	this.init();
-	this.endCallbacks[param] = callback;
+ContactProcessor.prototype.setContactEndCalback = function (callback, param) {
+    this.init();
+    this.endCallbacks[param] = callback;
 };
 
-ContactProcessor.prototype.getContactEndCallback = function(entity) {
-	this.beginCallbacks[entity.className];
+ContactProcessor.prototype.getContactEndCallback = function (entity) {
+    return this.beginCallbacks[entity.id];
 };
 
 ContactProcessor.prototype.setContactPreSolveCalback = function(callback, param) {
@@ -61,68 +61,74 @@ ContactProcessor.prototype.setContactPreSolveCalback = function(callback, param)
 };
 
 ContactProcessor.prototype.getContactPreSolveCalback = function(entity) {
-    return this.preSolveCallbacks[entity.className];
+    return this.preSolveCallbacks[entity.id];
 };
 
 ContactProcessor.prototype.setContactPostSolveCalback = function(callback, param) {
     this.init();
-    this.postSolveCAllbacks[param] = callback;
+    this.postSolveCallbacks[param] = callback;
 };
 
 ContactProcessor.prototype.getContactPostSolveCallback = function(entity) {
-    this.postSolveCAllbacks[entity.className];
+	return this.postSolveCallbacks[entity.id];
 };
 
-
-ContactProcessor.prototype.clearContactCallbacks = function(entity) {
-	if (!entity) {
-		this.beginCallbacks = {};
-		this.endCallbacks = {};
-	} else
-		delete this.beginCallbacks[entity.className];
+ContactProcessor.prototype.clearContactCallbacks = function (entity) {
+    if (!entity) {
+        this.beginCallbacks = {};
+        this.endCallbacks = {};
+        this.beginCallbacks = {};
+        this.endCallbacks = {};
+    } else {
+        delete this.beginCallbacks[entity.id];
+        delete this.endCallbacks[entity.id];
+        delete this.preSolveCallbacks[entity.id];
+        delete this.postSolveCallbacks[entity.id];
+    }
 };
 
-ContactProcessor.prototype.processBegin = function(contact) {
-	var entityA = contact.GetFixtureA().GetBody().GetUserData();
-	var entityB = contact.GetFixtureB().GetBody().GetUserData();
-	var callback = entityA ? this.beginCallbacks[entityA.className] : false;
-	if (callback && entityA.physics) 
-		callback.call(entityA, contact, entityB);
-	callback = entityB ? this.beginCallbacks[entityB.className] : false;
-	if (callback && entityB.physics) 
-		callback.call(entityB, contact, entityA);
+ContactProcessor.prototype.processBegin = function (contact) {
+    if (!contact.GetFixtureA() || !contact.GetFixtureB())
+        return;
+    var entityA = contact.GetFixtureA().GetBody().GetUserData();
+    var entityB = contact.GetFixtureB().GetBody().GetUserData();
+    var callback = entityA ? this.beginCallbacks[entityA.id] : false;
+    if (callback && entityA.physics)
+        callback.call(entityA, contact, entityB, contact.GetFixtureB());
+    callback = entityB ? this.beginCallbacks[entityB.id] : false;
+    if (callback && entityB.physics)
+        callback.call(entityB, contact, entityA, contact.GetFixtureA());
 };
 
-ContactProcessor.prototype.processEnd = function(contact) {
-	var entityA = contact.GetFixtureA().GetBody().GetUserData();
-	var entityB = contact.GetFixtureB().GetBody().GetUserData();
-	var callback = entityA ? this.endCallbacks[entityA.className] : false;
-	if (callback && entityA.physics) 
-		callback.call(entityA, contact, entityB);
-	callback = entityB ? this.endCallbacks[entityB.className] : false;
-	if (callback && entityB.physics) 
-		callback.call(entityB, contact, entityA);
+ContactProcessor.prototype.processEnd = function (contact) {
+    var entityA = contact.GetFixtureA().GetBody().GetUserData();
+    var entityB = contact.GetFixtureB().GetBody().GetUserData();
+    var callback = entityA ? this.endCallbacks[entityA.id] : false;
+    if (callback && entityA.physics)
+        callback.call(entityA, contact, entityB, contact.GetFixtureB());
+    callback = entityB ? this.endCallbacks[entityB.id] : false;
+    if (callback && entityB.physics)
+        callback.call(entityB, contact, entityA, contact.GetFixtureA());
 };
 
 ContactProcessor.prototype.processPreSolve = function(contact) {
     var entityA = contact.GetFixtureA().GetBody().GetUserData();
     var entityB = contact.GetFixtureB().GetBody().GetUserData();
-    var callback = entityA ? this.preSolveCallbacks[entityA.className] : false;
+    var callback = entityA ? this.preSolveCallbacks[entityA.id] : false;
     if (callback && entityA.physics)
-        callback.call(entityA, contact, entityB);
-    callback = entityB ? this.preSolveCallbacks[entityB.className] : false;
+        callback.call(entityA, contact, entityB, contact.GetFixtureB());
+    callback = entityB ? this.preSolveCallbacks[entityB.id] : false;
     if (callback && entityB.physics)
-        callback.call(entityB, contact, entityA);
+        callback.call(entityB, contact, entityA, contact.GetFixtureA());
 };
 
 ContactProcessor.prototype.processPostSolve = function(contact) {
     var entityA = contact.GetFixtureA().GetBody().GetUserData();
     var entityB = contact.GetFixtureB().GetBody().GetUserData();
-    var callback = entityA ? this.postSolveCAllbacks[entityA.className] : false;
+    var callback = entityA ? this.postSolveCallbacks[entityA.id] : false;
     if (callback && entityA.physics)
-        callback.call(entityA, contact, entityB);
-    callback = entityB ? this.postSolveCAllbacks[entityB.className] : false;
+        callback.call(entityA, contact, entityB, contact.GetFixtureB());
+    callback = entityB ? this.postSolveCallbacks[entityB.id] : false;
     if (callback && entityB.physics)
-        callback.call(entityB, contact, entityA);
+        callback.call(entityB, contact, entityA, contact.GetFixtureA());
 };
-

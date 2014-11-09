@@ -5214,18 +5214,12 @@ Box2D.postDefs = [];
          }
          var proxyA = fixtureA.m_proxy;
          var proxyB = fixtureB.m_proxy;
-
-          if (proxyA && proxyB) {
-          } else {
-              // crash
-          }
-
          var overlap = this.m_broadPhase.TestOverlap(proxyA, proxyB);
          if (overlap == false) {
-             cNuke = c;
-             c = cNuke.GetNext();
-             this.Destroy(cNuke);
-             continue;
+            cNuke = c;
+            c = cNuke.GetNext();
+            this.Destroy(cNuke);
+            continue;
          }
          c.Update(this.m_contactListener);
          c = c.GetNext();

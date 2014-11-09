@@ -178,9 +178,11 @@ Account.prototype.removeScheduledEntity = function(entity) {
 	assert(typeof (entity.id) == "string", "Entity ID must be string");
 	delete this.scheduledEntities[entity.id];
 	// if nothing to schedule anymore stop interval either
-	if (!this.globalUpdateIntervalHandle
-			&& $['isEmptyObject'](this.scheduledEntities)) {
-		this.clearInterval(this.globalUpdateIntervalHandle);
+	
+	if (this.globalUpdateIntervalHandle	&& $['isEmptyObject'](this.scheduledEntities)) {
+		
+//		this.clearInterval(this.globalUpdateIntervalHandle);
+		window.cancelAnimationFrame(this.globalUpdateIntervalHandle);
 		this.globalUpdateIntervalHandle = null;
 	}
 };
@@ -189,7 +191,9 @@ Account.prototype.removeScheduledEntity = function(entity) {
  */
 // Если ничего нет - возвращаем обычный таймер
 window.requestAnimationFrame = (function () {
-    return  window.requestAnimationFrame ||
+    return Device.isNative()? function (callback, element) {
+        /*window.*/return setTimeout(callback, 1000 / 50);
+    } : (window.requestAnimationFrame ||
         window.webkitRequestAnimationFrame ||
         window.mozRequestAnimationFrame ||
         window.oRequestAnimationFrame ||
@@ -199,9 +203,27 @@ window.requestAnimationFrame = (function () {
          * @param {function} callback
          * @param element DOM element
          */
-            function (callback, element) {
-            window.setTimeout(callback, 1000 / 50);
-        };
+        function (callback, element) {
+            /*window.*/return setTimeout(callback, 1000 / 50);
+        });
+})();
+
+window.cancelAnimationFrame = (function () {
+    return Device.isNative()? function (id) {
+        clearTimeout(id);
+    } : (window.cancelAnimationFrame ||
+        window.webkitCancelAnimationFrame ||
+        window.mozCancelAnimationFrame ||
+        window.oCancelAnimationFrame ||
+        window.msCancelAnimationFrame ||
+        /**
+         *
+         * @param {function} callback
+         * @param element DOM element
+         */
+        function (id) {
+            clearTimeout(id);
+        });
 })();
 
 Account.prototype.addRenderEntity = function(newEntity) {
@@ -310,6 +332,64 @@ Account.prototype.resize = function() {
 	});
 };
 
+Account.prototype.updateLoadingState = function(finished) {
+	if (finished) {
+		Loader.updateLoadingState(100);
+		return;
+	};
+	if (!this.loadingStates)
+		return;
+	var loadingState = 0;
+	var loadedResources = 0;
+	var totalResources = 0; //= countProperties(this.loadingStates);
+	$.each(this.loadingStates, function(id, child) {
+		totalResources += isNaN(child.totalJsons)? 0 : child.totalJsons;
+		totalResources += isNaN(child.totalMedia)? 0 : child.totalMedia;
+		loadedResources += isNaN(child.jsons)? 0 : child.jsons;
+		loadedResources += isNaN(child.media)? 0 : child.media;
+	});
+	
+	if (totalResources == 0)
+//		return;
+		loadingState = 100;
+	else
+		loadingState = 100 * loadedResources/totalResources;
+	loadingState = Math.ceil(loadingState.clamp(0, 100));
+	if (Device.isNative() && loadingState >= 100)
+		return;
+	Loader.updateLoadingState(Math.ceil(loadingState));
+};
+
+Account.prototype.loadStates = function(states, ignore) {
+	var that = this;
+	var previous = null;
+	var first = null;
+	var loadingStates = {};
+	$.each(states, function(id, child) {
+		if (!ignore || ignore != id && !ignore[id]) {
+			if (previous != null)
+				previous.onLoadComplete = function() {
+					that.readGlobalUpdate(child);
+				};
+				else
+					first = child;
+			previous = child[id];
+			loadingStates[id] = {
+					'jsons': 0,
+					'media': 0
+			};
+		}
+	});
+	if (!previous)
+		return;
+	this.loadingStates = loadingStates;
+	previous.onLoadComplete = function() {
+		that.loadingStates = null;
+		that.updateLoadingState(true);
+	};
+	this.readGlobalUpdate(first);
+};
+
 /*
  * NETWORKING FUNCTIONS dealing with external server /* NETWORKING FUNCTIONS
  * dealing with external server
@@ -407,5 +487,13 @@ Account.prototype.syncWithServer = function(callback, data, syncInterval) {
 			that.syncWithServer();
 		}, 5000);
 		// console.log("sheduleStoped"+(acc-1),((new Date()).getTime() - g));
+	}
+};
+
+function OnBackButtonClick() {
+	if (Account.instance && Account.instance.currentState) {
+		var currentState = Account.instance.getEntity(Account.instance.currentState);
+		if (currentState && currentState.onBackButton) 
+			Account.instance.getEntity(Account.instance.currentState).onBackButton();
 	}
 };

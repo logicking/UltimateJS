@@ -302,6 +302,9 @@ else
 		var context = null;
 	
 		try {
+		if (typeof(Native) != "undefined")
+			context = new webkitAudioContext();
+		else
 			context = new (window.AudioContext || window.webkitAudioContext)();
 	//		context = null;
 		} catch (e) {
@@ -312,8 +315,13 @@ else
 			snd.type = "webAudio";
 			snd.instance = new WebSound(context);
 		} else {
-			snd.type = "htmlSound";
-//			snd.instance = new jSound();
+			if (typeof(Native) != "undefined") {
+				snd.type = "jSound";
+				snd.instance = new jSound();
+			} else {
+				snd.type = "htmlSound";
+				snd.instance = new htmlSound();
+			}
 			snd.instance = new htmlSound();
 		}
 	

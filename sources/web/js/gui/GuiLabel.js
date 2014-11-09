@@ -59,8 +59,10 @@ GuiLabel.prototype.create = function(src) {
 };
 
 GuiLabel.prototype.change = function(src, fontSize) {
-	src = Resources.getString(src);
-	$("#" + this.cellId).text(src);
+	if (src != null && src != undefined) {
+		src = Resources.getString(src);
+		$("#" + this.cellId).html(src);
+	}
 	if (fontSize)
 		this.fontSize = fontSize;
 //	console.error(this.id,this.cellId, $("#" + this.cellId).text());
@@ -68,6 +70,15 @@ GuiLabel.prototype.change = function(src, fontSize) {
 			* Math.min(Screen.widthRatio(), Screen.heightRatio()))
 			+ "px");
 //	this.resize();
+};
+
+GuiLabel.prototype.refresh = function() {
+	this.change(Resources.getString(this.params.text && this.params.text.length ? this.params.text : this.getText()));
+	GuiLabel.parent.refresh.call(this);
+};
+
+GuiLabel.prototype.getText = function() {
+	return $("#" + this.cellId).html();
 };
 
 GuiLabel.prototype.append = function(src) {

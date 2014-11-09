@@ -38,7 +38,7 @@ BackgroundState.prototype.init = function(params) {
 	// an transparent PNG image 1x1 pixel size
 	// to prevent clicks
 	
-	if (params['transparent']) {
+	if (params['transparent'] && !Device.isNative()) {
 		this.transparent = true;
 	} else {
 		this.transparent = false;	
@@ -51,8 +51,8 @@ BackgroundState.prototype.init = function(params) {
 		style : !this.transparent?"mask":'',
 //        width : "FULL_WIDTH",
 //        height : "FULL_HEIGHT",
-        width : "100%",
-        height : "100%",
+        width : Device.isNative()? "FULL_WIDTH" : "100%",
+        height : Device.isNative()? "FULL_HEIGHT" : "100%",
 		x : 0,
 		y : 0
 	});

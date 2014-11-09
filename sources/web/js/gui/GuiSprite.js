@@ -36,7 +36,8 @@ GuiSprite.prototype.initialize = function(params) {
 	if (GUISPRITE_HACK_ON) {
 		this.totalSrc = Resources.getImage(params['totalImage']);
 	}
-
+	this.dependent = params.dependent ? params.dependent : false;
+	
 	if (params['totalTile'] == null) {
 		this.totalTile = {
 			x : 0,
@@ -86,6 +87,13 @@ GuiSprite.prototype.initialize = function(params) {
 	} else {
 		this.setMirror(params['mirror'].x,params['mirror'].y);
 	}
+	
+	if (!isNaN(params.z))
+		this.setZ(params.z);
+	if (params.visible === false)
+		this.hide();
+	if (params.transformOrigin)
+		this.setTransformOrigin(params.transformOrigin);
 };
 
 GuiSprite.prototype.setStaticUpdate = function(isStatic){

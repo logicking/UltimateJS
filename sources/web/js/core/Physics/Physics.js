@@ -19,8 +19,8 @@ if (typeof(Native) == "undefined" || !USE_NATIVE_PHYSICS) {
 var DEFAULT_B2WORLD_RATIO = 30;
 var DEFAULT_B2WORLD_GRAVITY = new b2Vec2(0, 10);
 var DEFAULT_B2WORLD_TIMESTEP = 1/45;
-var DEFAULT_B2WORLD_POS_ITERATIONS = 5;
-var DEFAULT_B2WORLD_VEL_ITERATIONS = 5;
+var DEFAULT_B2WORLD_POS_ITERATIONS = 4;
+var DEFAULT_B2WORLD_VEL_ITERATIONS = 4;
 var DEFAULT_B2WORLD_UPDATE_INTERVAL = 15;
 
 // TODO: remove?
@@ -84,13 +84,11 @@ function DebugCanvas() {
     if (!canvasElm) {
         $("#root")
             .append(
-            "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px; z-index:9999999999; pointer-events:none;'></canvas>");
+            "<canvas id='debugCanvas' style='position :absolute; top: 0px; left: 0px;'></canvas>");
         canvasElm = document.getElementById("debugCanvas");
     }
-    canvasElm.width = BASE_WIDTH;//ENHANCED_BASE_WIDTH;
-    canvasElm.height = BASE_HEIGHT;//ENHANCED_BASE_HEIGHT;
-//    canvasElm.style.left = -ENHANCED_BASE_MARGIN_WIDTH;
-//    canvasElm.style.top = -ENHANCED_BASE_MARGIN_HEIGHT;
+    canvasElm.width = BASE_WIDTH;
+    canvasElm.height = BASE_HEIGHT;
     canvasElm.style.width = canvasElm.width * Screen.widthRatio();
     canvasElm.style.height = canvasElm.height * Screen.heightRatio();
 
@@ -111,6 +109,8 @@ var Physics = (function () {
     var debugCanvas = null;
     var updateItems = [];
     var bodiesToDestroy = [];
+    var bodiesToCreate = [];
+    var bodiesToActivate = [];
     var contactProcessor = null;
     var contactListener = null;
     var nativePhysics = Device.isNative();//Device.isNative() && USE_NATIVE_PHYSICS;//Device.isNative();// && typeof(NativeContactBegin) != "undefined";
@@ -148,11 +148,11 @@ var Physics = (function () {
      * @param {boolean} sleep default: true;
      * @param {number} ratio Box2d to Ultimate.js coordinates
      */
-    function createWorld(gravity, sleep) {
+    function createWorld(gravity, sleep, scale) {
         if (world != null) 
             return;
         gravity = gravity? gravity : worldParams.gravity;
-        world = new b2World(gravity, sleep != null ? sleep : true);
+        world = new b2World(gravity, sleep != null ? sleep : true, nativePhysics? scale : null);
     }
 
     return { // public interface
@@ -174,19 +174,23 @@ var Physics = (function () {
 	        	if (world !== null)
 	        		world.SetGravity(worldParams.gravity);
         	}
-        	if (nativePhysics)
+        	if (nativePhysics) {
         		Native.Physics.Setup(JSON.stringify(worldParams));
+        	}
         },
         createWorld: function (gravity, sleep, ratio) {
         	Physics.setup({
 	        		'gravity': gravity, 
 	        		'ratio': ratio
         		});
-            createWorld(worldParams.gravity, sleep, worldParams.ratio);
+            createWorld(worldParams.gravity, sleep, worldParams.b2dToGameRatio);
         },
         getWorld: function () {
             createWorld();
             assert(world, "No physics world created!");
+            return world;
+        },
+        getWorldIfExists: function () {
             return world;
         },
         getB2dToGameRatio: function () {
@@ -207,15 +211,15 @@ var Physics = (function () {
             return contactListener;
         },
         updateWorld: function () {
-            if (world === null || pause === true || nativePhysics === true)
-                return;
+        	 if (world === null || pause === true)
+                 return;
 
-            var world = Physics.getWorld();
-            if (nativePhysics) {
-           	 world.UpdateBodies();
-           	 world.UpdateContactListener();
-            }
-            world.Step(worldParams.timeStep, worldParams.positionIterations, worldParams.velocityIterations);
+             var world = Physics.getWorld();
+             if (nativePhysics) {
+                 if (!WINDOWS_NATIVE)
+            	    world.UpdateBodies();
+             } else
+            	 world.Step(worldParams.timeStep, worldParams.positionIterations, worldParams.velocityIterations);
             if (timeout) {
                 timeout.tick(15);
             }
@@ -223,14 +227,34 @@ var Physics = (function () {
             if (debugCanvas) {
                 world.DrawDebugData();
             }
-            world.ClearForces();
+            if (!nativePhysics)
+            	world.ClearForces();
             for (var i = 0; i < updateItems.length; ++i) {
                 updateItems[i].updatePositionFromPhysics();
-                if (Screen.isDOMForced() === true && updateItems[i] && updateItems[i].initialPosRequiered === true) {
+                if (Screen.isDOMForced() === true && updateItems[i].initialPosRequiered === true) {
                 	updateItems[i].initialPosRequiered = false;
             		updateItems[i].physics.SetAwake(false);
                 }
-            }
+            };
+            if (bodiesToCreate.length > 0 && !world.IsLocked()) {
+            	for (var i = 0; i < bodiesToCreate.length; ++i) {
+            		var body = world.CreateBody(bodiesToCreate[i].def);
+                	if (bodiesToCreate[i].callback)
+                		bodiesToCreate[i].callback(body);
+                }
+            	bodiesToCreate.length = 0;// = [];
+            };
+            
+            if (bodiesToActivate.length > 0 && !world.IsLocked()) {
+            	for (var i = 0; i < bodiesToActivate.length; ++i) {
+            		if (!bodiesToActivate[i].body)
+            			continue;
+            		bodiesToActivate[i].body.SetActive(bodiesToActivate[i].value);
+                	if (bodiesToActivate[i].callback)
+                		bodiesToActivate[i].callback(bodiesToActivate[i].body);
+                }
+            	bodiesToActivate.length = 0;// = [];
+            };
             if (bodiesToDestroy.length > 0) {
                 for (var i = 0; i < bodiesToDestroy.length; ++i) {
                 	if (world.IsLocked() === false)
@@ -238,8 +262,8 @@ var Physics = (function () {
                 	bodiesToDestroy[i].SetUserData(null);
                 	bodiesToDestroy[i] = null;
                 }
-                bodiesToDestroy = [];
-            }
+                bodiesToDestroy.length = 0;// = [];
+            };
         },
         getMaxSpeed: function () {
         	for (var i = 0; i < updateItems.length; ++i) {
@@ -261,18 +285,61 @@ var Physics = (function () {
                 	return false;
             return true;
         },
+        setActive: function (entity, value, callback) {
+            assert(world);
+//            if (!entity)
+//            	return;
+            if (!entity.physics) {
+            	entity.m_SetActiveOnCreate = value;
+            	return;
+            }
+            if (world.IsLocked() === false || nativePhysics) {
+            	entity.physics.SetActive(value);
+            	if (callback)
+            		callback(entity.physics);
+            }
+            else
+                bodiesToActivate.push({'body': entity.physics, 'value' : value? 1: 0, 'callback' : callback});
+        },
+        applyCenterImpulse: function (body, impulse) {
+            assert(world);
+            if (!body || !impulse)
+            	return;
+            if (nativePhysics)
+            	body.ApplyCenterImpulse(impulse);
+            else {
+            	var centerPos = body.GetWorldCenter();
+            	body.SetAwake(true);
+            	body.ApplyImpulse(impulse, centerPos);
+            }
+        },
+        createBody: function (bodyDef, callback) {
+            assert(world);
+            if (world.IsLocked() === false || nativePhysics) {
+                var body = world.CreateBody(bodyDef);
+            	if (callback)
+            		callback(body);
+            }
+            else
+                bodiesToCreate.push({'def' : bodyDef, 'callback' : callback});
+        },
         destroyBody: function (body) {
             if (!body) 
                 return;
             assert(world);
-            if (world.IsLocked() === false || nativePhysics === true)
-            	world.DestroyBody(body);
+            if (world.IsLocked() === false || nativePhysics)
+                world.DestroyBody(body);
             else
-            	bodiesToDestroy.push(body);
+                bodiesToDestroy.push(body);
         },
         destroyWorld: function () {
             world = null;
             updateItems = [];
+            if (nativePhysics) {
+            	Native.Physics.DestroyWorld();
+            	PhysicsBodies = {};
+            	PhysicsFixtures = {};
+            }
         },
         pause: function (v) {
             if (v == null) {

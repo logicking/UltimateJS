@@ -9,7 +9,7 @@ var Resources = (function() {
 
 	var images = new Array();
 	var resolutions = new Object();
-
+	
 	// enum of strings of current language
 	var strings = new Object();
 
@@ -22,6 +22,9 @@ var Resources = (function() {
 		image.onload = callback;
 		return image;
 	};
+	
+	var indexed = {};
+	var INDEX_SEED = 1;
 
 	return { // public interface
 
@@ -77,6 +80,27 @@ var Resources = (function() {
 				resolutions[resolutionName].images[name] = name;
 			}
 		},
+		index : function(value, index) {
+			if (!index)
+				index = INDEX_SEED++;
+			if (typeof (value) == "string" && !isNaN(index))
+				indexed[value] = index;
+			return index;
+		},
+		getIndex : function(value) {
+			if (value && value.length && indexed[value])
+				return indexed[value];
+			else
+				return -1;
+		},
+		getValueAtIndex : function(index) {
+			if (!idNaN(index))
+				$.each(indexed, function(src, idx){
+					if (idx == index)
+						return src;
+				});
+			return null;
+		},
 		// returnes string
 		getString : function(stringId, rand) {
 			if (strings[stringId]) {
@@ -100,10 +124,21 @@ var Resources = (function() {
 			if ((array == true) && (typeof language == "object")) {
 				strings = language;
 			} else {
-				var fileName = "resources/localization/" + language + ".json";
-				$['getJSON'](fileName, function(data) {
-					strings = data;
-				});
+				if (language) {
+					var fileName = "resources/localization/" + language + ".json";
+					$['getJSON'](fileName, function(data) {
+						strings = data;
+					}).error(function () {
+					    fileName = "resources/localization/" + "EN" + ".json";
+					    $['getJSON'](fileName, function (data) {
+					        strings = data;
+					    });
+					});
+					Device.setStorageItem("language", language);
+					if (Device.isNative())
+					    Native.Screen.SetLanguage(language);
+				} else
+				    Resources.setLanguage(Device.getStorageItem("language", Device.isNative() ? Native.Screen.GetLanguage() : "EN"));
 			}
 		},
 		// returns filename of an image for current resolution
@@ -219,7 +254,7 @@ var Resources = (function() {
 			
 			var i = 0, l = data.length, current, obj, total = l, j = 0, ext;
 			
-			function onAssetLoad() {
+			function onAssetLoad(isImageTypeAsset) {
 				++j;
 				// if progress callback, give information of assets loaded,
 				// total and percent
@@ -230,9 +265,31 @@ var Resources = (function() {
 						percent : (j / total * 100)
 					});
 				}
-				if (j === total) {
-					if (oncomplete)
+				if (j === total && oncomplete) {
+					if (!Device.isNative())
 						oncomplete();
+					else {
+						var texturesToLoad = null;
+						var indexesToLoad = null;
+						$.each(indexed, function(src, idx){
+							if (texturesToLoad == null)
+								texturesToLoad = src;
+							else
+								texturesToLoad += "," + src;
+							if (indexesToLoad == null)
+								indexesToLoad = idx + "";
+							else
+								indexesToLoad += "," + idx;
+						});
+						if (texturesToLoad != null) {
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED] = {};
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].oncomplete = oncomplete;
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].onprogress = onprogress;
+							ONASSETSLOADCALLBACKS[ASSETSLOADCALLBACK_SEED].onerror = onerror;
+							Native.Loader.LoadTextures(texturesToLoad, indexesToLoad, ASSETSLOADCALLBACK_SEED++);
+						} else
+							oncomplete();
+					}
 				}
 			};
 
@@ -269,13 +326,17 @@ var Resources = (function() {
 				} else if (ext === "jpg" || ext === "jpeg" || ext === "gif"
 						|| ext === "png") {
 					if (Device.isNative()) {
-//						ImageTable[Resources.getImage(current)] = ImageTableSeed;
-						if (Native.Loader.LoadImage(Resources.getImage(current)
-//								, ImageTableSeed++
-								))
-							onAssetLoad();
-						else
-							onAssetError();
+					    //						ImageTable[Resources.getImage(current)] = ImageTableSeed;
+					    if (!indexed[Resources.getImage(current)]) {
+
+					        var imageId = Resources.index(Resources.getImage(current));//Native.Loader.LoadImageIndexed(Resources.getImage(current));
+					        if (imageId > 0) {
+//					            Resources.index(Resources.getImage(current), imageId);
+					            onAssetLoad(true);
+					        } else
+					            onAssetError();
+					    } else
+					        onAssetLoad(true);
 					} else {
 						obj = new Image();
 						obj.src = Resources.getImage(current);

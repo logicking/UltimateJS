@@ -1,3 +1,15 @@
+var ENVIRONMENT = {
+	'Web': 1,
+	'Android': 2,
+	'WindowsPhone7': 3,
+	'WindowsPhone8': 4,
+	'Windows': 5
+};
+
+if (typeof(CurrentEnvironment) == "undefined") {
+	var CurrentEnvironment = ENVIRONMENT.Web;
+}
+
 // Inheritance pattern
 Function.prototype.inheritsFrom = function(parentClassOrObject) {
 	if (parentClassOrObject.constructor == Function) {
@@ -66,12 +78,14 @@ function getCursorPositionXY(e) {
 function cssTransform(obj, matrix, rotate, scaleX, scaleY, translate) {
 
 	if (Device.isNative()) {
-	    var transform = {
-	            "matrix": matrix,
-	            "translate": [translate.x, translate.y],
-	            "rotate": rotate
-	        };
-	    obj['css']("transform", transform);
+//	    var transform = {
+//	            "matrix": matrix,
+//	            "translate": [translate.x, translate.y],
+//	            "rotate": rotate,
+//	            "scaleX": scaleX,
+//	            "scaleY": scaleY
+//	        };
+	    obj.setTransform(matrix, rotate, scaleX, scaleY, translate);
 	    return;
 	}
 	
@@ -588,4 +602,8 @@ var mathCos = Math.cos;
 Math.cos = function(a){
     if (a === 0) return 1;
     else return mathCos(a);
+};
+
+Number.prototype.clamp = function(min, max) {
+	return Math.min(Math.max(this, min), max);
 };

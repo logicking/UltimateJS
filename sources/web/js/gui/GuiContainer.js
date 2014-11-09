@@ -54,6 +54,13 @@ GuiContainer.prototype.clear = function() {
 	this.guiEntitiesMap = {};
 };
 
+GuiContainer.prototype.refresh = function() {
+	for (var i = 0; i < this.guiEntities.length; i++) {
+		if (this.guiEntities[i].refresh) 
+			this.guiEntities[i].refresh();
+	}
+};
+
 GuiContainer.prototype.remove = function() {
 	this.clear();
 	this.resetUpdateInterval();

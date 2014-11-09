@@ -30,12 +30,49 @@ VisualEntity.prototype.createVisual = function() {
 	this.assert(this.description, "There is no correct description");
 };
 
+VisualEntity.prototype.createVisualsFromDescription = function(description, extraParams) {
+	var that = this;
+	this.description = description;
+	extraParams = extraParams ? extraParams : {};
+	if (this.params.mainVisual) {
+		
+		this.mainVisual = this.appendVisual(this.params.mainVisual, 
+	    		description.visuals[this.params.mainVisual], this.guiParent);
+		this.mainVisual.setPosition(this.params.x ? this.params.x : 0,
+				this.params.y ? this.params.y : 0);
+	}
+	
+    $.each(description.visuals, function (id, visualInfo) {
+        if (!that.params.mainVisual || id != that.params.mainVisual) {
+        	extraparams = $.extend({               
+        		'parent': that.mainVisual ? that.mainVisual : that.guiParent,
+                'style': "sprite",
+                'dependent' : that.mainGui ? true : false
+            }, $.extend(visualInfo, extraParams));
+            var gui = guiFactory.createObject(visualInfo['class'], extraparams);
+            var resInfo = {};
+            resInfo.visual = gui;
+            that.addVisual(id, resInfo);
+    	}
+    });
+};
+
+VisualEntity.prototype.appendVisual = function(id, description, guiParent) {
+    var gui = guiFactory.createObject(description['class'], $.extend({
+        'parent': guiParent,
+        'style': "sprite"
+    }, description));
+    var resInfo = {};
+    resInfo.visual = gui;
+    this.addVisual(id, resInfo);
+    return gui;
+};
+
 VisualEntity.prototype.addVisual = function(visualId, visualInfo) {
 	var id = (visualId == null) ? 0 : visualId;
 	this.assert(this.visuals[id] == null, "Visual id = '" + id
 			+ "' is already created.");
 	this.visuals[id] = visualInfo;
-
 };
 
 
@@ -112,11 +149,19 @@ VisualEntity.prototype.setZ = function(z) {
 		}
 	});
 };
+
+
 VisualEntity.prototype.setPosition = function(x, y) {
 	this.x = x;
 	this.y = y;
 
 	var that = this;
+	
+	if (this.mainVisual) {
+		this.mainVisual.setPosition(x, y);
+		return;
+	}
+	
 	$['each'](that.visuals, function(id, visualInfo) {
 		// dont' move dependent
 		if (visualInfo.dependent) {
@@ -131,6 +176,24 @@ VisualEntity.prototype.setPosition = function(x, y) {
 		}
 
 		visualInfo.visual.setPosition(x, y);
+	});
+};
+
+VisualEntity.prototype.rotate = function(angle) {
+	this.angle = angle;
+	var that = this;
+	
+	if (this.mainVisual) {
+		this.mainVisual.rotate(angle);
+		return;
+	}
+	
+	$['each'](that.visuals, function(id, visualInfo) {
+		// dont' move dependent
+		if (visualInfo.dependent) {
+			return;
+		}
+		visualInfo.visual.rotate(angle);
 	});
 };
 
